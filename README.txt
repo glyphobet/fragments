@@ -1,5 +1,5 @@
 Differencing Fragmentation Manager
-=============================
+==================================
 
 Operations:
 
