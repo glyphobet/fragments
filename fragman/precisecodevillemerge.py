@@ -234,10 +234,10 @@ class Weave:
         unused = [revid]
         s = set()
         while unused:
-            next = unused.pop()
-            if next not in s:
-                unused.extend(self.parents[next])
-                s.add(next)
+            nextrev = unused.pop()
+            if nextrev not in s:
+                unused.extend(self.parents[nextrev])
+                s.add(nextrev)
         v = {}
         for n in s:
             for p, q in self.newedgestates.get(n, []):
@@ -260,14 +260,27 @@ class Weave:
         ids = self._lineids(self._make_vals(revid))
         return [line for (lineid, line) in self.weave if lineid in ids]
 
-    def merge(self, reva, revb):
+    def cherry_pick(self, reva, revb):
+        # pulls just the change in reva (without history) into revb
+        v = {}
+        for p, q in self.newedgestates.get(reva, []):
+            v[p] = max(v.get(p, 0), q)
+
+        alines = self._lineids(self._make_vals(reva))
+        return self.merge(reva, revb, edgesa=v, alines=alines)
+
+    def merge(self, reva, revb, edgesa=None, alines=None, edgesb=None, blines=None):
         # returns [line]
         # non-conflict lines are strings, conflict sections are
         # ([linesa], [linesb])
-        edgesa = self._make_vals(reva)
-        alines = self._lineids(edgesa)
-        edgesb = self._make_vals(revb)
-        blines = self._lineids(edgesb)
+        if edgesa is None:
+			edgesa = self._make_vals(reva)
+        if alines is None:
+            alines = self._lineids(edgesa)
+        if edgesb is None:
+			edgesb = self._make_vals(revb)
+        if blines is None:
+            blines = self._lineids(edgesb)
         lastalineid = None
         lastblineid = None
         awins = False
@@ -295,6 +308,7 @@ class Weave:
                     bwins = True
                 lastblineid = lineid
             if lineid is None or (lineid in alines and lineid in blines):
+                #if not (awins ^ bwins):
                 if awins and bwins:
                     result.append((apartial, bpartial))
                 elif awins:
@@ -313,6 +327,7 @@ class Weave:
                 if lineid in blines:
                     bpartial.append(line)
         return result
+
 w = Weave()
 w.add_revision(1, ['a', 'b'], [])
 assert w.retrieve_revision(1) == ['a', 'b']
@@ -485,4 +500,17 @@ w.add_revision(4, ['a', 'p', 'z', 'm', 'y', 'm', 'z', 'p', 'b'], [3])
 w.add_revision(5, ['a', 'q', 'z', 'n', 'y', 'n', 'z', 'q', 'b'], [3])
 assert w.merge(4, 5) == ['a', (['p'], ['q']), 'z', (['m'], ['n']), 'y', (['m'], ['n']), 'z', (['p'], ['q']), 'b']
 
+w = Weave()
+w.add_revision(1, ['a', 'b', 'c', 'd', 'e', 'f'], [])
+w.add_revision(2, ['a', 'b', 'c', 'd', 'e', 'g'], [1])
+w.add_revision(3, ['b', 'c', 'c', 'd', 'e', 'f'], [])
+assert w.cherry_pick(2, 3) == ['b', 'c', 'c', 'd', 'e', 'g']
+w.add_revision(4, ['a', 'b', 'c', 'd', 'f'], [])
+assert w.cherry_pick(2, 4) == ['a', 'b', 'c', 'd', (['e', 'g'], ['f'])]
 
+
+w = Weave()
+w.add_revision(1, ['a', 'b', 'c', 'd', 'e', 'f'], [])
+w.add_revision(2, ['a', 'b', 'c', 'e', 'f'], [1])
+w.add_revision(3, ['a', 'b', 'd', 'e', 'f'], [1])
+w.merge(2, 3) == ['a', 'b', (['c'], ['d']), 'e', 'f']
