@@ -1,4 +1,4 @@
-Fragman Fragmentation Manager
+Differencing Fragmentation Manager
 =============================
 
 Operations:
