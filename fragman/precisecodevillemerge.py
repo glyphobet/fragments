@@ -312,7 +312,7 @@ class Weave:
                     apartial.append(line)
                 if lineid in blines:
                     bpartial.append(line)
-        return result
+        return result
 w = Weave()
 w.add_revision(1, ['a', 'b'], [])
 assert w.retrieve_revision(1) == ['a', 'b']
