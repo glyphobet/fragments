@@ -1,4 +1,3 @@
-from sets import Set as set
 from bisect import bisect
 
 def unique_lcs(a, b):
@@ -12,7 +11,7 @@ def unique_lcs(a, b):
         else:
             index[line]= i
     # make btoa[i] = position of line i in a, unless
-    # that line doesn't occur exactly once in both, 
+    # that line doesn't occur exactly once in both,
     # in which case it's set to None
     btoa = [None] * len(b)
     index2 = {}
@@ -64,15 +63,6 @@ def unique_lcs(a, b):
     result.reverse()
     return result
 
-assert unique_lcs('', '') == []
-assert unique_lcs('a', 'a') == [(0, 0)]
-assert unique_lcs('a', 'b') == []
-assert unique_lcs('ab', 'ab') == [(0, 0), (1, 1)]
-assert unique_lcs('abcde', 'cdeab') == [(2, 0), (3, 1), (4, 2)]
-assert unique_lcs('cdeab', 'abcde') == [(0, 2), (1, 3), (2, 4)]
-assert unique_lcs('abXde', 'abYde') == [(0, 0), (1, 1), (3, 3), (4, 4)]
-assert unique_lcs('acbac', 'abc') == [(2, 1)]
-
 def recurse_matches(a, b, ahi, bhi, answer, maxrecursion):
     oldlen = len(answer)
     if maxrecursion < 0:
@@ -114,13 +104,6 @@ def recurse_matches(a, b, ahi, bhi, answer, maxrecursion):
         for i in xrange(ahi - nahi):
             answer.append((nahi + i, nbhi + i))
 
-a1 = []
-recurse_matches(['a', None, 'b', None, 'c'], ['a', 'a', 'b', 'c', 'c'], 5, 5, a1, 10)
-assert a1 == [(0, 0), (2, 2), (4, 4)]
-a2 = []
-recurse_matches(['a', 'c', 'b', 'a', 'c'], ['a', 'b', 'c'], 5, 3, a2, 10)
-assert  a2 == [(0, 0), (2, 1), (4, 2)]
-
 class Weave:
     def __init__(self):
         # [(lineid, line)]
@@ -145,7 +128,7 @@ class Weave:
         self.parents[revid] = [i for i in parents]
 
         # match against living lines
-        # require that a line be part of living edges on either 
+        # require that a line be part of living edges on either
         # side to be part of a living line,
         # to avoid including something in 'living lines' just
         # because a deletion happened next to it
@@ -174,7 +157,7 @@ class Weave:
             recurse_matches(lines, lines2, p, mapping[q], matches, 10)
             matches.append((p, mapping[q]))
         recurse_matches(lines, lines2, len(lines), len(lines2), matches, 10)
-    
+
         # build a new weave
         alledges = set()
         for i in self.newedgestates.values():
@@ -186,11 +169,11 @@ class Weave:
         matches.append((len(lines), len(lines2)))
         currentlines = []
         for a, b in matches:
-            # take a guess as to whether it's better to put 
+            # take a guess as to whether it's better to put
             # extant lines before or after new lines
             hit = True
             if weavepos != -1 and weavepos + 1 != len(self.weave):
-                hit = (self.weave[weavepos][0], 
+                hit = (self.weave[weavepos][0],
                     self.weave[weavepos + 1][0]) in alledges
             if hit:
                 # add current weave lines to the new weave
@@ -327,190 +310,3 @@ class Weave:
                 if lineid in blines:
                     bpartial.append(line)
         return result
-
-w = Weave()
-w.add_revision(1, ['a', 'b'], [])
-assert w.retrieve_revision(1) == ['a', 'b']
-w.add_revision(2, ['a', 'x', 'b'], [1])
-assert w.retrieve_revision(2) == ['a', 'x', 'b']
-w.add_revision(3, ['a', 'y', 'b'], [1])
-assert w.retrieve_revision(3) == ['a', 'y', 'b']
-assert w.merge(2, 3) == ['a', (['x'], ['y']), 'b']
-w.add_revision(4, ['a', 'x', 'b'], [1])
-w.add_revision(5, ['a', 'z', 'b'], [4])
-assert w.merge(2, 5) == ['a', 'z', 'b']
-w = Weave()
-w.add_revision(1, ['b'], [])
-assert w.retrieve_revision(1) == ['b']
-w.add_revision(2, ['x', 'b'], [1])
-assert w.retrieve_revision(2) == ['x', 'b']
-w.add_revision(3, ['y', 'b'], [1])
-assert w.retrieve_revision(3) == ['y', 'b']
-assert w.merge(2, 3) == [(['x'], ['y']), 'b']
-w.add_revision(4, ['x', 'b'], [1])
-w.add_revision(5, ['z', 'b'], [4])
-assert w.merge(2, 5) == ['z', 'b']
-w = Weave()
-w.add_revision(1, ['a'], [])
-assert w.retrieve_revision(1) == ['a']
-w.add_revision(2, ['a', 'x'], [1])
-assert w.retrieve_revision(2) == ['a', 'x']
-w.add_revision(3, ['a', 'y'], [1])
-assert w.retrieve_revision(3) == ['a', 'y']
-assert w.merge(2, 3) == ['a', (['x'], ['y'])]
-w.add_revision(4, ['a', 'x'], [1])
-w.add_revision(5, ['a', 'z'], [4])
-assert w.merge(2, 5) == ['a', 'z']
-w = Weave()
-w.add_revision(1, [], [])
-assert w.retrieve_revision(1) == []
-w.add_revision(2, ['x'], [1])
-assert w.retrieve_revision(2) == ['x']
-w.add_revision(3, ['y'], [1])
-assert w.retrieve_revision(3) == ['y']
-assert w.merge(2, 3) == [(['x'], ['y'])]
-w.add_revision(4, ['x'], [1])
-w.add_revision(5, ['z'], [4])
-assert w.merge(2, 5) == ['z']
-
-w = Weave()
-w.add_revision(1, ['a', 'b'], [])
-w.add_revision(2, ['a', 'c', 'b'], [1])
-w.add_revision(3, ['a', 'b'], [2])
-w.add_revision(4, ['a', 'd', 'b'], [1])
-assert w.merge(2, 4) == ['a', (['c'], ['d']), 'b']
-assert w.merge(3, 4) == ['a', ([], ['d']), 'b']
-w.add_revision(5, ['a', 'b'], [4])
-assert w.merge(4, 5) == ['a', 'b']
-w = Weave()
-w.add_revision(1, ['b'], [])
-w.add_revision(2, ['c', 'b'], [1])
-w.add_revision(3, ['b'], [2])
-w.add_revision(4, ['d', 'b'], [1])
-assert w.merge(2, 4) == [(['c'], ['d']), 'b']
-assert w.merge(3, 4) == [([], ['d']), 'b']
-w.add_revision(5, ['b'], [4])
-assert w.merge(4, 5) == ['b']
-w = Weave()
-w.add_revision(1, ['a'], [])
-w.add_revision(2, ['a', 'c'], [1])
-w.add_revision(3, ['a'], [2])
-w.add_revision(4, ['a', 'd'], [1])
-assert w.merge(2, 4) == ['a', (['c'], ['d'])]
-assert w.merge(3, 4) == ['a', ([], ['d'])]
-w.add_revision(5, ['a'], [4])
-assert w.merge(4, 5) == ['a']
-w = Weave()
-w.add_revision(1, [], [])
-w.add_revision(2, ['c'], [1])
-w.add_revision(3, [], [2])
-w.add_revision(4, ['d'], [1])
-assert w.merge(2, 4) == [(['c'], ['d'])]
-assert w.merge(3, 4) == [([], ['d'])]
-w.add_revision(5, [], [4])
-assert w.merge(4, 5) == []
-
-w = Weave()
-w.add_revision(1, ['a', 'b', 'c', 'd', 'e'], [])
-w.add_revision(2, ['a', 'x', 'c', 'd', 'e'], [1])
-w.add_revision(3, ['a', 'e'], [1])
-w.add_revision(4, ['a', 'b', 'c', 'd', 'e'], [3])
-assert w.merge(2, 4) == ['a', (['x'], ['b']), 'c', 'd', 'e']
-w = Weave()
-w.add_revision(1, ['b', 'c', 'd', 'e'], [])
-w.add_revision(2, ['x', 'c', 'd', 'e'], [1])
-w.add_revision(3, ['e'], [1])
-w.add_revision(4, ['b', 'c', 'd', 'e'], [3])
-assert w.merge(2, 4) == [(['x'], ['b']), 'c', 'd', 'e']
-w = Weave()
-w.add_revision(1, ['a', 'b', 'c', 'd'], [])
-w.add_revision(2, ['a', 'x', 'c', 'd'], [1])
-w.add_revision(3, ['a'], [1])
-w.add_revision(4, ['a', 'b', 'c', 'd'], [3])
-assert w.merge(2, 4) == ['a', (['x'], ['b']), 'c', 'd']
-w = Weave()
-w.add_revision(1, ['b', 'c', 'd'], [])
-w.add_revision(2, ['x', 'c', 'd'], [1])
-w.add_revision(3, [], [1])
-w.add_revision(4, ['b', 'c', 'd'], [3])
-assert w.merge(2, 4) == [(['x'], ['b']), 'c', 'd']
-
-w = Weave()
-w.add_revision(1, ['a', 'b'], [])
-w.add_revision(2, ['a', 'c', 'b'], [1])
-w.add_revision(3, ['a', 'd', 'b'], [1])
-w.add_revision(4, ['a', 'c', 'd', 'b'], [2, 3])
-w.add_revision(5, ['a', 'd', 'c', 'b'], [2, 3])
-assert w.merge(4, 5) == ['a', (['c'], []), 'd', 'c', 'b']
-w = Weave()
-w.add_revision(1, ['b'], [])
-w.add_revision(2, ['c', 'b'], [1])
-w.add_revision(3, ['d', 'b'], [1])
-w.add_revision(4, ['c', 'd', 'b'], [2, 3])
-w.add_revision(5, ['d', 'c', 'b'], [2, 3])
-assert w.merge(4, 5) == [(['c'], []), 'd', 'c', 'b']
-w = Weave()
-w.add_revision(1, ['a'], [])
-w.add_revision(2, ['a', 'c'], [1])
-w.add_revision(3, ['a', 'd'], [1])
-w.add_revision(4, ['a', 'c', 'd'], [2, 3])
-w.add_revision(5, ['a', 'd', 'c'], [2, 3])
-assert w.merge(4, 5) == ['a', (['c'], []), 'd', 'c']
-w = Weave()
-w.add_revision(1, [], [])
-w.add_revision(2, ['c'], [1])
-w.add_revision(3, ['d'], [1])
-w.add_revision(4, ['c', 'd'], [2, 3])
-w.add_revision(5, ['d', 'c'], [2, 3])
-assert w.merge(4, 5) == [(['c'], []), 'd', 'c']
-
-w = Weave()
-w.add_revision(1, ['a', 'b'], [])
-w.add_revision(2, ['a', 'f', 'y', 'y', 'f', 'b'], [1])
-w.add_revision(3, ['a', 'y', 'b'], [1])
-w.add_revision(4, ['a', 'p', 'y', 'p', 'b'], [3])
-w.add_revision(5, ['a', 'q', 'y', 'q', 'b'], [3])
-assert w.merge(4, 5) == ['a', (['p'], ['q']), 'y', (['p'], ['q']), 'b']
-w = Weave()
-w.add_revision(1, [], [])
-w.add_revision(2, ['f', 'y', 'y', 'f'], [1])
-w.add_revision(3, ['y'], [1])
-w.add_revision(4, ['p', 'y', 'p'], [3])
-w.add_revision(5, ['q', 'y', 'q'], [3])
-assert w.merge(4, 5) == [(['p'], ['q']), 'y', (['p'], ['q'])]
-w = Weave()
-w.add_revision(1, ['a'], [])
-w.add_revision(2, ['a', 'f', 'y', 'y', 'f'], [1])
-w.add_revision(3, ['a', 'y'], [1])
-w.add_revision(4, ['a', 'p', 'y', 'p'], [3])
-w.add_revision(5, ['a', 'q', 'y', 'q'], [3])
-assert w.merge(4, 5) == ['a', (['p'], ['q']), 'y', (['p'], ['q'])]
-w = Weave()
-w.add_revision(1, ['a', 'b'], [])
-w.add_revision(2, ['a', 'f', 'y', 'y', 'f', 'b'], [1])
-w.add_revision(3, ['a', 'y', 'b'], [1])
-w.add_revision(4, ['a', 'p', 'z', 'z', 'y', 'z', 'z', 'p', 'b'], [3])
-w.add_revision(5, ['a', 'q', 'z', 'z', 'y', 'z', 'z', 'q', 'b'], [3])
-assert w.merge(4, 5) == ['a', (['p'], ['q']), 'z', 'z', 'y', 'z', 'z', (['p'], ['q']), 'b']
-w = Weave()
-w.add_revision(1, ['a', 'b'], [])
-w.add_revision(2, ['a', 'f', 'y', 'y', 'f', 'b'], [1])
-w.add_revision(3, ['a', 'y', 'b'], [1])
-w.add_revision(4, ['a', 'p', 'z', 'm', 'y', 'm', 'z', 'p', 'b'], [3])
-w.add_revision(5, ['a', 'q', 'z', 'n', 'y', 'n', 'z', 'q', 'b'], [3])
-assert w.merge(4, 5) == ['a', (['p'], ['q']), 'z', (['m'], ['n']), 'y', (['m'], ['n']), 'z', (['p'], ['q']), 'b']
-
-w = Weave()
-w.add_revision(1, ['a', 'b', 'c', 'd', 'e', 'f'], [])
-w.add_revision(2, ['a', 'b', 'c', 'd', 'e', 'g'], [1])
-w.add_revision(3, ['b', 'c', 'c', 'd', 'e', 'f'], [])
-assert w.cherry_pick(2, 3) == ['b', 'c', 'c', 'd', 'e', 'g']
-w.add_revision(4, ['a', 'b', 'c', 'd', 'f'], [])
-assert w.cherry_pick(2, 4) == ['a', 'b', 'c', 'd', (['e', 'g'], ['f'])]
-
-
-w = Weave()
-w.add_revision(1, ['a', 'b', 'c', 'd', 'e', 'f'], [])
-w.add_revision(2, ['a', 'b', 'c', 'e', 'f'], [1])
-w.add_revision(3, ['a', 'b', 'd', 'e', 'f'], [1])
-w.merge(2, 3) == ['a', 'b', (['c'], ['d']), 'e', 'f']
