@@ -257,11 +257,11 @@ class Weave(object):
         # non-conflict lines are strings, conflict sections are
         # ([linesa], [linesb])
         if edgesa is None:
-			edgesa = self._make_vals(reva)
+            edgesa = self._make_vals(reva)
         if alines is None:
             alines = self._lineids(edgesa)
         if edgesb is None:
-			edgesb = self._make_vals(revb)
+            edgesb = self._make_vals(revb)
         if blines is None:
             blines = self._lineids(edgesb)
         lastalineid = None
