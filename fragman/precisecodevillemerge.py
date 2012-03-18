@@ -104,7 +104,7 @@ def recurse_matches(a, b, ahi, bhi, answer, maxrecursion):
         for i in xrange(ahi - nahi):
             answer.append((nahi + i, nbhi + i))
 
-class Weave:
+class Weave(object):
     def __init__(self):
         # [(lineid, line)]
         self.weave = []
