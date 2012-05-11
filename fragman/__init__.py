@@ -11,7 +11,7 @@ def find_configuration(current=None):
     path = current or os.getcwd()
     while True:
         configuration_path = os.path.join(path, configuration_name)
-        if os.path.exists(current) and os.path.exists(configuration_path):
+        if os.path.exists(path) and os.path.exists(configuration_path):
             return configuration_path
         path, oldpath = os.path.split(path)[0], path
         if oldpath == path:
