@@ -2,11 +2,11 @@ import unittest
 import os, shutil, tempfile
 import pdb
 
-from fragman.__main__ import ExecutionError, init, stat
+from fragman.__main__ import ExecutionError, init, stat, add
 from fragman.config import configuration_file_name, configuration_directory_name, ConfigurationDirectoryNotFound
 
 
-class BaseCommandTest(unittest.TestCase):
+class CommandBase(unittest.TestCase):
 
     test_content_directory = 'test_content'
 
@@ -21,7 +21,7 @@ class BaseCommandTest(unittest.TestCase):
         shutil.rmtree(self.path)
 
 
-class TestInitCommand(BaseCommandTest):
+class TestInitCommand(CommandBase):
 
     def test_init_creates_fragments_directory_and_config_json(self):
         init()
@@ -61,11 +61,31 @@ class TestInitCommand(BaseCommandTest):
         self.assertTrue(os.path.exists(os.path.join(self.path, configuration_directory_name, configuration_file_name + '.corrupt')))
 
 
-class TestStatCommand(BaseCommandTest):
+class PostInitCommandMixIn(object):
 
-    def test_stat_raises_error_before_init(self):
-        self.assertRaises(ConfigurationDirectoryNotFound, stat)
+    def get_command(self):
+        return globals()[self.command] # a little hacky
 
-    def test_stat_runs_after_init(self):
+    def test_command_raises_error_before_init(self):
+        self.assertRaises(ConfigurationDirectoryNotFound, self.get_command())
+
+    def test_command_runs_after_init(self):
         init()
-        stat()
+        self.get_command()()
+
+
+class TestStatCommand(CommandBase, PostInitCommandMixIn):
+
+    command = 'stat'
+
+
+class TestAddCommand(CommandBase, PostInitCommandMixIn):
+
+    command = 'add'
+
+    def test_add_a_file(self):
+        init()
+        file_name = 'file.ext'
+        new_file = file(os.path.join(self.content_path, file_name), 'w')
+        new_file.write("CONTENTS\nCONTENTS\n")
+        add(file_name)
