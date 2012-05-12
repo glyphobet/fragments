@@ -1,18 +1,48 @@
 import os, sys, json
+from . import FragmanError
 
-defaults = {
-    'files': (),
-}
-name = 'config.json'
+configuration_file_name = 'config.json'
+configuration_directory_name = 'fragments'
+
+
+class ConfigurationError(FragmanError): pass
+class ConfigurationDirectoryNotFound(ConfigurationError): pass
+class ConfigurationFileNotFound(ConfigurationError): pass
+class ConfigurationFileCorrupt(ConfigurationError): pass
+
+
+def find_configuration(current=None):
+    path = current or os.getcwd()
+    while True:
+        configuration_path = os.path.join(path, configuration_directory_name)
+        if os.path.exists(path) and os.path.exists(configuration_path):
+            return configuration_path
+        path, oldpath = os.path.split(path)[0], path
+        if oldpath == path:
+            raise ConfigurationDirectoryNotFound(current)
+
 
 class FragmanConfig(dict):
-    def __init__(self, directory):
-        self.path = os.path.join(directory, name)
-        self.update(defaults)
-        if os.access(self.path, os.R_OK|os.W_OK):
-            self.update(json.loads(open(self.path, 'r').read()))
-        else:
-            sys.exit("Could not access %r, check permissions" % self.path)
 
-    def save(self):
+    defaults = {
+        'files': (),
+    }
+
+    def __init__(self, directory=None, autoload=True):
+        if directory is None:
+            directory = find_configuration()
+        self.path = os.path.join(directory, configuration_file_name)
+        self.update(FragmanConfig.defaults)
+        if autoload:
+            self.load()
+
+    def load(self):
+        if os.access(self.path, os.R_OK|os.W_OK):
+            file_contents = open(self.path, 'r').read()
+            parsed_json = json.loads(file_contents)
+            self.update(parsed_json)
+        else:
+            raise ConfigurationFileNotFound("Could not access %r, if the file exists, check its permissions" % self.path)
+
+    def dump(self):
         file(self.path, 'w').write(json.dumps(self, sort_keys=True, indent=4))

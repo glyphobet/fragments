@@ -1,32 +1,43 @@
 import sys, os, pdb
 
-from fragman import __version__, configuration_name, find_configuration, ConfigurationNotFound
-from fragman.config import FragmanConfig
+from fragman import __version__, FragmanError
+from fragman.config import FragmanConfig, configuration_directory_name, find_configuration, ConfigurationDirectoryNotFound
 
+class ExecutionError(FragmanError): pass
 
 def help(*a):
     """Prints help."""
-    print("help!")
+    return "help!"
 
 
 def init(*a):
     """Initialize a fragments repository."""
     try:
         configuration_path = find_configuration()
-    except ConfigurationNotFound, exc:
+    except ConfigurationDirectoryNotFound, exc:
         configuration_parent = os.path.split(os.getcwd())[0]
         if os.access(configuration_parent, os.R_OK|os.W_OK):
-            configuration_path = os.path.join(configuration_parent, configuration_name)
+            configuration_path = os.path.join(configuration_parent, configuration_directory_name)
             os.mkdir(configuration_path)
-            config = FragmanConfig(configuration_path)
-            config.save()
+            config = FragmanConfig(configuration_path, autoload=False)
+            config.dump()
         else:
-            sys.exit("Could not create fragments directory in %s, aborting.\n(Do you have the correct permissions?)" % configuration_parent)
+            raise ExecutionError("Could not create fragments directory in %s, aborting.\n(Do you have the correct permissions?)" % configuration_parent)
     else:
-        sys.exit("Current fragments directory found at %s, aborting." % configuration_path)
+        raise ExecutionError("Current fragments directory found at %s, aborting." % configuration_path)
+
+
+def stat(*a):
+    config = FragmanConfig()
+    return repr(config)
 
 
 if __name__ == '__main__':
     print "%s version %s.%s.%s" % ((__package__,) + __version__)
-    locals().get(sys.argv[1], help)(sys.argv[2:])
-
+    if len(sys.argv) > 1:
+        try:
+            print(locals().get(sys.argv[1], help)(sys.argv[2:]))
+        except ExecutionError, exc:
+            sys.exit(exc.message)
+    else:
+        print(help())
