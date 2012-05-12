@@ -40,8 +40,15 @@ if __name__ == '__main__':
     print "%s version %s.%s.%s" % ((__package__,) + __version__)
     if len(sys.argv) > 1:
         try:
-            print(locals().get(sys.argv[1], help)(sys.argv[2:]))
+            cmd = locals()[sys.argv[1]]
+        except KeyError, exc:
+            print(help())
         except ExecutionError, exc:
             sys.exit(exc.message)
+        else:
+            if callable(cmd):
+                print(cmd(sys.argv[2:]))
+            else:
+                print(help())
     else:
         print(help())
