@@ -1,7 +1,7 @@
 import sys, os, pdb
 
 from fragman import __version__, FragmanError
-from fragman.config import FragmanConfig, configuration_directory_name, find_configuration, ConfigurationFileNotFound, ConfigurationDirectoryNotFound
+from fragman.config import FragmanConfig, configuration_directory_name, find_configuration, ConfigurationFileCorrupt, ConfigurationFileNotFound, ConfigurationDirectoryNotFound
 
 class ExecutionError(FragmanError): pass
 
@@ -14,6 +14,10 @@ def init(*a):
     """Initialize a fragments repository."""
     try:
         config = FragmanConfig()
+    except ConfigurationFileCorrupt, exc:
+        config = FragmanConfig(autoload=False)
+        os.rename(config.path, config.path + '.corrupt')
+        config.dump()
     except ConfigurationFileNotFound, exc:
         config = FragmanConfig(autoload=False)
         config.dump()
