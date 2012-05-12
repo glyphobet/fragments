@@ -41,6 +41,19 @@ def stat(*a):
     return repr(config)
 
 
+def add(*args):
+    """Add files to fragments tracking."""
+    config = FragmanConfig()
+    for filename in args:
+        try:
+            fullpath = os.path.join(os.getcwd(), filename)
+        except Exception, exc:
+            pdb.set_trace()
+        else:
+            if os.access(fullpath, os.W_OK):
+                pass
+
+
 if __name__ == '__main__':
     print "%s version %s.%s.%s" % ((__package__,) + __version__)
     if len(sys.argv) > 1:
