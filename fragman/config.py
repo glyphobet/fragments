@@ -12,14 +12,15 @@ class ConfigurationFileCorrupt(ConfigurationError): pass
 
 
 def find_configuration(current=None):
-    path = current or os.getcwd()
+    current = current or os.getcwd()
+    path = current
     while True:
         configuration_path = os.path.join(path, configuration_directory_name)
         if os.path.exists(path) and os.path.exists(configuration_path):
             return configuration_path
         path, oldpath = os.path.split(path)[0], path
         if oldpath == path:
-            raise ConfigurationDirectoryNotFound(current)
+            raise ConfigurationDirectoryNotFound("Could not find fragments configuration directory in %r or any parent directories" % current)
 
 
 class FragmanConfig(dict):
