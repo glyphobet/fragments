@@ -36,6 +36,7 @@ def init(*a):
 
 
 def stat(*a):
+    """Get status of a fragments repository."""
     config = FragmanConfig()
     return repr(config)
 
