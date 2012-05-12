@@ -40,7 +40,10 @@ class FragmanConfig(dict):
     def load(self):
         if os.access(self.path, os.R_OK|os.W_OK):
             file_contents = open(self.path, 'r').read()
-            parsed_json = json.loads(file_contents)
+            try:
+                parsed_json = json.loads(file_contents)
+            except Exception, exc:
+                raise ConfigurationFileCorrupt(exc.message)
             self.update(parsed_json)
         else:
             raise ConfigurationFileNotFound("Could not access %r, if the file exists, check its permissions" % self.path)
