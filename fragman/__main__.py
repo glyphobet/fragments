@@ -1,6 +1,7 @@
 import sys, os, pdb
 
 from fragman import __version__, configuration_name, find_configuration, ConfigurationNotFound
+from fragman.config import FragmanConfig
 
 
 def help(*a):
@@ -17,6 +18,8 @@ def init(*a):
         if os.access(configuration_parent, os.R_OK|os.W_OK):
             configuration_path = os.path.join(configuration_parent, configuration_name)
             os.mkdir(configuration_path)
+            config = FragmanConfig(configuration_path)
+            config.save()
         else:
             sys.exit("Could not create fragments directory in %s, aborting.\n(Do you have the correct permissions?)" % configuration_parent)
     else:
