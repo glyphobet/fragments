@@ -1,5 +1,5 @@
 import unittest
-import os, shutil, tempfile
+import os, shutil, tempfile, types
 import pdb
 
 from fragman.__main__ import ExecutionError, init, stat, add
@@ -64,6 +64,13 @@ class TestInitCommand(CommandBase):
 
 
 class PostInitCommandMixIn(object):
+
+    def setUp(self):
+        super(CommandBase, self).setUp()
+
+    def test_command_attribute_set_properly(self):
+        self.assertTrue(isinstance(self.command, types.FunctionType), 
+            "%s.command attribute must be a staticmethod." % type(self).__name__)
 
     def test_command_raises_error_before_init(self):
         self.assertRaises(ConfigurationDirectoryNotFound, self.command)
