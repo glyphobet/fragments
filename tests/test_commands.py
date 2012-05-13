@@ -11,6 +11,7 @@ class CommandBase(unittest.TestCase):
     test_content_directory = 'test_content'
 
     def setUp(self):
+        super(CommandBase, self).setUp()
         self.path = os.path.realpath(tempfile.mkdtemp())
         self.content_path = os.path.join(self.path, self.test_content_directory) 
         os.mkdir(self.content_path)
@@ -19,6 +20,7 @@ class CommandBase(unittest.TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.path)
+        super(CommandBase, self).tearDown()
 
 
 class TestInitCommand(CommandBase):
