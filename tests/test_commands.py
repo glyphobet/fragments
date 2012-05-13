@@ -63,25 +63,22 @@ class TestInitCommand(CommandBase):
 
 class PostInitCommandMixIn(object):
 
-    def get_command(self):
-        return globals()[self.command] # a little hacky
-
     def test_command_raises_error_before_init(self):
-        self.assertRaises(ConfigurationDirectoryNotFound, self.get_command())
+        self.assertRaises(ConfigurationDirectoryNotFound, self.command)
 
     def test_command_runs_after_init(self):
         init()
-        self.get_command()()
+        self.command()
 
 
 class TestStatCommand(CommandBase, PostInitCommandMixIn):
 
-    command = 'stat'
+    command = staticmethod(stat)
 
 
 class TestAddCommand(CommandBase, PostInitCommandMixIn):
 
-    command = 'add'
+    command = staticmethod(add)
 
     def _create_file(self, file_name='file.ext', contents='CONTENTS\nCONTENTS\n'):
         file_path = os.path.join(self.content_path, file_name)
