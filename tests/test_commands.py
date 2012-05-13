@@ -83,13 +83,47 @@ class TestAddCommand(CommandBase, PostInitCommandMixIn):
 
     command = 'add'
 
-    def test_add_a_file(self):
-        init()
-        file_name = 'file.ext'
+    def _create_file(self, file_name='file.ext', contents='CONTENTS\nCONTENTS\n'):
         file_path = os.path.join(self.content_path, file_name)
         new_file = file(file_path, 'w')
-        new_file.write("CONTENTS\nCONTENTS\n")
+        new_file.write(contents)
+        return file_name, file_path
+
+    def test_add_a_file(self):
+        init()
+        file_name, file_path = self._create_file()
         add(file_name)
         config = FragmanConfig()
         key = file_path[len(os.path.split(config.directory)[0])+1:]
         self.assertIn(key, config['files'])
+
+    def test_file_twice_on_the_command_line(self):
+        init()
+        file_name, file_path = self._create_file()
+        add(file_name, file_name)
+        config = FragmanConfig()
+        key = file_path[len(os.path.split(config.directory)[0])+1:]
+        self.assertIn(key, config['files'])
+
+    def test_add_file_two_times(self):
+        init()
+        file_name, file_path = self._create_file()
+        add(file_name)
+        config = FragmanConfig()
+        key = file_path[len(os.path.split(config.directory)[0])+1:]
+        uuid = config['files'][key]
+        add(file_name)
+        config = FragmanConfig()
+        self.assertIn(key, config['files'])
+        self.assertEquals(config['files'][key], uuid)
+
+    def test_add_two_files(self):
+        init()
+        file1_name, file1_path = self._create_file(file_name='file1.ext')
+        file2_name, file2_path = self._create_file(file_name='file2.ext')
+        add(file1_name, file2_name)
+        config = FragmanConfig()
+        key1 = file1_path[len(os.path.split(config.directory)[0])+1:]
+        key2 = file2_path[len(os.path.split(config.directory)[0])+1:]
+        self.assertIn(key1, config['files'])
+        self.assertIn(key2, config['files'])
