@@ -3,7 +3,7 @@ import os, shutil, tempfile
 import pdb
 
 from fragman.__main__ import ExecutionError, init, stat, add
-from fragman.config import configuration_file_name, configuration_directory_name, ConfigurationDirectoryNotFound
+from fragman.config import configuration_file_name, configuration_directory_name, ConfigurationDirectoryNotFound, FragmanConfig
 
 
 class CommandBase(unittest.TestCase):
@@ -11,7 +11,7 @@ class CommandBase(unittest.TestCase):
     test_content_directory = 'test_content'
 
     def setUp(self):
-        self.path = tempfile.mkdtemp()
+        self.path = os.path.realpath(tempfile.mkdtemp())
         self.content_path = os.path.join(self.path, self.test_content_directory) 
         os.mkdir(self.content_path)
         self.assertTrue(os.path.exists(os.path.join(self.path, self.test_content_directory)))
@@ -86,6 +86,10 @@ class TestAddCommand(CommandBase, PostInitCommandMixIn):
     def test_add_a_file(self):
         init()
         file_name = 'file.ext'
-        new_file = file(os.path.join(self.content_path, file_name), 'w')
+        file_path = os.path.join(self.content_path, file_name)
+        new_file = file(file_path, 'w')
         new_file.write("CONTENTS\nCONTENTS\n")
         add(file_name)
+        config = FragmanConfig()
+        key = file_path[len(os.path.split(config.directory)[0])+1:]
+        self.assertIn(key, config['files'])

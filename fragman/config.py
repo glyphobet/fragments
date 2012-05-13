@@ -1,4 +1,4 @@
-import os, sys, json
+import os, sys, json, uuid
 from . import FragmanError
 
 configuration_file_name = 'config.json'
@@ -9,6 +9,13 @@ class ConfigurationError(FragmanError): pass
 class ConfigurationDirectoryNotFound(ConfigurationError): pass
 class ConfigurationFileNotFound(ConfigurationError): pass
 class ConfigurationFileCorrupt(ConfigurationError): pass
+
+
+class UUIDEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, uuid.UUID):
+            return str(obj)
+        return json.JSONEncoder.default(self, obj)
 
 
 def find_configuration(current=None):
@@ -26,13 +33,14 @@ def find_configuration(current=None):
 class FragmanConfig(dict):
 
     defaults = {
-        'files': (),
+        'files': {},
     }
 
     def __init__(self, directory=None, autoload=True):
         if directory is None:
             directory = find_configuration()
-        self.path = os.path.join(directory, configuration_file_name)
+        self.directory = directory
+        self.path = os.path.join(self.directory, configuration_file_name)
         self.update(FragmanConfig.defaults)
         if autoload:
             self.load()
@@ -49,4 +57,4 @@ class FragmanConfig(dict):
             raise ConfigurationFileNotFound("Could not access %r, if the file exists, check its permissions" % self.path)
 
     def dump(self):
-        file(self.path, 'w').write(json.dumps(self, sort_keys=True, indent=4))
+        file(self.path, 'w').write(json.dumps(self, sort_keys=True, indent=4, cls=UUIDEncoder))

@@ -1,4 +1,5 @@
-import sys, os, pdb
+import sys, os, uuid
+import pdb
 
 from fragman import __version__, FragmanError
 from fragman.config import FragmanConfig, configuration_directory_name, find_configuration, ConfigurationFileCorrupt, ConfigurationFileNotFound, ConfigurationDirectoryNotFound
@@ -41,17 +42,22 @@ def stat(*a):
     return repr(config)
 
 
-def add(*args):
+def add(*args): # Also could be called track
     """Add files to fragments tracking."""
     config = FragmanConfig()
-    for filename in args:
-        try:
-            fullpath = os.path.join(os.getcwd(), filename)
-        except Exception, exc:
-            pdb.set_trace()
-        else:
-            if os.access(fullpath, os.W_OK):
-                pass
+    prefix = os.path.split(config.directory)[0]
+    random_uuid = uuid.uuid4()
+    for filename in set(args):
+        fullpath = os.path.join(os.getcwd(), filename)
+        if fullpath.startswith(prefix):
+            if os.access(fullpath, os.W_OK|os.R_OK):
+                file_path = fullpath[len(prefix)+1:]
+                if file_path in config['files']:
+                    # file already tracked
+                    continue
+                file_uuid = uuid.uuid5(random_uuid, file_path)
+                config['files'][file_path] = file_uuid
+    config.dump()
 
 
 if __name__ == '__main__':
