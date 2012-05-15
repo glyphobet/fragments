@@ -2,7 +2,7 @@ import unittest
 import os, shutil, tempfile, types
 import pdb
 
-from fragman.__main__ import ExecutionError, init, stat, add
+from fragman.__main__ import ExecutionError, init, stat, track
 from fragman.config import configuration_file_name, configuration_directory_name, ConfigurationDirectoryNotFound, FragmanConfig
 
 
@@ -85,9 +85,9 @@ class TestStatCommand(CommandBase, PostInitCommandMixIn):
     command = staticmethod(stat)
 
 
-class TestAddCommand(CommandBase, PostInitCommandMixIn):
+class TestTrackCommand(CommandBase, PostInitCommandMixIn):
 
-    command = staticmethod(add)
+    command = staticmethod(track)
 
     def _create_file(self, file_name='file.ext', contents='CONTENTS\nCONTENTS\n'):
         file_path = os.path.join(self.content_path, file_name)
@@ -95,10 +95,10 @@ class TestAddCommand(CommandBase, PostInitCommandMixIn):
         new_file.write(contents)
         return file_name, file_path
 
-    def test_add_a_file(self):
+    def test_track_a_file(self):
         init()
         file_name, file_path = self._create_file()
-        add(file_name)
+        track(file_name)
         config = FragmanConfig()
         key = file_path[len(os.path.split(config.directory)[0])+1:]
         self.assertIn(key, config['files'])
@@ -106,28 +106,28 @@ class TestAddCommand(CommandBase, PostInitCommandMixIn):
     def test_file_twice_on_the_command_line(self):
         init()
         file_name, file_path = self._create_file()
-        add(file_name, file_name)
+        track(file_name, file_name)
         config = FragmanConfig()
         key = file_path[len(os.path.split(config.directory)[0])+1:]
         self.assertIn(key, config['files'])
 
-    def test_add_file_two_times(self):
+    def test_track_file_two_times(self):
         init()
         file_name, file_path = self._create_file()
-        add(file_name)
+        track(file_name)
         config = FragmanConfig()
         key = file_path[len(os.path.split(config.directory)[0])+1:]
         uuid = config['files'][key]
-        add(file_name)
+        track(file_name)
         config = FragmanConfig()
         self.assertIn(key, config['files'])
         self.assertEquals(config['files'][key], uuid)
 
-    def test_add_two_files(self):
+    def test_track_two_files(self):
         init()
         file1_name, file1_path = self._create_file(file_name='file1.ext')
         file2_name, file2_path = self._create_file(file_name='file2.ext')
-        add(file1_name, file2_name)
+        track(file1_name, file2_name)
         config = FragmanConfig()
         key1 = file1_path[len(os.path.split(config.directory)[0])+1:]
         key2 = file2_path[len(os.path.split(config.directory)[0])+1:]

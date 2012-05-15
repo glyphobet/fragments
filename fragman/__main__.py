@@ -42,7 +42,7 @@ def stat(*a):
     return repr(config)
 
 
-def add(*args): # Also could be called track
+def track(*args):
     """Add files to fragments tracking."""
     config = FragmanConfig()
     prefix = os.path.split(config.directory)[0]
