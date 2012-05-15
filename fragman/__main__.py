@@ -60,6 +60,28 @@ def track(*args):
     config.dump()
 
 
+def commit(*args):
+    """Commit changes to fragments repository"""
+    config = FragmanConfig()
+    prefix = os.path.split(config.directory)[0]
+    for filename, uuid in config['files'].items():
+        repo_path = os.path.join(prefix, uuid)
+        if os.access(repo_path, os.R_OK|os.W_OK):
+            repo_mtime = os.stat(repo_path)[8]
+        else:
+            repo_mtime = -1
+        curr_path = os.path.join(prefix, filename)
+        if os.access(curr_path, os.R_OK|os.W_OK):
+            curr_mtime = os.stat(curr_path)[8]
+        else:
+            continue
+        if repo_mtime < curr_mtime:
+            repo_file = file(repo_path, 'a')
+            repo_file.write(file(curr_path, 'r').read())
+            repo_file.close()
+
+
+
 if __name__ == '__main__':
     print "%s version %s.%s.%s" % ((__package__,) + __version__)
     if len(sys.argv) > 1:

@@ -2,7 +2,7 @@ import unittest
 import os, shutil, tempfile, types
 import pdb
 
-from fragman.__main__ import ExecutionError, init, stat, track
+from fragman.__main__ import ExecutionError, init, stat, track, commit
 from fragman.config import configuration_file_name, configuration_directory_name, ConfigurationDirectoryNotFound, FragmanConfig
 
 
@@ -133,3 +133,8 @@ class TestTrackCommand(CommandBase, PostInitCommandMixIn):
         key2 = file2_path[len(os.path.split(config.directory)[0])+1:]
         self.assertIn(key1, config['files'])
         self.assertIn(key2, config['files'])
+
+
+class TestCommitCommand(CommandBase, PostInitCommandMixIn):
+
+    command = staticmethod(commit)
