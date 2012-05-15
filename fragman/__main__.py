@@ -64,17 +64,30 @@ def commit(*args):
     """Commit changes to fragments repository"""
     config = FragmanConfig()
     prefix = os.path.split(config.directory)[0]
-    for filename, uuid in config['files'].items():
+    cwd = os.getcwd()
+
+    if args:
+        iterate = (os.path.join(cwd, a) for a in args)
+    else:
+        iterate = (os.path.join(prefix, f) for f in config['files'])
+
+    for curr_path in iterate:
+        key = curr_path[len(prefix)+1:]
+        if key not in config['files']:
+            continue # trying to commit an untracked file
+        uuid = config['files'][key]
+
         repo_path = os.path.join(config.directory, uuid)
         if os.access(repo_path, os.R_OK|os.W_OK):
             repo_mtime = os.stat(repo_path)[8]
         else:
-            repo_mtime = -1
-        curr_path = os.path.join(prefix, filename)
+            repo_mtime = -1 # committing a file for the first time
+
         if os.access(curr_path, os.R_OK|os.W_OK):
             curr_atime, curr_mtime = os.stat(curr_path)[7:9]
         else:
-            continue
+            continue # trying to commit a nonexistent file
+
         if repo_mtime < curr_mtime:
             repo_file = file(repo_path, 'w')
             repo_file.write(file(curr_path, 'r').read())
