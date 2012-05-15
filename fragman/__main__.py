@@ -95,7 +95,6 @@ def commit(*args):
             os.utime(repo_path, (curr_atime, curr_mtime))
 
 
-
 if __name__ == '__main__':
     print "%s version %s.%s.%s" % ((__package__,) + __version__)
     if len(sys.argv) > 1:
