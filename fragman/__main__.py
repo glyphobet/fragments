@@ -117,6 +117,40 @@ def commit(*args):
             os.utime(repo_path, (curr_atime, curr_mtime))
 
 
+def revert(*args):
+    """Revert changes to fragments repository"""
+    config = FragmanConfig()
+    prefix = os.path.split(config.directory)[0]
+
+    if args:
+        iterate = (os.path.realpath(a) for a in set(args))
+    else:
+        iterate = (os.path.join(prefix, f) for f in config['files'])
+
+    for curr_path in iterate:
+        key = curr_path[len(prefix)+1:]
+        if key not in config['files']:
+            continue # trying to revert an unfollowed file
+        uuid = config['files'][key]
+
+        repo_path = os.path.join(config.directory, uuid)
+        if os.access(repo_path, os.R_OK|os.W_OK):
+            repo_atime, repo_mtime = os.stat(repo_path)[7:9]
+        else:
+            continue # trying to revert an uncommitted file
+
+        if os.access(curr_path, os.R_OK|os.W_OK):
+            curr_atime, curr_mtime = os.stat(curr_path)[7:9]
+        else:
+            continue # trying to revert a nonexistent file
+
+        if repo_mtime < curr_mtime:
+            curr_file = file(curr_path, 'w')
+            curr_file.write(file(repo_path, 'r').read())
+            curr_file.close()
+            os.utime(curr_file, (repo_atime, repo_mtime))
+
+
 if __name__ == '__main__':
     print "%s version %s.%s.%s" % ((__package__,) + __version__)
     if len(sys.argv) > 1:

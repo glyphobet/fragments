@@ -2,7 +2,7 @@ import unittest
 import os, shutil, tempfile, types, time
 import pdb
 
-from fragman.__main__ import ExecutionError, init, stat, follow, forget, commit
+from fragman.__main__ import ExecutionError, init, stat, follow, forget, commit, revert
 from fragman.config import configuration_file_name, configuration_directory_name, ConfigurationDirectoryNotFound, FragmanConfig
 
 
@@ -191,3 +191,8 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
             file(os.path.join(config.directory, config['files'][key]), 'r').read(),
             file(file_path, 'r').read(),
         )
+
+
+class TestRevertCommand(CommandBase, PostInitCommandMixIn):
+
+    command = staticmethod(revert)
