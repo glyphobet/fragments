@@ -2,7 +2,7 @@ import unittest
 import os, shutil, tempfile, types, time
 import pdb
 
-from fragman.__main__ import ExecutionError, init, stat, track, forget, commit
+from fragman.__main__ import ExecutionError, init, stat, follow, forget, commit
 from fragman.config import configuration_file_name, configuration_directory_name, ConfigurationDirectoryNotFound, FragmanConfig
 
 
@@ -91,14 +91,14 @@ class TestStatCommand(CommandBase, PostInitCommandMixIn):
     command = staticmethod(stat)
 
 
-class TestTrackCommand(CommandBase, PostInitCommandMixIn):
+class TestfollowCommand(CommandBase, PostInitCommandMixIn):
 
-    command = staticmethod(track)
+    command = staticmethod(follow)
 
-    def test_track_a_file(self):
+    def test_follow_a_file(self):
         init()
         file_name, file_path = self._create_file()
-        track(file_name)
+        follow(file_name)
         config = FragmanConfig()
         key = file_path[len(os.path.split(config.directory)[0])+1:]
         self.assertIn(key, config['files'])
@@ -106,28 +106,28 @@ class TestTrackCommand(CommandBase, PostInitCommandMixIn):
     def test_file_twice_on_the_command_line(self):
         init()
         file_name, file_path = self._create_file()
-        track(file_name, file_name)
+        follow(file_name, file_name)
         config = FragmanConfig()
         key = file_path[len(os.path.split(config.directory)[0])+1:]
         self.assertIn(key, config['files'])
 
-    def test_track_file_two_times(self):
+    def test_follow_file_two_times(self):
         init()
         file_name, file_path = self._create_file()
-        track(file_name)
+        follow(file_name)
         config = FragmanConfig()
         key = file_path[len(os.path.split(config.directory)[0])+1:]
         uuid = config['files'][key]
-        track(file_name)
+        follow(file_name)
         config = FragmanConfig()
         self.assertIn(key, config['files'])
         self.assertEquals(config['files'][key], uuid)
 
-    def test_track_two_files(self):
+    def test_follow_two_files(self):
         init()
         file1_name, file1_path = self._create_file(file_name='file1.ext')
         file2_name, file2_path = self._create_file(file_name='file2.ext')
-        track(file1_name, file2_name)
+        follow(file1_name, file2_name)
         config = FragmanConfig()
         key1 = file1_path[len(os.path.split(config.directory)[0])+1:]
         key2 = file2_path[len(os.path.split(config.directory)[0])+1:]
@@ -147,7 +147,7 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
     def test_commit_a_file(self):
         init()
         file_name, file_path = self._create_file()
-        track(file_name)
+        follow(file_name)
         commit(file_name)
         config = FragmanConfig()
         prefix = os.path.split(config.directory)[0]
@@ -168,7 +168,7 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         yestersecond = time.time() - 2
         os.utime(file_path, (yestersecond, yestersecond))
 
-        track(file_name)
+        follow(file_name)
         commit(file_name)
 
         f = file(file_path, 'a')

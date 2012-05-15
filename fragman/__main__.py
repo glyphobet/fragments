@@ -42,8 +42,8 @@ def stat(*a):
     return repr(config)
 
 
-def track(*args):
-    """Add files to fragments tracking."""
+def follow(*args):
+    """Add files to fragments following."""
     config = FragmanConfig()
     prefix = os.path.split(config.directory)[0]
     random_uuid = uuid.uuid4()
@@ -53,19 +53,19 @@ def track(*args):
             if os.access(fullpath, os.W_OK|os.R_OK):
                 key = fullpath[len(prefix)+1:]
                 if key in config['files']:
-                    # file already tracked
+                    # file already followed
                     continue
                 file_uuid = uuid.uuid5(random_uuid, key)
                 config['files'][key] = file_uuid
             else:
                 pass # cannot read the file to copy it
         else:
-            pass # trying to track a file outside the repository
+            pass # trying to follow a file outside the repository
     config.dump()
 
 
 def forget(*args):
-    """Remove files from fragments tracking"""
+    """Remove files from fragments following"""
     config = FragmanConfig()
     prefix = os.path.split(config.directory)[0]
     for filename in set(args):
@@ -77,7 +77,7 @@ def forget(*args):
                 os.unlink(os.path.join(config.directory, file_uuid))
                 del config['files'][key]
             else:
-                pass # trying to forget an untracked file
+                pass # trying to forget an unfollowed file
         else:
             pass # trying to forget a file outside the repository
     config.dump()
@@ -96,7 +96,7 @@ def commit(*args):
     for curr_path in iterate:
         key = curr_path[len(prefix)+1:]
         if key not in config['files']:
-            continue # trying to commit an untracked file
+            continue # trying to commit an unfollowed file
         uuid = config['files'][key]
 
         repo_path = os.path.join(config.directory, uuid)
