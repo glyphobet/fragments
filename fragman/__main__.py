@@ -48,15 +48,19 @@ def track(*args):
     prefix = os.path.split(config.directory)[0]
     random_uuid = uuid.uuid4()
     for filename in set(args):
-        fullpath = os.path.join(os.getcwd(), filename)
+        fullpath = os.path.realpath(filename)
         if fullpath.startswith(prefix):
             if os.access(fullpath, os.W_OK|os.R_OK):
-                file_path = fullpath[len(prefix)+1:]
-                if file_path in config['files']:
+                key = fullpath[len(prefix)+1:]
+                if key in config['files']:
                     # file already tracked
                     continue
-                file_uuid = uuid.uuid5(random_uuid, file_path)
-                config['files'][file_path] = file_uuid
+                file_uuid = uuid.uuid5(random_uuid, key)
+                config['files'][key] = file_uuid
+            else:
+                pass # cannot read the file to copy it
+        else:
+            pass # trying to track a file outside the repository
     config.dump()
 
 
@@ -69,8 +73,8 @@ def forget(*args):
         if fullpath.startswith(prefix):
             key = fullpath[len(prefix)+1:]
             if key in config['files']:
-                uuid = config['files'][key]
-                os.unlink(os.path.join(config.directory, uuid))
+                file_uuid = config['files'][key]
+                os.unlink(os.path.join(config.directory, file_uuid))
                 del config['files'][key]
             else:
                 pass # trying to forget an untracked file
@@ -83,10 +87,9 @@ def commit(*args):
     """Commit changes to fragments repository"""
     config = FragmanConfig()
     prefix = os.path.split(config.directory)[0]
-    cwd = os.getcwd()
 
     if args:
-        iterate = (os.path.join(cwd, a) for a in args)
+        iterate = (os.path.realpath(a) for a in set(args))
     else:
         iterate = (os.path.join(prefix, f) for f in config['files'])
 
