@@ -65,20 +65,21 @@ def commit(*args):
     config = FragmanConfig()
     prefix = os.path.split(config.directory)[0]
     for filename, uuid in config['files'].items():
-        repo_path = os.path.join(prefix, uuid)
+        repo_path = os.path.join(config.directory, uuid)
         if os.access(repo_path, os.R_OK|os.W_OK):
             repo_mtime = os.stat(repo_path)[8]
         else:
             repo_mtime = -1
         curr_path = os.path.join(prefix, filename)
         if os.access(curr_path, os.R_OK|os.W_OK):
-            curr_mtime = os.stat(curr_path)[8]
+            curr_atime, curr_mtime = os.stat(curr_path)[7:9]
         else:
             continue
         if repo_mtime < curr_mtime:
-            repo_file = file(repo_path, 'a')
+            repo_file = file(repo_path, 'w')
             repo_file.write(file(curr_path, 'r').read())
             repo_file.close()
+            os.utime(repo_path, (curr_atime, curr_mtime))
 
 
 

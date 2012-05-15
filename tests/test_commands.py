@@ -1,10 +1,11 @@
 import unittest
-import os, shutil, tempfile, types
+import os, shutil, tempfile, types, time
 import pdb
 
 from fragman.__main__ import ExecutionError, init, stat, track, commit
 from fragman.config import configuration_file_name, configuration_directory_name, ConfigurationDirectoryNotFound, FragmanConfig
 
+MINIMUM_SLEEP = 1 # Minimum number of seconds (float) to sleep to register changes on a file
 
 class CommandBase(unittest.TestCase):
 
@@ -27,6 +28,9 @@ class CommandBase(unittest.TestCase):
         new_file = file(file_path, 'w')
         new_file.write(contents)
         return file_name, file_path
+
+    def sleep(self):
+        time.sleep(MINIMUM_SLEEP)
 
 
 class TestInitCommand(CommandBase):
@@ -138,3 +142,47 @@ class TestTrackCommand(CommandBase, PostInitCommandMixIn):
 class TestCommitCommand(CommandBase, PostInitCommandMixIn):
 
     command = staticmethod(commit)
+
+    def test_commit_a_file(self):
+        init()
+        file_name, file_path = self._create_file()
+        track(file_name)
+        commit(file_name)
+        config = FragmanConfig()
+        prefix = os.path.split(config.directory)[0]
+        key = file_path[len(prefix)+1:]
+        self.assertIn(key, config['files'])
+        self.assertTrue(os.access(os.path.join(config.directory, config['files'][key]), os.R_OK|os.W_OK))
+        self.assertEquals(
+            file(os.path.join(config.directory, config['files'][key]), 'r').read(),
+            file(file_path, 'r').read(),
+        )
+
+    def test_commit_and_modify_a_file(self):
+        init()
+        file_name, file_path = self._create_file()
+        track(file_name)
+        commit(file_name)
+
+        self.sleep()
+
+        f = file(file_path, 'a')
+        f.write("GIBBERISH!\n")
+        f.close()
+
+        config = FragmanConfig()
+        prefix = os.path.split(config.directory)[0]
+        key = file_path[len(prefix)+1:]
+
+        self.assertIn(key, config['files'])
+        self.assertTrue(os.access(os.path.join(config.directory, config['files'][key]), os.R_OK|os.W_OK))
+        self.assertNotEquals(
+            file(os.path.join(config.directory, config['files'][key]), 'r').read(),
+            file(file_path, 'r').read(),
+        )
+
+        commit(file_name)
+        self.assertEquals(
+            file(os.path.join(config.directory, config['files'][key]), 'r').read(),
+            file(file_path, 'r').read(),
+        )
