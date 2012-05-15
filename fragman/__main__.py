@@ -60,6 +60,25 @@ def track(*args):
     config.dump()
 
 
+def forget(*args):
+    """Remove files from fragments tracking"""
+    config = FragmanConfig()
+    prefix = os.path.split(config.directory)[0]
+    for filename in set(args):
+        fullpath = os.path.realpath(filename)
+        if fullpath.startswith(prefix):
+            key = fullpath[len(prefix)+1:]
+            if key in config['files']:
+                uuid = config['files'][key]
+                os.unlink(os.path.join(config.directory, uuid))
+                del config['files'][key]
+            else:
+                pass # trying to forget an untracked file
+        else:
+            pass # trying to forget a file outside the repository
+    config.dump()
+
+
 def commit(*args):
     """Commit changes to fragments repository"""
     config = FragmanConfig()

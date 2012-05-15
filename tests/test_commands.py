@@ -2,7 +2,7 @@ import unittest
 import os, shutil, tempfile, types, time
 import pdb
 
-from fragman.__main__ import ExecutionError, init, stat, track, commit
+from fragman.__main__ import ExecutionError, init, stat, track, forget, commit
 from fragman.config import configuration_file_name, configuration_directory_name, ConfigurationDirectoryNotFound, FragmanConfig
 
 MINIMUM_SLEEP = 1 # Minimum number of seconds (float) to sleep to register changes on a file
@@ -137,6 +137,11 @@ class TestTrackCommand(CommandBase, PostInitCommandMixIn):
         key2 = file2_path[len(os.path.split(config.directory)[0])+1:]
         self.assertIn(key1, config['files'])
         self.assertIn(key2, config['files'])
+
+
+class TestForgetCommand(CommandBase, PostInitCommandMixIn):
+
+    command = staticmethod(forget)
 
 
 class TestCommitCommand(CommandBase, PostInitCommandMixIn):
