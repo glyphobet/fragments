@@ -22,6 +22,12 @@ class CommandBase(unittest.TestCase):
         shutil.rmtree(self.path)
         super(CommandBase, self).tearDown()
 
+    def _create_file(self, file_name='file.ext', contents='CONTENTS\nCONTENTS\n'):
+        file_path = os.path.join(self.content_path, file_name)
+        new_file = file(file_path, 'w')
+        new_file.write(contents)
+        return file_name, file_path
+
 
 class TestInitCommand(CommandBase):
 
@@ -88,12 +94,6 @@ class TestStatCommand(CommandBase, PostInitCommandMixIn):
 class TestTrackCommand(CommandBase, PostInitCommandMixIn):
 
     command = staticmethod(track)
-
-    def _create_file(self, file_name='file.ext', contents='CONTENTS\nCONTENTS\n'):
-        file_path = os.path.join(self.content_path, file_name)
-        new_file = file(file_path, 'w')
-        new_file.write(contents)
-        return file_name, file_path
 
     def test_track_a_file(self):
         init()
