@@ -5,7 +5,6 @@ import pdb
 from fragman.__main__ import ExecutionError, init, stat, track, forget, commit
 from fragman.config import configuration_file_name, configuration_directory_name, ConfigurationDirectoryNotFound, FragmanConfig
 
-MINIMUM_SLEEP = 1 # Minimum number of seconds (float) to sleep to register changes on a file
 
 class CommandBase(unittest.TestCase):
 
@@ -28,9 +27,6 @@ class CommandBase(unittest.TestCase):
         new_file = file(file_path, 'w')
         new_file.write(contents)
         return file_name, file_path
-
-    def sleep(self):
-        time.sleep(MINIMUM_SLEEP)
 
 
 class TestInitCommand(CommandBase):
@@ -166,10 +162,14 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
     def test_commit_and_modify_a_file(self):
         init()
         file_name, file_path = self._create_file()
+
+        # pretend file was actually created two seconds ago
+        # so that commit will detect changes
+        yestersecond = time.time() - 2
+        os.utime(file_path, (yestersecond, yestersecond))
+
         track(file_name)
         commit(file_name)
-
-        self.sleep()
 
         f = file(file_path, 'a')
         f.write("GIBBERISH!\n")
