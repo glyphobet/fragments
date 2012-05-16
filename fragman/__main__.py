@@ -50,11 +50,11 @@ def follow(*args):
     for filename in set(args):
         fullpath = os.path.realpath(filename)
         if fullpath.startswith(prefix):
+            key = fullpath[len(prefix)+1:]
+            if key in config['files']:
+                # file already followed
+                continue
             if os.access(fullpath, os.W_OK|os.R_OK):
-                key = fullpath[len(prefix)+1:]
-                if key in config['files']:
-                    # file already followed
-                    continue
                 file_uuid = uuid.uuid5(random_uuid, key)
                 config['files'][key] = file_uuid
             else:
