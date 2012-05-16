@@ -2,7 +2,7 @@ import unittest
 import os, shutil, tempfile, types, time
 import pdb
 
-from fragman.__main__ import ExecutionError, init, stat, follow, forget, commit, revert
+from fragman.__main__ import ExecutionError, help, init, stat, follow, forget, commit, revert
 from fragman.config import configuration_file_name, configuration_directory_name, ConfigurationDirectoryNotFound, FragmanConfig
 
 
@@ -29,12 +29,23 @@ class CommandBase(unittest.TestCase):
         return file_name, file_path
 
 
+class TestHelpCommand(CommandBase):
+
+    def test_help(self):
+        help()
+
+
 class TestInitCommand(CommandBase):
 
     def test_init_creates_fragments_directory_and_config_json(self):
         init()
         self.assertTrue(os.path.exists(os.path.join(self.path, configuration_directory_name)))
         self.assertTrue(os.path.exists(os.path.join(self.path, configuration_directory_name, configuration_file_name)))
+
+    def test_init_raises_error_on_unwritable_parent(self):
+        os.chmod(self.path, 0500)
+        self.assertRaises(ExecutionError, init)
+        os.chmod(self.path, 0700)
 
     def test_init_raises_error_on_second_run(self):
         init()
@@ -95,7 +106,7 @@ class TestFollowCommand(CommandBase, PostInitCommandMixIn):
 
     command = staticmethod(follow)
 
-    def test_follow_a_file(self):
+    def test_follow_file(self):
         init()
         file_name, file_path = self._create_file()
         follow(file_name)
@@ -134,17 +145,66 @@ class TestFollowCommand(CommandBase, PostInitCommandMixIn):
         self.assertIn(key1, config['files'])
         self.assertIn(key2, config['files'])
 
+    def test_follow_nonexistent_file(self):
+        init()
+        nonexistent_path = os.path.join(os.getcwd(), 'nonexistent.file')
+        follow(nonexistent_path)
+
+    def test_follow_file_outside_repository(self):
+        init()
+        outside_path = os.path.realpath(tempfile.mkdtemp())
+        outside_file = os.path.join(outside_path, 'outside.repository')
+        follow(outside_path)
+
 
 class TestForgetCommand(CommandBase, PostInitCommandMixIn):
 
     command = staticmethod(forget)
+
+    def test_forget_unfollowed_file(self):
+        init()
+        file_name, file_path = self._create_file()
+        forget(file_name)
+
+    def test_follow_forget_file(self):
+        init()
+        file_name, file_path = self._create_file()
+        follow(file_name)
+        config = FragmanConfig()
+        key = file_path[len(os.path.split(config.directory)[0])+1:]
+        uuid = config['files'][key]
+        forget(file_name)
+        config = FragmanConfig()
+        key = file_path[len(os.path.split(config.directory)[0])+1:]
+        self.assertNotIn(key, config['files'])
+        self.assertFalse(os.path.exists(os.path.join(config.directory, uuid)))
+
+    def test_follow_commit_forget_file(self):
+        init()
+        file_name, file_path = self._create_file()
+        follow(file_name)
+        config = FragmanConfig()
+        key = file_path[len(os.path.split(config.directory)[0])+1:]
+        uuid = config['files'][key]
+        commit(file_name)
+        forget(file_name)
+        config = FragmanConfig()
+        key = file_path[len(os.path.split(config.directory)[0])+1:]
+        self.assertNotIn(key, config['files'])
+        self.assertFalse(os.path.exists(os.path.join(config.directory, uuid)))
+
+    def test_forget_file_outside_repository(self):
+        init()
+        outside_path = os.path.realpath(tempfile.mkdtemp())
+        outside_file = os.path.join(outside_path, 'outside.repository')
+        forget(outside_path)
 
 
 class TestCommitCommand(CommandBase, PostInitCommandMixIn):
 
     command = staticmethod(commit)
 
-    def test_commit_a_file(self):
+    def test_commit_file(self):
         init()
         file_name, file_path = self._create_file()
         follow(file_name)
@@ -159,7 +219,7 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
             file(file_path, 'r').read(),
         )
 
-    def test_commit_and_modify_a_file(self):
+    def test_commit_modify_commit_file(self):
         init()
         file_name, file_path = self._create_file()
 
@@ -192,7 +252,91 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
             file(file_path, 'r').read(),
         )
 
+    def test_commit_unfollowed_file(self):
+        init()
+        file_name, file_path = self._create_file()
+        commit(file_path)
+
+    def test_commit_removed_file(self):
+        init()
+        file_name, file_path = self._create_file()
+        follow(file_name)
+        os.unlink(file_path)
+        commit(file_name)
+
 
 class TestRevertCommand(CommandBase, PostInitCommandMixIn):
 
     command = staticmethod(revert)
+
+    def test_commit_modify_revert_file(self):
+        init()
+        file_name, file_path = self._create_file()
+        original_content = file(file_path, 'r').read()
+
+        # pretend file was actually created two seconds ago
+        # so that commit will detect changes
+        yestersecond = time.time() - 2
+        os.utime(file_path, (yestersecond, yestersecond))
+
+        follow(file_name)
+        commit(file_name)
+
+        f = file(file_path, 'a')
+        f.write("GIBBERISH!\n")
+        f.close()
+
+        config = FragmanConfig()
+        prefix = os.path.split(config.directory)[0]
+        key = file_path[len(prefix)+1:]
+
+        self.assertIn(key, config['files'])
+        self.assertTrue(os.access(os.path.join(config.directory, config['files'][key]), os.R_OK|os.W_OK))
+        self.assertNotEquals(
+            file(os.path.join(config.directory, config['files'][key]), 'r').read(),
+            file(file_path, 'r').read(),
+        )
+
+        revert(file_name)
+        self.assertEquals(
+            file(os.path.join(config.directory, config['files'][key]), 'r').read(),
+            file(file_path, 'r').read(),
+        )
+
+        self.assertEquals(
+            original_content,
+            file(file_path, 'r').read(),
+        )
+
+    def test_follow_modify_revert_file(self):
+        init()
+        file_name, file_path = self._create_file()
+        original_content = file(file_path, 'r').read()
+
+        # pretend file was actually created two seconds ago
+        # so that commit will detect changes
+        yestersecond = time.time() - 2
+        os.utime(file_path, (yestersecond, yestersecond))
+
+        follow(file_name)
+        revert(file_name)
+
+    def test_revert_unfollowed_file(self):
+        init()
+        file_name, file_path = self._create_file()
+        revert(file_name)
+
+    def test_revert_removed_file(self):
+        init()
+        file_name, file_path = self._create_file()
+        original_content = file(file_path, 'r').read()
+
+        follow(file_name)
+        commit(file_name)
+        os.unlink(file_path)
+        revert(file_name)
+
+        self.assertEquals(
+            original_content,
+            file(file_path, 'r').read(),
+        )

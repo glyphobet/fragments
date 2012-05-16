@@ -74,7 +74,11 @@ def forget(*args):
             key = fullpath[len(prefix)+1:]
             if key in config['files']:
                 file_uuid = config['files'][key]
-                os.unlink(os.path.join(config.directory, file_uuid))
+                uuid_path = os.path.join(config.directory, file_uuid)
+                if os.access(os.path.join(config.directory, file_uuid), os.W_OK|os.R_OK):
+                    os.unlink(uuid_path)
+                else:
+                    pass # forgetting an uncommitted file
                 del config['files'][key]
             else:
                 pass # trying to forget an unfollowed file
@@ -108,7 +112,7 @@ def commit(*args):
         if os.access(curr_path, os.R_OK|os.W_OK):
             curr_atime, curr_mtime = os.stat(curr_path)[7:9]
         else:
-            continue # trying to commit a nonexistent file
+            continue # trying to commit a file that's been removed
 
         if repo_mtime < curr_mtime:
             repo_file = file(repo_path, 'w')
@@ -142,16 +146,16 @@ def revert(*args):
         if os.access(curr_path, os.R_OK|os.W_OK):
             curr_atime, curr_mtime = os.stat(curr_path)[7:9]
         else:
-            continue # trying to revert a nonexistent file
+            curr_mtime = float('+Inf') # trying to revert a file that's been removed
 
         if repo_mtime < curr_mtime:
             curr_file = file(curr_path, 'w')
             curr_file.write(file(repo_path, 'r').read())
             curr_file.close()
-            os.utime(curr_file, (repo_atime, repo_mtime))
+            os.utime(curr_path, (repo_atime, repo_mtime))
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     print "%s version %s.%s.%s" % ((__package__,) + __version__)
     if len(sys.argv) > 1:
         try:
