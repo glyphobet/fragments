@@ -91,7 +91,7 @@ class TestStatCommand(CommandBase, PostInitCommandMixIn):
     command = staticmethod(stat)
 
 
-class TestfollowCommand(CommandBase, PostInitCommandMixIn):
+class TestFollowCommand(CommandBase, PostInitCommandMixIn):
 
     command = staticmethod(follow)
 
