@@ -65,7 +65,7 @@ def unique_lcs(a, b):
 
 def recurse_matches(a, b, ahi, bhi, answer, maxrecursion):
     oldlen = len(answer)
-    if maxrecursion < 0:
+    if maxrecursion < 0:  # pragma: no cover
         # this will never happen normally, this check is to prevent DOS attacks
         return
     oldlength = len(answer)
