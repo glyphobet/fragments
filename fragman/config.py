@@ -1,5 +1,5 @@
 import os, sys, json, uuid
-from . import FragmanError
+from . import FragmanError, __version__
 
 configuration_file_name = 'config.json'
 configuration_directory_name = 'fragments'
@@ -34,6 +34,7 @@ class FragmanConfig(dict):
 
     defaults = {
         'files': {},
+        'version': __version__,
     }
 
     def __init__(self, directory=None, autoload=True):
@@ -57,4 +58,5 @@ class FragmanConfig(dict):
             raise ConfigurationFileNotFound("Could not access %r, if the file exists, check its permissions" % self.path)
 
     def dump(self):
+        self['version'] = __version__
         file(self.path, 'w').write(json.dumps(self, sort_keys=True, indent=4, cls=UUIDEncoder))

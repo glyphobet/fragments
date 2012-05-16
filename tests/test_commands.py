@@ -47,6 +47,14 @@ class TestInitCommand(CommandBase):
         self.assertRaises(ExecutionError, init)
         os.chmod(self.path, 0700)
 
+    def test_init_json(self):
+        init()
+        config = FragmanConfig()
+        self.assertIn('files', config)
+        self.assertIn('version', config)
+        self.assertIsInstance(config['files'], dict)
+        self.assertIsInstance(config['version'], list)
+
     def test_init_raises_error_on_second_run(self):
         init()
         self.assertRaises(ExecutionError, init)
