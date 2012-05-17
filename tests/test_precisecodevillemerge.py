@@ -1,3 +1,7 @@
+# This code is based on code from
+#   http://revctrl.org/PreciseCodevilleMerge?action=AttachFile
+# That code was in turn based on BSD-licensed code from the Codeville distributed version control system
+
 import unittest
 
 from fragman.precisecodevillemerge import Weave, unique_lcs, recurse_matches
