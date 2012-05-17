@@ -10,10 +10,10 @@ def apply_changes(changed_path, config):
     weave.add_revision(2, file(changed_path, 'r').readlines(), [1])
 
     for i, other_key in enumerate(config['files']):
-        revision = i + 3
         other_path = os.path.join(config.root, other_key)
         if other_path == changed_path:
             continue # don't try to apply changes to ourself
+        revision = i + 3
         weave.add_revision(revision, file(other_path, 'r').readlines(), [])
         merge_result = weave.cherry_pick(2, revision) # Can I apply changes in revision 2 onto this other file?
         if tuple in (type(mr) for mr in merge_result):
