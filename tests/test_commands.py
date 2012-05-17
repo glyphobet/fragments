@@ -356,11 +356,7 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
 
 class TestApplyCommand(CommandBase, PostInitCommandMixIn):
 
-    command = staticmethod(apply)
-
-    def test_apply(self):
-        init()
-        file1_contents = """<!DOCTYPE html>
+    html_file1_contents = """<!DOCTYPE html>
 <html>
     <head>
         <title>
@@ -379,13 +375,8 @@ class TestApplyCommand(CommandBase, PostInitCommandMixIn):
     <body>
         <h1>One</h1>
     </body>
-</html>
-"""
-        file1_name, file1_path = self._create_file(contents=file1_contents)
-        follow(file1_name)
-        commit(file1_name)
-
-        file2_contents = """<!DOCTYPE html>
+</html>"""
+    html_file2_contents = """<!DOCTYPE html>
 <html>
     <head>
         <title>
@@ -400,15 +391,43 @@ class TestApplyCommand(CommandBase, PostInitCommandMixIn):
     <body>
         <h1>Two</h1>
     </body>
-</html>
-"""
-        file2_name, file2_path = self._create_file(contents=file2_contents)
+</html>"""
+
+    command = staticmethod(apply)
+
+    def test_apply(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
+        follow(file1_name)
+        commit(file1_name)
+
+        file2_name, file2_path = self._create_file(contents=self.html_file2_contents)
         follow(file2_name)
         commit(file2_name)
 
-        new_file1_contents = file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
+        new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         open(file1_name, 'w').write(new_file1_contents)
         apply(file1_name)
 
-        target_file2_contents = file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
+        target_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         self.assertEqual(open(file2_name, 'r').read(), target_file2_contents)
+
+    def test_apply_detects_convergent_changes(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
+        follow(file1_name)
+        commit(file1_name)
+
+        file2_name, file2_path = self._create_file(contents=self.html_file2_contents)
+        follow(file2_name)
+        commit(file2_name)
+
+        new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
+        open(file1_name, 'w').write(new_file1_contents)
+
+        new_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
+        open(file2_name, 'w').write(new_file2_contents)
+
+        apply(file1_name)
+
+        self.assertEqual(open(file2_name, 'r').read(), new_file2_contents)
