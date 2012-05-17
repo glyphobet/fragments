@@ -147,7 +147,7 @@ def commit(*args):
         if os.access(curr_path, os.R_OK|os.W_OK):
             curr_atime, curr_mtime = os.stat(curr_path)[7:9]
         else:
-            yield "Could not commit %r because it has been removed, try reverting it first" % key
+            yield "Could not commit %r because it has been removed, instead revert or remove it" % key
             continue
 
         if repo_mtime < curr_mtime:
