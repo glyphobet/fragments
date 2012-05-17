@@ -4,35 +4,35 @@ Differencing Fragmentation Manager
 Commands
 --------
 
-* help
+* `help`
 
-  display help
+    display help
 
-* init
+* `init`
 
-  initialize a new fragmentation manager repository
+    initialize a new fragmentation manager repository
 
-* stat
+* `stat`
 
-  get the current status of the repository
+    get the current status of the repository
 
-* follow FILENAME [FILENAME ...]
+* `follow FILENAME [FILENAME ...]`
 
-  start following changes to one or more files
+    start following changes to one or more files
 
-* forget FILENAME [FILENAME ...]
+* `forget FILENAME [FILENAME ...]`
 
-  stop following changes to one or more files
+    stop following changes to one or more files
 
-* commit [FILENAME [FILENAME ...]]
+* `commit [FILENAME [FILENAME ...]]`
 
-  commit changes to one or more files
+    commit changes to one or more files
 
-* revert [FILENAME [FILENAME ...]]
+* `revert [FILENAME [FILENAME ...]]`
 
-  revert changes to one or more files
+    revert changes to one or more files
 
-* apply FILENAME [FILENAME ...]
+* `apply FILENAME [FILENAME ...]`
 
-  apply changes in one or more files that were made since last commit to as many other followed files as possible
+    apply changes in one or more files that were made since last commit to as many other followed files as possible
 
