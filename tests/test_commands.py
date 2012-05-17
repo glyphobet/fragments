@@ -2,7 +2,7 @@ import unittest
 import os, shutil, tempfile, types, time
 import pdb
 
-from fragman.__main__ import ExecutionError, help, init, stat, follow, forget, commit, revert, apply
+from fragman.__main__ import ExecutionError, help, init, stat, follow, forget, commit, revert, diff, apply
 from fragman.config import configuration_file_name, configuration_directory_name, ConfigurationDirectoryNotFound, FragmanConfig
 
 
@@ -352,6 +352,93 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
             original_content,
             file(file_path, 'r').read(),
         )
+
+
+class TestDiffCommand(CommandBase, PostInitCommandMixIn):
+
+    command = staticmethod(diff)
+
+    original_file = "Line One\nLine Two\nLine Three\nLine Four\nLine Five\n"
+
+    def test_diff(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.original_file)
+        yestersecond = time.time() - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
+
+        follow(file1_name)
+        commit(file1_name)
+        file(file1_name, 'w').write(self.original_file.replace('Line Three', 'Line 2.6666\nLine Three and One Third'))
+        self.assertEquals(list(diff(file1_name)), [
+            '--- test_content/file1.ext\n',
+            '+++ test_content/file1.ext\n',
+            '@@ -1,5 +1,6 @@\n',
+            ' Line One\n',
+            ' Line Two\n',
+            '-Line Three\n',
+            '+Line 2.6666\n',
+            '+Line Three and One Third\n',
+            ' Line Four\n',
+            ' Line Five\n'])
+
+    def test_unmodified_file_diff(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.original_file)
+        yestersecond = time.time() - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
+
+        follow(file1_name)
+        commit(file1_name)
+        self.assertEquals(list(diff(file1_name)), [])
+
+    def test_mtime_different_but_not_contents_diff(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.original_file)
+        now = time.time()
+        yestersecond = now - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
+
+        follow(file1_name)
+        commit(file1_name)
+        os.utime(file1_path, (now, now))
+        self.assertEquals(list(diff(file1_name)), [])
+
+    def test_diff_uncommitted_file(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.original_file)
+        yestersecond = time.time() - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
+
+        follow(file1_path)
+        self.assertEquals(list(diff(file1_name)), [
+            '--- test_content/file1.ext\n',
+            '+++ test_content/file1.ext\n',
+            '@@ -0,0 +1,5 @@\n',
+            '+Line One\n',
+            '+Line Two\n',
+            '+Line Three\n',
+            '+Line Four\n',
+            '+Line Five\n'])
+
+    def test_diff_removed_file(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.original_file)
+        yestersecond = time.time() - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
+
+        follow(file1_path)
+        commit(file1_path)
+        
+        os.unlink(file1_path)
+        self.assertEquals(list(diff(file1_name)), [
+            '--- test_content/file1.ext\n',
+            '+++ test_content/file1.ext\n',
+            '@@ -1,5 +0,0 @@\n',
+            '-Line One\n',
+            '-Line Two\n',
+            '-Line Three\n',
+            '-Line Four\n',
+            '-Line Five\n'])
 
 
 class TestApplyCommand(CommandBase, PostInitCommandMixIn):

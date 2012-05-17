@@ -1,4 +1,4 @@
-import sys, os, uuid
+import sys, os, uuid, difflib
 import pdb
 
 from fragman import __version__, FragmanError
@@ -86,6 +86,41 @@ def forget(*args):
         else:
             pass # trying to forget a file outside the repository
     config.dump()
+
+
+def diff(*args):
+    """Show differences between committed and uncommitted versions"""
+    config = FragmanConfig()
+    if args:
+        iterate = (os.path.realpath(a) for a in set(args))
+    else:
+        iterate = (os.path.join(config.root, f) for f in config['files'])
+
+    for curr_path in iterate:
+        key = curr_path[len(config.root)+1:]
+        if key not in config['files']:
+            continue # trying to diff an unfollowed file
+
+        uuid = config['files'][key]
+        repo_path = os.path.join(config.directory, uuid)
+
+        if os.access(repo_path, os.R_OK|os.W_OK):
+            repo_mtime = os.stat(repo_path)[8]
+            repo_lines = file(repo_path, 'r').readlines()
+        else:
+            repo_mtime = -1 # diffing an uncommitted file for the first time
+            repo_lines = []
+
+        if os.access(curr_path, os.R_OK|os.W_OK):
+            curr_mtime = os.stat(curr_path)[8]
+            curr_lines = file(curr_path, 'r').readlines()
+        else:
+            curr_mtime = float('+Inf') # trying to diff a file that's been removed
+            curr_lines =[]
+
+        if repo_mtime < curr_mtime:
+            for dl in difflib.unified_diff(repo_lines, curr_lines, fromfile=key, tofile=key):
+                yield dl
 
 
 def commit(*args):

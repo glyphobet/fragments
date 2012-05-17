@@ -24,6 +24,10 @@ Commands
 
     stop following changes to one or more files
 
+* `diff [FILENAME [FILENAME ...]]`
+
+    show differences between committed and uncommitted versions
+
 * `commit [FILENAME [FILENAME ...]]`
 
     commit changes to one or more files
