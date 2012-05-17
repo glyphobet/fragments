@@ -568,3 +568,23 @@ table {
 
         apply(file1_name)
         self.assertEqual(open(css_name, 'r').read(), self.css_file1_contents)
+
+    def test_apply_generates_conflict(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
+        follow(file1_name)
+        commit(file1_name)
+
+        file2_name, file2_path = self._create_file(contents=self.html_file2_contents)
+        follow(file2_name)
+        commit(file2_name)
+
+        new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />')
+        open(file1_name, 'w').write(new_file1_contents)
+        new_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="colors.css" />')
+        open(file2_name, 'w').write(new_file2_contents)
+
+        result = apply(file1_name, file2_name)
+        self.assertEqual(result, [
+            "Conflict merging 'test_content/file1.ext' => u'test_content/file2.ext'",
+            "Conflict merging 'test_content/file2.ext' => u'test_content/file1.ext'"])

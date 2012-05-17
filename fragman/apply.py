@@ -20,8 +20,21 @@ def apply_changes(changed_path, config):
             if len(merge_result) == 1:
                 # total conflict, skip
                 yield "Changes in %r cannot apply to %r, skipping" % (changed_key, other_key)
-            # recover!
-            yield "NEED TO RECOVER %r => %r" % (changed_key, other_key)
+                continue
+            other_file = file(other_path, 'w')
+            for line_or_conflict in merge_result:
+                if isinstance(line_or_conflict, basestring):
+                    other_file.write(line_or_conflict)
+                else:
+                    other_file.write('>'*7 + '\n')
+                    for line in line_or_conflict[0]:
+                        other_file.write(line)
+                    other_file.write('='*7 + '\n')
+                    for line in line_or_conflict[1]:
+                        other_file.write(line)
+                    other_file.write('>'*7 + '\n')
+            other_file.close()
+            yield "Conflict merging %r => %r" % (changed_key, other_key)
         else:
             # Merge is clean:
             other_file = file(other_path, 'w')
