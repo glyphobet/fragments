@@ -14,7 +14,7 @@ class CommandBase(unittest.TestCase):
         super(CommandBase, self).setUp()
         self.file_counter = 1
         self.path = os.path.realpath(tempfile.mkdtemp())
-        self.content_path = os.path.join(self.path, self.test_content_directory) 
+        self.content_path = os.path.join(self.path, self.test_content_directory)
         os.mkdir(self.content_path)
         self.assertTrue(os.path.exists(os.path.join(self.path, self.test_content_directory)))
         os.chdir(self.content_path)
