@@ -88,15 +88,18 @@ def forget(*args):
     config.dump()
 
 
+def _iterate_over_files(args, config):
+    if args:
+        return (os.path.realpath(a) for a in set(args))
+    else:
+        return (os.path.join(config.root, f) for f in config['files'])
+
+
 def diff(*args):
     """Show differences between committed and uncommitted versions"""
     config = FragmanConfig()
-    if args:
-        iterate = (os.path.realpath(a) for a in set(args))
-    else:
-        iterate = (os.path.join(config.root, f) for f in config['files'])
 
-    for curr_path in iterate:
+    for curr_path in _iterate_over_files(args, config):
         key = curr_path[len(config.root)+1:]
         if key not in config['files']:
             continue # trying to diff an unfollowed file
@@ -126,15 +129,9 @@ def diff(*args):
 def commit(*args):
     """Commit changes to fragments repository"""
     config = FragmanConfig()
-    prefix = os.path.split(config.directory)[0]
 
-    if args:
-        iterate = (os.path.realpath(a) for a in set(args))
-    else:
-        iterate = (os.path.join(prefix, f) for f in config['files'])
-
-    for curr_path in iterate:
-        key = curr_path[len(prefix)+1:]
+    for curr_path in _iterate_over_files(args, config):
+        key = curr_path[len(config.root)+1:]
         if key not in config['files']:
             continue # trying to commit an unfollowed file
         uuid = config['files'][key]
@@ -160,15 +157,9 @@ def commit(*args):
 def revert(*args):
     """Revert changes to fragments repository"""
     config = FragmanConfig()
-    prefix = os.path.split(config.directory)[0]
 
-    if args:
-        iterate = (os.path.realpath(a) for a in set(args))
-    else:
-        iterate = (os.path.join(prefix, f) for f in config['files'])
-
-    for curr_path in iterate:
-        key = curr_path[len(prefix)+1:]
+    for curr_path in _iterate_over_files(args, config):
+        key = curr_path[len(config.root)+1:]
         if key not in config['files']:
             continue # trying to revert an unfollowed file
         uuid = config['files'][key]
@@ -194,20 +185,14 @@ def revert(*args):
 def apply(*args):
     """Revert changes to fragments repository"""
     config = FragmanConfig()
-    prefix = os.path.split(config.directory)[0]
 
-    if args:
-        iterate = (os.path.realpath(a) for a in set(args))
-    else:
-        iterate = (os.path.join(prefix, f) for f in config['files'])
-
-    for path in iterate:
+    for path in _iterate_over_files(args, config):
         apply_changes(path, config)
 
 
 if __name__ == '__main__': # pragma: no cover
     print "%s version %s.%s.%s" % ((__package__,) + __version__)
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 1 and sys.argv[1][0] != '_':
         try:
             cmd = locals()[sys.argv[1]]
         except KeyError, exc:
