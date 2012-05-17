@@ -2,8 +2,20 @@ import unittest
 import os, shutil, tempfile, types, time
 import pdb
 
-from fragman.__main__ import ExecutionError, help, init, stat, follow, forget, commit, revert, diff, apply
+from fragman import __main__ as fragman_main
+from fragman.__main__ import ExecutionError
 from fragman.config import configuration_file_name, configuration_directory_name, ConfigurationDirectoryNotFound, FragmanConfig
+
+def help  (*a): return list(fragman_main.help  (*a))
+def init  (*a): return list(fragman_main.init  (*a))
+def stat  (*a): return list(fragman_main.stat  (*a))
+def follow(*a): return list(fragman_main.follow(*a))
+def forget(*a): return list(fragman_main.forget(*a))
+def commit(*a): return list(fragman_main.commit(*a))
+def revert(*a): return list(fragman_main.revert(*a))
+def diff  (*a): return list(fragman_main.diff  (*a))
+def apply (*a): return list(fragman_main.apply (*a))
+
 
 
 class CommandBase(unittest.TestCase):
@@ -402,6 +414,13 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
         commit(file1_name)
         os.utime(file1_path, (now, now))
         self.assertEquals(list(diff(file1_name)), [])
+
+    def test_diff_unfollowed_file(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.original_file)
+        yestersecond = time.time() - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
+        self.assertEquals(list(diff(file1_name)), ["Could not diff 'test_content/file1.ext', it is not being followed"])
 
     def test_diff_uncommitted_file(self):
         init()

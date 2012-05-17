@@ -19,10 +19,12 @@ def apply_changes(changed_path, config):
         if tuple in (type(mr) for mr in merge_result):
             if len(merge_result) == 1:
                 # total conflict, skip
-                continue
+                yield "Changes in %r cannot apply to %r, skipping" % (changed_key, other_key)
             # recover!
+            yield "NEED TO RECOVER %r => %r" % (changed_key, other_key)
         else:
-            # Merge is successful:
+            # Merge is clean:
             other_file = file(other_path, 'w')
             other_file.writelines(merge_result)
             other_file.close()
+            yield "Changes in %r applied cleanly to %r" % (changed_key, other_key)

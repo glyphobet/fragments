@@ -9,7 +9,7 @@ class ExecutionError(FragmanError): pass
 
 def help(*a):
     """Prints help."""
-    return "help!"
+    yield "help!"
 
 
 def init(*a):
@@ -34,57 +34,57 @@ def init(*a):
             raise ExecutionError("Could not create fragments directory in %r, aborting.\n(Do you have the correct permissions?)" % configuration_parent)
     else:
         raise ExecutionError("Current fragments configuration found in %r, aborting." % config.path)
-    return "Fragments configuration created in %r" % config.path
+    yield "Fragments configuration created in %r" % config.path
 
 
 def stat(*a):
     """Get status of a fragments repository."""
     config = FragmanConfig()
-    return repr(config)
+    yield repr(config)
 
 
 def follow(*args):
     """Add files to fragments following."""
     config = FragmanConfig()
-    prefix = os.path.split(config.directory)[0]
     random_uuid = uuid.uuid4()
     for filename in set(args):
         fullpath = os.path.realpath(filename)
-        if fullpath.startswith(prefix):
-            key = fullpath[len(prefix)+1:]
+        if fullpath.startswith(config.root):
+            key = fullpath[len(config.root)+1:]
             if key in config['files']:
-                # file already followed
+                yield "%r is already being followed" % filename
                 continue
             if os.access(fullpath, os.W_OK|os.R_OK):
                 file_uuid = uuid.uuid5(random_uuid, key)
                 config['files'][key] = file_uuid
+                yield "%r is now being followed, UUID %r" % (filename, file_uuid)
             else:
-                pass # cannot read the file to copy it
+                yield "Could not access %r to follow it" % filename
         else:
-            pass # trying to follow a file outside the repository
+            yield "Could not follow %r; it is outside the repository" % filename
     config.dump()
 
 
 def forget(*args):
     """Remove files from fragments following"""
     config = FragmanConfig()
-    prefix = os.path.split(config.directory)[0]
     for filename in set(args):
         fullpath = os.path.realpath(filename)
-        if fullpath.startswith(prefix):
-            key = fullpath[len(prefix)+1:]
+        if fullpath.startswith(config.root):
+            key = fullpath[len(config.root)+1:]
             if key in config['files']:
                 file_uuid = config['files'][key]
                 uuid_path = os.path.join(config.directory, file_uuid)
                 if os.access(os.path.join(config.directory, file_uuid), os.W_OK|os.R_OK):
                     os.unlink(uuid_path)
+                    yield "%r is no longer being followed" % filename
                 else:
-                    pass # forgetting an uncommitted file
+                    yield "%r was never committed and will not be followed" % filename
                 del config['files'][key]
             else:
-                pass # trying to forget an unfollowed file
+                yield "Could not forget %r, it was not being followed" % filename
         else:
-            pass # trying to forget a file outside the repository
+            yield "Could not forget %r; it is outside the repository" % filename
     config.dump()
 
 
@@ -102,7 +102,8 @@ def diff(*args):
     for curr_path in _iterate_over_files(args, config):
         key = curr_path[len(config.root)+1:]
         if key not in config['files']:
-            continue # trying to diff an unfollowed file
+            yield "Could not diff %r, it is not being followed" % key
+            continue
 
         uuid = config['files'][key]
         repo_path = os.path.join(config.directory, uuid)
@@ -111,7 +112,7 @@ def diff(*args):
             repo_mtime = os.stat(repo_path)[8]
             repo_lines = file(repo_path, 'r').readlines()
         else:
-            repo_mtime = -1 # diffing an uncommitted file for the first time
+            repo_mtime = -1 # diffing an uncommitted file
             repo_lines = []
 
         if os.access(curr_path, os.R_OK|os.W_OK):
@@ -133,7 +134,8 @@ def commit(*args):
     for curr_path in _iterate_over_files(args, config):
         key = curr_path[len(config.root)+1:]
         if key not in config['files']:
-            continue # trying to commit an unfollowed file
+            yield "Could not commit %r because it is not being followed" % key
+            continue
         uuid = config['files'][key]
 
         repo_path = os.path.join(config.directory, uuid)
@@ -145,13 +147,15 @@ def commit(*args):
         if os.access(curr_path, os.R_OK|os.W_OK):
             curr_atime, curr_mtime = os.stat(curr_path)[7:9]
         else:
-            continue # trying to commit a file that's been removed
+            yield "Could not commit %r because it has been removed, try reverting it first" % key
+            continue
 
         if repo_mtime < curr_mtime:
             repo_file = file(repo_path, 'w')
             repo_file.write(file(curr_path, 'r').read())
             repo_file.close()
             os.utime(repo_path, (curr_atime, curr_mtime))
+            yield "%r committed"
 
 
 def revert(*args):
@@ -161,14 +165,16 @@ def revert(*args):
     for curr_path in _iterate_over_files(args, config):
         key = curr_path[len(config.root)+1:]
         if key not in config['files']:
-            continue # trying to revert an unfollowed file
+            yield "Could not revert %r because it is not being followed" % key
+            continue
         uuid = config['files'][key]
 
         repo_path = os.path.join(config.directory, uuid)
         if os.access(repo_path, os.R_OK|os.W_OK):
             repo_atime, repo_mtime = os.stat(repo_path)[7:9]
         else:
-            continue # trying to revert an uncommitted file
+            yield "Could not revert %r because it has never been committed" % key
+            continue
 
         if os.access(curr_path, os.R_OK|os.W_OK):
             curr_atime, curr_mtime = os.stat(curr_path)[7:9]
@@ -180,6 +186,7 @@ def revert(*args):
             curr_file.write(file(repo_path, 'r').read())
             curr_file.close()
             os.utime(curr_path, (repo_atime, repo_mtime))
+            yield "%r reverted" % key
 
 
 def apply(*args):
@@ -187,7 +194,8 @@ def apply(*args):
     config = FragmanConfig()
 
     for path in _iterate_over_files(args, config):
-        apply_changes(path, config)
+        for q in apply_changes(path, config):
+            yield q
 
 
 if __name__ == '__main__': # pragma: no cover
@@ -201,7 +209,8 @@ if __name__ == '__main__': # pragma: no cover
             sys.exit(exc.message)
         else:
             if callable(cmd):
-                print(cmd(sys.argv[2:]))
+                for l in cmd(sys.argv[2:]):
+                    print(l)
             else:
                 print(help())
     else:
