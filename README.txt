@@ -1,17 +1,15 @@
 Differencing Fragmentation Manager
 ==================================
 
-Operations:
+Commands
+--------
 
-Operations starting from working tree:
-
- • Add new root
- • Add new file and detect common sequences and generate parent node with those sequences
- • Modify a leaf and apply modifications in that leaf to all leaves with that sequence (cherry-picking)
- • Modify a leaf and don't apply modifications and generate a new leaf accordingly
-
-Operations starting from repository:
-
- • Modify a sequence (commit a changeset up the tree and rebase)
- • Sprout a new leaf (branch)
+help: display help
+init: initialize a new fragmentation manager repository
+stat: get the current status of the repository
+follow FILENAME [FILENAME ...] : start following changes to one or more files
+forget FILENAME [FILENAME ...] : stop following changes to one or more files
+commit [FILENAME [FILENAME ...]] : commit changes to one or more files
+revert [FILENAME [FILENAME ...]] : revert changes to one or more files
+apply FILENAME [FILENAME ...] : apply changes in one or more files that were made since last commit to as many other followed files as possible
 
