@@ -42,6 +42,7 @@ class FragmanConfig(dict):
             directory = find_configuration()
         self.directory = directory
         self.path = os.path.join(self.directory, configuration_file_name)
+        self.root = os.path.split(self.directory)[0]
         self.update(FragmanConfig.defaults)
         if autoload:
             self.load()

@@ -3,6 +3,7 @@ import pdb
 
 from fragman import __version__, FragmanError
 from fragman.config import FragmanConfig, configuration_directory_name, find_configuration, ConfigurationFileCorrupt, ConfigurationFileNotFound, ConfigurationDirectoryNotFound
+from fragman.apply import apply_changes
 
 class ExecutionError(FragmanError): pass
 
@@ -153,6 +154,20 @@ def revert(*args):
             curr_file.write(file(repo_path, 'r').read())
             curr_file.close()
             os.utime(curr_path, (repo_atime, repo_mtime))
+
+
+def apply(*args):
+    """Revert changes to fragments repository"""
+    config = FragmanConfig()
+    prefix = os.path.split(config.directory)[0]
+
+    if args:
+        iterate = (os.path.realpath(a) for a in set(args))
+    else:
+        iterate = (os.path.join(prefix, f) for f in config['files'])
+
+    for path in iterate:
+        apply_changes(path, config)
 
 
 if __name__ == '__main__': # pragma: no cover

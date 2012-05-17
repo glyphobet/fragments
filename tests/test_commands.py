@@ -2,7 +2,7 @@ import unittest
 import os, shutil, tempfile, types, time
 import pdb
 
-from fragman.__main__ import ExecutionError, help, init, stat, follow, forget, commit, revert
+from fragman.__main__ import ExecutionError, help, init, stat, follow, forget, commit, revert, apply
 from fragman.config import configuration_file_name, configuration_directory_name, ConfigurationDirectoryNotFound, FragmanConfig
 
 
@@ -12,6 +12,7 @@ class CommandBase(unittest.TestCase):
 
     def setUp(self):
         super(CommandBase, self).setUp()
+        self.file_counter = 1
         self.path = os.path.realpath(tempfile.mkdtemp())
         self.content_path = os.path.join(self.path, self.test_content_directory) 
         os.mkdir(self.content_path)
@@ -22,7 +23,10 @@ class CommandBase(unittest.TestCase):
         shutil.rmtree(self.path)
         super(CommandBase, self).tearDown()
 
-    def _create_file(self, file_name='file.ext', contents='CONTENTS\nCONTENTS\n'):
+    def _create_file(self, file_name=None, contents='CONTENTS\nCONTENTS\n'):
+        if file_name is None:
+            file_name = 'file%d.ext' % self.file_counter
+            self.file_counter += 1
         file_path = os.path.join(self.content_path, file_name)
         new_file = file(file_path, 'w')
         new_file.write(contents)
@@ -144,8 +148,8 @@ class TestFollowCommand(CommandBase, PostInitCommandMixIn):
 
     def test_follow_two_files(self):
         init()
-        file1_name, file1_path = self._create_file(file_name='file1.ext')
-        file2_name, file2_path = self._create_file(file_name='file2.ext')
+        file1_name, file1_path = self._create_file()
+        file2_name, file2_path = self._create_file()
         follow(file1_name, file2_name)
         config = FragmanConfig()
         key1 = file1_path[len(os.path.split(config.directory)[0])+1:]
@@ -348,3 +352,63 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
             original_content,
             file(file_path, 'r').read(),
         )
+
+
+class TestApplyCommand(CommandBase, PostInitCommandMixIn):
+
+    command = staticmethod(apply)
+
+    def test_apply(self):
+        init()
+        file1_contents = """<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            Page One
+        </title>
+        <link href="default.css" />
+        <link href="site.css" />
+        <script href="script.js" />
+        <script href="other.js" />
+        <script type="text/javascript">
+            var whole = function (buncha) {
+                $tuff;
+            };
+        </script>
+    </head>
+    <body>
+        <h1>One</h1>
+    </body>
+</html>
+"""
+        file1_name, file1_path = self._create_file(contents=file1_contents)
+        follow(file1_name)
+        commit(file1_name)
+
+        file2_contents = """<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            Page Two
+        </title>
+        <link href="default.css" />
+        <link href="site.css" />
+        <link href="custom.css" />
+        <script href="script.js" />
+        <script href="other.js" />
+    </head>
+    <body>
+        <h1>Two</h1>
+    </body>
+</html>
+"""
+        file2_name, file2_path = self._create_file(contents=file2_contents)
+        follow(file2_name)
+        commit(file2_name)
+
+        new_file1_contents = file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
+        open(file1_name, 'w').write(new_file1_contents)
+        apply(file1_name)
+
+        target_file2_contents = file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
+        self.assertEqual(open(file2_name, 'r').read(), target_file2_contents)
