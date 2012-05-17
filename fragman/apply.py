@@ -16,7 +16,13 @@ def apply_changes(changed_path, config):
             continue # don't try to apply changes to ourself
         weave.add_revision(revision, file(other_path, 'r').readlines(), [])
         merge_result = weave.cherry_pick(2, revision) # Can I apply changes in revision 2 onto this other file?
-        # Merge is successful:
-        other_file = file(other_path, 'w')
-        other_file.writelines(merge_result)
-        other_file.close()
+        if tuple in (type(mr) for mr in merge_result):
+            if len(merge_result) == 1:
+                # total conflict, skip
+                continue
+            # recover!
+        else:
+            # Merge is successful:
+            other_file = file(other_path, 'w')
+            other_file.writelines(merge_result)
+            other_file.close()

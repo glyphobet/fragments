@@ -376,6 +376,7 @@ class TestApplyCommand(CommandBase, PostInitCommandMixIn):
         <h1>One</h1>
     </body>
 </html>"""
+
     html_file2_contents = """<!DOCTYPE html>
 <html>
     <head>
@@ -392,6 +393,16 @@ class TestApplyCommand(CommandBase, PostInitCommandMixIn):
         <h1>Two</h1>
     </body>
 </html>"""
+
+    css_file1_contents = """
+body {
+    margin-left: 0em;
+    background-attachment: fixed;
+}
+table {
+    content: "this is totally random";
+}
+"""
 
     command = staticmethod(apply)
 
@@ -431,3 +442,23 @@ class TestApplyCommand(CommandBase, PostInitCommandMixIn):
         apply(file1_name)
 
         self.assertEqual(open(file2_name, 'r').read(), new_file2_contents)
+
+    def test_apply_skips_unrelated_files(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
+        follow(file1_name)
+        commit(file1_name)
+
+        file2_name, file2_path = self._create_file(contents=self.html_file2_contents)
+        follow(file2_name)
+        commit(file2_name)
+
+        css_name, css_path = self._create_file(contents=self.css_file1_contents)
+        follow(css_name)
+        commit(css_name)
+
+        new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
+        open(file1_name, 'w').write(new_file1_contents)
+
+        apply(file1_name)
+        self.assertEqual(open(css_name, 'r').read(), self.css_file1_contents)
