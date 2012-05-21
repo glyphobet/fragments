@@ -5,8 +5,21 @@ from .precisecodevillemerge import Weave
 def apply_changes(changed_path, config):
     weave = Weave()
     changed_key = changed_path[len(config.root)+1:]
+    if changed_key not in config['files']:
+        yield "Could not apply changes in %r, it is not being followed" % changed_key
+        return
+    elif not os.access(changed_path, os.R_OK|os.W_OK):
+        yield "Could not apply changes in %r, it no longer exists on disk" % changed_key
+        return
+
     changed_uuid = config['files'][changed_key]
-    weave.add_revision(1, file(os.path.join(config.directory, changed_uuid), 'r').readlines(), [])
+    old_path = os.path.join(config.directory, changed_uuid)
+
+    if not os.access(old_path, os.R_OK|os.W_OK):
+        yield "Could not apply changes in %r, it has never been committed" % changed_key
+        return
+
+    weave.add_revision(1, file(old_path, 'r').readlines(), [])
     weave.add_revision(2, file(changed_path, 'r').readlines(), [1])
 
     for i, other_key in enumerate(config['files']):

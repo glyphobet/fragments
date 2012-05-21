@@ -576,7 +576,7 @@ table {
 }
 """
 
-    command = staticmethod(apply)
+    command = staticmethod(lambda : apply('file.ext'))
 
     def test_apply(self):
         init()
@@ -594,6 +594,41 @@ table {
 
         target_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         self.assertEqual(open(file2_name, 'r').read(), target_file2_contents)
+
+    def test_cant_apply_nonexistent_file(self):
+        init()
+        self.assertEqual(apply("nonexistent.file"), ["Could not apply changes in 'test_content/nonexistent.file', it is not being followed"])
+
+    def test_cant_apply_unfollowed_file(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
+        os.unlink(file1_path)
+        self.assertEqual(apply(file1_name), ["Could not apply changes in 'test_content/file1.ext', it is not being followed"])
+
+    def test_cant_apply_removed_file(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
+        follow(file1_name)
+        commit(file1_name)
+        os.unlink(file1_path)
+        self.assertEqual(apply(file1_name), ["Could not apply changes in 'test_content/file1.ext', it no longer exists on disk"])
+
+    def test_cant_apply_uncommitted_file(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
+        follow(file1_name)
+        self.assertEqual(apply(file1_name), ["Could not apply changes in 'test_content/file1.ext', it has never been committed"])
+
+    def test_cant_apply_missing_history_file(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
+        follow(file1_name)
+        commit(file1_name)
+        config = FragmanConfig()
+        key = file1_path[len(config.root)+1:]
+        uuid_path = os.path.join(config.directory, config['files'][key])
+        os.unlink(uuid_path)
+        self.assertEqual(apply(file1_name), ["Could not apply changes in 'test_content/file1.ext', it has never been committed"])
 
     def test_apply_detects_convergent_changes(self):
         init()
@@ -650,7 +685,5 @@ table {
         new_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="colors.css" />')
         open(file2_name, 'w').write(new_file2_contents)
 
-        result = apply(file1_name, file2_name)
-        self.assertEqual(result, [
-            "Conflict merging 'test_content/file1.ext' => u'test_content/file2.ext'",
-            "Conflict merging 'test_content/file2.ext' => u'test_content/file1.ext'"])
+        self.assertEqual(apply(file1_name), ["Conflict merging 'test_content/file1.ext' => u'test_content/file2.ext'"])
+        self.assertEqual(apply(file2_name), ["Conflict merging 'test_content/file2.ext' => u'test_content/file1.ext'"])

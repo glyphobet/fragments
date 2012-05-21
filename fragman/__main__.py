@@ -212,13 +212,12 @@ def revert(*args):
             yield "%r reverted" % key
 
 
-def apply(*args):
+def apply(file_name):
     """Revert changes to fragments repository"""
     config = FragmanConfig()
 
-    for path in _iterate_over_files(args, config):
-        for q in apply_changes(path, config):
-            yield q
+    for q in apply_changes(os.path.realpath(file_name), config):
+        yield q
 
 
 if __name__ == '__main__': # pragma: no cover
