@@ -51,6 +51,10 @@ Commands
 
     stop following changes to one or more files
 
+* `rename OLD_FILENAME NEW_FILENAME`
+
+    rename OLD\_FILENAME to NEW\_FILENAME, moving the actual file on disk if has not already been moved
+
 * `diff [FILENAME [FILENAME ...]]`
 
     show differences between committed and uncommitted versions
