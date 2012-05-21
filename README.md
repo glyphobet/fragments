@@ -67,7 +67,7 @@ Commands
 
     revert changes to one or more files
 
-* `apply FILENAME [FILENAME ...]`
+* `apply FILENAME`
 
-    apply changes in one or more files that were made since last commit to as many other followed files as possible
+    apply changes in FILENAME that were made since last commit to as many other followed files as possible
 
