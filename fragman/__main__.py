@@ -88,6 +88,29 @@ def forget(*args):
     config.dump()
 
 
+def rename(old_name, new_name):
+    """Rename one file to another"""
+    config = FragmanConfig()
+    old_path = os.path.realpath(old_name)
+    old_key = old_path[len(config.root)+1:]
+    new_path = os.path.realpath(new_name)
+    new_key = new_path[len(config.root)+1:]
+    if old_key not in config['files']:
+        yield "Could not rename %r, it is not being tracked" % old_name
+    elif new_key in config['files']:
+        yield "Could not rename %r to %r, %r is already being tracked" % (old_name, new_name, new_name)
+    elif os.access(old_path, os.W_OK|os.R_OK) and os.access(new_path, os.W_OK|os.R_OK):
+        yield "Could not rename %r to %r, both files already exist" % (old_name, new_name)
+    elif not os.access(old_path, os.W_OK|os.R_OK) and not os.access(new_path, os.W_OK|os.R_OK):
+        yield "Could not rename %r to %r, neither file exists" % (old_name, new_name)
+    else:
+        config['files'][new_key] = config['files'][old_key]
+        del config['files'][old_key]
+        if os.access(old_path, os.W_OK|os.R_OK):
+            os.rename(old_path, new_path)
+    config.dump()
+
+
 def _iterate_over_files(args, config):
     if args:
         return (os.path.realpath(a) for a in set(args))

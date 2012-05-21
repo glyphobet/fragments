@@ -11,6 +11,7 @@ def init  (*a): return list(fragman_main.init  (*a))
 def stat  (*a): return list(fragman_main.stat  (*a))
 def follow(*a): return list(fragman_main.follow(*a))
 def forget(*a): return list(fragman_main.forget(*a))
+def rename(*a): return list(fragman_main.rename(*a))
 def commit(*a): return list(fragman_main.commit(*a))
 def revert(*a): return list(fragman_main.revert(*a))
 def diff  (*a): return list(fragman_main.diff  (*a))
@@ -222,6 +223,71 @@ class TestForgetCommand(CommandBase, PostInitCommandMixIn):
         outside_path = os.path.realpath(tempfile.mkdtemp())
         outside_file = os.path.join(outside_path, 'outside.repository')
         forget(outside_path)
+
+
+class TestRenameCommand(CommandBase, PostInitCommandMixIn):
+
+    command = staticmethod(lambda : rename('foo', 'bar'))
+
+    def test_cant_rename_followed_file(self):
+        init()
+        file_name, file_path = self._create_file()
+        self.assertEquals(rename(file_name, 'new_file'), ["Could not rename %r, it is not being tracked" % file_name])
+
+    def test_cant_rename_onto_other_followed_file(self):
+        init()
+        file1_name, file1_path = self._create_file()
+        file2_name, file2_path = self._create_file()
+        follow(file1_name, file2_name)
+        commit(file1_name, file2_name)
+        self.assertEquals(rename(file1_name, file2_name), ["Could not rename %r to %r, %r is already being tracked" % (file1_name, file2_name, file2_name)])
+
+    def test_cant_rename_onto_existing_file(self):
+        init()
+        file1_name, file1_path = self._create_file()
+        file2_name, file2_path = self._create_file()
+        follow(file1_name)
+        commit(file1_name)
+        self.assertEquals(rename(file1_name, file2_name), ["Could not rename %r to %r, both files already exist" % (file1_name, file2_name)])
+
+    def test_cant_rename_if_neither_file_exists(self):
+        init()
+        file1_name, file1_path = self._create_file()
+        file2_name, file2_path = self._create_file()
+        follow(file1_name)
+        commit(file1_name)
+        os.unlink(file1_path)
+        os.unlink(file2_path)
+        self.assertEquals(rename(file1_name, file2_name), ["Could not rename %r to %r, neither file exists" % (file1_name, file2_name)])
+
+    def test_rename_moves_file_if_not_already_moved(self):
+        init()
+        file1_name, file1_path = self._create_file()
+        follow(file1_name)
+        commit(file1_name)
+        self.assertEquals(rename(file1_name, 'other.ext'), [])
+        self.assertFalse(os.access(file1_path, os.R_OK|os.W_OK))
+        self.assertTrue(os.access('other.ext', os.R_OK|os.W_OK))
+        config = FragmanConfig()
+        old_key = file1_path[len(config.root)+1:]
+        new_key = os.path.realpath('other.ext')[len(config.root)+1:]
+        self.assertNotIn(old_key, config['files'])
+        self.assertIn(new_key, config['files'])
+
+    def test_rename_succeeds_if_file_already_moved(self):
+        init()
+        file1_name, file1_path = self._create_file()
+        follow(file1_name)
+        commit(file1_name)
+        os.rename(file1_name, 'other.ext')
+        self.assertEquals(rename(file1_name, 'other.ext'), [])
+        self.assertFalse(os.access(file1_path, os.R_OK|os.W_OK))
+        self.assertTrue(os.access('other.ext', os.R_OK|os.W_OK))
+        config = FragmanConfig()
+        old_key = file1_path[len(config.root)+1:]
+        new_key = os.path.realpath('other.ext')[len(config.root)+1:]
+        self.assertNotIn(old_key, config['files'])
+        self.assertIn(new_key, config['files'])
 
 
 class TestCommitCommand(CommandBase, PostInitCommandMixIn):
