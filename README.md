@@ -35,7 +35,7 @@ The next release of Fragments will add chunk-based application of changes, simil
 
 Since Fragments is diff-based, it will not do well with minified or otherwise compressed content. Do not expect it to handle changes to your 1,000 character, single line, über-compressed CSS file. The more newlines in your files, the more robust Fragments' merging will be.
 
-Adding preprocessors for different file formats would potentially make Fragments' merging even more robust. Running a preprocessor before `commit` and `apply` would make the merging more robust by ensuring that XML tags, (some) HTML tags, and CSS declarations get their own lines, placing a canonical amount of whitespace between functions and CSS rules, and enforcing the project's coding standards.
+Adding preprocessors for different file formats would potentially make Fragments' merging even more robust. Running a preprocessor before `commit` and `apply` would make the merging more robust by ensuring that XML tags, (some) HTML tags, and CSS declarations get their own lines, and by placing a canonical number of newlines around CSS rules, functions and any other structures in the document.
 
 Commands
 --------
