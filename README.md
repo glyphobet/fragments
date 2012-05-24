@@ -1,14 +1,14 @@
 Fragments
 =========
 
-Fragments is neither a templating language, nor a version control system, but it combines aspects of both. It enables a programmer to violate the [DRY (Don't Repeat Yourself)](http://en.wikipedia.org/wiki/Don't_repeat_yourself) principle; it is a [Multiple Source of Truth](http://en.wikipedia.org/wiki/Single_Source_of_Truth) engine. I prefer to think of it as a Differencing Fragmentation Manager.
+Fragments is neither a templating language, nor a version control system, but it combines aspects of both. It enables a programmer to violate the [DRY (Don't Repeat Yourself)](http://en.wikipedia.org/wiki/Don't_repeat_yourself) principle; it is a [Multiple Source of Truth](http://en.wikipedia.org/wiki/Single_Source_of_Truth) engine. You could think of it as "fragmentation control".
 
-What is a Differencing Fragmentation Manager?
+What is Fragmentation Control?
 ---------------------------------------------
 
 Generating HTML with templating languages is difficult because the templates have two semi-incompatible purposes. The first purpose is sometimes called page "inheritance": managing common HTML elements like headers, sidebars, and footers, across multiple templates. The second purpose is to perform display logic operating on data from a backend. Separate these two tasks and your templates become much simpler. Fragments takes care of common HTML elements, leaving the actual display logic to your templating language.
 
-The machinery to manage common file fragments across multiple files already exists in modern version control systems. Instead of a "diachronic" system, which manages many changes to a single file over time, Fragments is a "synchronic" system, which can apply a single change to many files synchronously. Each HTML file (or any other type of file, really) is in effect its own "branch", and whenever you modify a file ("branch") you can merge that change into whichever other files ("branches") you wish. In this sense Fragments is really just version control turned on its side.
+The machinery to manage common code fragments across multiple files already exists in modern version control systems. Instead of a "diachronic" system, which manages many changes to a single file over time, Fragments is a "synchronic" system, which can apply a single change to many files synchronously. Each HTML file (or any other type of file, really) is in effect its own "branch", and whenever you modify a file ("branch") you can apply ("merge) that change into whichever other files ("branches") you choose. In this sense Fragments is a different kind of "source control" -- rather than controlling versions/revisions, it controls fragments. Hence the term "fragmentation control".
 
 How does it work?
 -----------------
