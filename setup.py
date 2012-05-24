@@ -19,7 +19,7 @@ setup(
     packages= ['fragments',],
     entry_points = {
         'console_scripts': [
-            'fragments = fragments.commands:main',
+            'fragments = fragments.commands:_main',
         ],
     },
     license='BSD',

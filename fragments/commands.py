@@ -212,7 +212,7 @@ def revert(*args):
             yield "%r reverted" % key
 
 
-def main(): # pragma: no cover
+def _main(): # pragma: no cover
     print "%s version %s.%s.%s" % ((__package__,) + __version__)
     if (len(sys.argv) > 1              and  # command was specified
         sys.argv[1][0] != '_'          and  # command does not start with _
