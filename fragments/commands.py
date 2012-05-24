@@ -222,18 +222,15 @@ def apply(file_name):
 
 def main(): # pragma: no cover
     print "%s version %s.%s.%s" % ((__package__,) + __version__)
-    if len(sys.argv) > 1 and sys.argv[1][0] != '_':
+    if (len(sys.argv) > 1              and  # command was specified
+        sys.argv[1][0] != '_'          and  # command does not start with _
+        sys.argv[1] in locals()        and  # command exists in namespace
+        callable(locals()[sys.argv[1]]) ):  # command is callable
         try:
-            cmd = locals()[sys.argv[1]]
-        except KeyError, exc:
-            print(help())
+            for l in cmd(sys.argv[2:]):
+                print(l)
         except ExecutionError, exc:
             sys.exit(exc.message)
-        else:
-            if callable(cmd):
-                for l in cmd(sys.argv[2:]):
-                    print(l)
-            else:
-                print(help())
     else:
-        print(help())
+        for l in help():
+            print l
