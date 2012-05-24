@@ -20,7 +20,7 @@ Fragments is also not HTML specific. XML, CSS, JSON, YAML, source code from your
 Integration with Version Control
 --------------------------------
 
-Fragments has no "history"; It only stores the previous committed state of a file. Storing history is up to your ("diachronic") version control system. Fragments stores its repository configuration in such a way to allow your version control system to manage it painlessly and obviously. Configuration is stored in a `fragments` directory. This directory name is not preceded by a `.`, and all the files in it are stored as plain text. The configuration resides one directory above your actual content, so as to not interfere with template loading code, and so it is not accidentally deployed to production along with your actual content.
+Fragments has no "history"; It only stores the previous committed state of a file. Storing history is up to your ("diachronic") version control system. Fragments stores its repository configuration in such a way to allow your version control system to manage it painlessly and obviously. Configuration is stored in a `_fragments` directory. This directory name is not preceded by a `.`, and all the files in it are stored as plain text. The configuration resides one directory above your actual content, so as to not interfere with template loading code, and so it is not accidentally deployed to production along with your actual content.
 
 Future Improvements
 -------------------

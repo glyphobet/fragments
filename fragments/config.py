@@ -2,7 +2,7 @@ import os, sys, json, uuid
 from . import FragmentsError, __version__
 
 configuration_file_name = 'config.json'
-configuration_directory_name = 'fragments'
+configuration_directory_name = '_fragments'
 
 
 class ConfigurationError(FragmentsError): pass
