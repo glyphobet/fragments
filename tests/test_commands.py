@@ -525,6 +525,16 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
             '-Line Four\n',
             '-Line Five\n'])
 
+    def test_diff_uncommitted_removed_file(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.original_file)
+        yestersecond = time.time() - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
+
+        follow(file1_path)
+        os.unlink(file1_path)
+        self.assertEquals(list(diff(file1_name)), [])
+
 
 class TestApplyCommand(CommandBase, PostInitCommandMixIn):
 
