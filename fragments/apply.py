@@ -1,9 +1,13 @@
 import os
 import pdb
 from .precisecodevillemerge import Weave
+from .config import FragmentsConfig
 
-def apply_changes(changed_path, config):
+def apply(file_name):
+    """Revert changes to fragments repository"""
+    config = FragmentsConfig()
     weave = Weave()
+    changed_path = os.path.realpath(file_name)
     changed_key = changed_path[len(config.root)+1:]
     if changed_key not in config['files']:
         yield "Could not apply changes in %r, it is not being followed" % changed_key

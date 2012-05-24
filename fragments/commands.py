@@ -3,7 +3,7 @@ import pdb
 
 from fragments import __version__, FragmentsError
 from fragments.config import FragmentsConfig, configuration_directory_name, find_configuration, ConfigurationFileCorrupt, ConfigurationFileNotFound, ConfigurationDirectoryNotFound
-from fragments.apply import apply_changes
+from fragments.apply import apply
 
 class ExecutionError(FragmentsError): pass
 
@@ -210,14 +210,6 @@ def revert(*args):
             curr_file.close()
             os.utime(curr_path, (repo_atime, repo_mtime))
             yield "%r reverted" % key
-
-
-def apply(file_name):
-    """Revert changes to fragments repository"""
-    config = FragmentsConfig()
-
-    for q in apply_changes(os.path.realpath(file_name), config):
-        yield q
 
 
 def main(): # pragma: no cover
