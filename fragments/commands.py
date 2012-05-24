@@ -1,9 +1,9 @@
 import sys, os, uuid, difflib
 import pdb
 
-from fragments import __version__, FragmentsError
-from fragments.config import FragmentsConfig, configuration_directory_name, find_configuration, ConfigurationFileCorrupt, ConfigurationFileNotFound, ConfigurationDirectoryNotFound
-from fragments.apply import apply
+from . import __version__, FragmentsError
+from .config import FragmentsConfig, configuration_directory_name, find_configuration, ConfigurationFileCorrupt, ConfigurationFileNotFound, ConfigurationDirectoryNotFound
+from .apply import apply
 
 class ExecutionError(FragmentsError): pass
 
