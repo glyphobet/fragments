@@ -1,11 +1,11 @@
 import sys, os, uuid, difflib
 import pdb
 
-from fragman import __version__, FragmanError
-from fragman.config import FragmanConfig, configuration_directory_name, find_configuration, ConfigurationFileCorrupt, ConfigurationFileNotFound, ConfigurationDirectoryNotFound
-from fragman.apply import apply_changes
+from fragments import __version__, FragmentsError
+from fragments.config import FragmentsConfig, configuration_directory_name, find_configuration, ConfigurationFileCorrupt, ConfigurationFileNotFound, ConfigurationDirectoryNotFound
+from fragments.apply import apply_changes
 
-class ExecutionError(FragmanError): pass
+class ExecutionError(FragmentsError): pass
 
 def help(*a):
     """Prints help."""
@@ -15,20 +15,20 @@ def help(*a):
 def init(*a):
     """Initialize a fragments repository."""
     try:
-        config = FragmanConfig()
+        config = FragmentsConfig()
     except ConfigurationFileCorrupt, exc:
-        config = FragmanConfig(autoload=False)
+        config = FragmentsConfig(autoload=False)
         os.rename(config.path, config.path + '.corrupt')
         config.dump()
     except ConfigurationFileNotFound, exc:
-        config = FragmanConfig(autoload=False)
+        config = FragmentsConfig(autoload=False)
         config.dump()
     except ConfigurationDirectoryNotFound, exc:
         configuration_parent = os.path.split(os.getcwd())[0]
         if os.access(configuration_parent, os.R_OK|os.W_OK):
             configuration_path = os.path.join(configuration_parent, configuration_directory_name)
             os.mkdir(configuration_path)
-            config = FragmanConfig(configuration_path, autoload=False)
+            config = FragmentsConfig(configuration_path, autoload=False)
             config.dump()
         else:
             raise ExecutionError("Could not create fragments directory in %r, aborting.\n(Do you have the correct permissions?)" % configuration_parent)
@@ -39,13 +39,13 @@ def init(*a):
 
 def stat(*a):
     """Get status of a fragments repository."""
-    config = FragmanConfig()
+    config = FragmentsConfig()
     yield repr(config)
 
 
 def follow(*args):
     """Add files to fragments following."""
-    config = FragmanConfig()
+    config = FragmentsConfig()
     random_uuid = uuid.uuid4()
     for filename in set(args):
         fullpath = os.path.realpath(filename)
@@ -67,7 +67,7 @@ def follow(*args):
 
 def forget(*args):
     """Remove files from fragments following"""
-    config = FragmanConfig()
+    config = FragmentsConfig()
     for filename in set(args):
         fullpath = os.path.realpath(filename)
         if fullpath.startswith(config.root):
@@ -90,7 +90,7 @@ def forget(*args):
 
 def rename(old_name, new_name):
     """Rename one file to another"""
-    config = FragmanConfig()
+    config = FragmentsConfig()
     old_path = os.path.realpath(old_name)
     old_key = old_path[len(config.root)+1:]
     new_path = os.path.realpath(new_name)
@@ -120,7 +120,7 @@ def _iterate_over_files(args, config):
 
 def diff(*args):
     """Show differences between committed and uncommitted versions"""
-    config = FragmanConfig()
+    config = FragmentsConfig()
 
     for curr_path in _iterate_over_files(args, config):
         key = curr_path[len(config.root)+1:]
@@ -152,7 +152,7 @@ def diff(*args):
 
 def commit(*args):
     """Commit changes to fragments repository"""
-    config = FragmanConfig()
+    config = FragmentsConfig()
 
     for curr_path in _iterate_over_files(args, config):
         key = curr_path[len(config.root)+1:]
@@ -183,7 +183,7 @@ def commit(*args):
 
 def revert(*args):
     """Revert changes to fragments repository"""
-    config = FragmanConfig()
+    config = FragmentsConfig()
 
     for curr_path in _iterate_over_files(args, config):
         key = curr_path[len(config.root)+1:]
@@ -214,7 +214,7 @@ def revert(*args):
 
 def apply(file_name):
     """Revert changes to fragments repository"""
-    config = FragmanConfig()
+    config = FragmentsConfig()
 
     for q in apply_changes(os.path.realpath(file_name), config):
         yield q

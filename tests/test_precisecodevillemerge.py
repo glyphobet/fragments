@@ -4,7 +4,7 @@
 
 import unittest
 
-from fragman.precisecodevillemerge import Weave, unique_lcs, recurse_matches
+from fragments.precisecodevillemerge import Weave, unique_lcs, recurse_matches
 
 class TestWeave(unittest.TestCase):
     def test_unique_lcs(self):

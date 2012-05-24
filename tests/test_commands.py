@@ -2,20 +2,20 @@ import unittest
 import os, shutil, tempfile, types, time
 import pdb
 
-from fragman import __main__ as fragman_main
-from fragman.__main__ import ExecutionError
-from fragman.config import configuration_file_name, configuration_directory_name, ConfigurationDirectoryNotFound, FragmanConfig
+from fragments import __main__ as fragments_main
+from fragments.__main__ import ExecutionError
+from fragments.config import configuration_file_name, configuration_directory_name, ConfigurationDirectoryNotFound, FragmentsConfig
 
-def help  (*a): return list(fragman_main.help  (*a))
-def init  (*a): return list(fragman_main.init  (*a))
-def stat  (*a): return list(fragman_main.stat  (*a))
-def follow(*a): return list(fragman_main.follow(*a))
-def forget(*a): return list(fragman_main.forget(*a))
-def rename(*a): return list(fragman_main.rename(*a))
-def commit(*a): return list(fragman_main.commit(*a))
-def revert(*a): return list(fragman_main.revert(*a))
-def diff  (*a): return list(fragman_main.diff  (*a))
-def apply (*a): return list(fragman_main.apply (*a))
+def help  (*a): return list(fragments_main.help  (*a))
+def init  (*a): return list(fragments_main.init  (*a))
+def stat  (*a): return list(fragments_main.stat  (*a))
+def follow(*a): return list(fragments_main.follow(*a))
+def forget(*a): return list(fragments_main.forget(*a))
+def rename(*a): return list(fragments_main.rename(*a))
+def commit(*a): return list(fragments_main.commit(*a))
+def revert(*a): return list(fragments_main.revert(*a))
+def diff  (*a): return list(fragments_main.diff  (*a))
+def apply (*a): return list(fragments_main.apply (*a))
 
 
 
@@ -66,7 +66,7 @@ class TestInitCommand(CommandBase):
 
     def test_init_json(self):
         init()
-        config = FragmanConfig()
+        config = FragmentsConfig()
         self.assertIn('files', config)
         self.assertIn('version', config)
         self.assertIsInstance(config['files'], dict)
@@ -135,7 +135,7 @@ class TestFollowCommand(CommandBase, PostInitCommandMixIn):
         init()
         file_name, file_path = self._create_file()
         follow(file_name)
-        config = FragmanConfig()
+        config = FragmentsConfig()
         key = file_path[len(os.path.split(config.directory)[0])+1:]
         self.assertIn(key, config['files'])
 
@@ -143,7 +143,7 @@ class TestFollowCommand(CommandBase, PostInitCommandMixIn):
         init()
         file_name, file_path = self._create_file()
         follow(file_name, file_name)
-        config = FragmanConfig()
+        config = FragmentsConfig()
         key = file_path[len(os.path.split(config.directory)[0])+1:]
         self.assertIn(key, config['files'])
 
@@ -151,11 +151,11 @@ class TestFollowCommand(CommandBase, PostInitCommandMixIn):
         init()
         file_name, file_path = self._create_file()
         follow(file_name)
-        config = FragmanConfig()
+        config = FragmentsConfig()
         key = file_path[len(os.path.split(config.directory)[0])+1:]
         uuid = config['files'][key]
         follow(file_name)
-        config = FragmanConfig()
+        config = FragmentsConfig()
         self.assertIn(key, config['files'])
         self.assertEquals(config['files'][key], uuid)
 
@@ -164,7 +164,7 @@ class TestFollowCommand(CommandBase, PostInitCommandMixIn):
         file1_name, file1_path = self._create_file()
         file2_name, file2_path = self._create_file()
         follow(file1_name, file2_name)
-        config = FragmanConfig()
+        config = FragmentsConfig()
         key1 = file1_path[len(os.path.split(config.directory)[0])+1:]
         key2 = file2_path[len(os.path.split(config.directory)[0])+1:]
         self.assertIn(key1, config['files'])
@@ -195,11 +195,11 @@ class TestForgetCommand(CommandBase, PostInitCommandMixIn):
         init()
         file_name, file_path = self._create_file()
         follow(file_name)
-        config = FragmanConfig()
+        config = FragmentsConfig()
         key = file_path[len(os.path.split(config.directory)[0])+1:]
         uuid = config['files'][key]
         forget(file_name)
-        config = FragmanConfig()
+        config = FragmentsConfig()
         key = file_path[len(os.path.split(config.directory)[0])+1:]
         self.assertNotIn(key, config['files'])
         self.assertFalse(os.path.exists(os.path.join(config.directory, uuid)))
@@ -208,12 +208,12 @@ class TestForgetCommand(CommandBase, PostInitCommandMixIn):
         init()
         file_name, file_path = self._create_file()
         follow(file_name)
-        config = FragmanConfig()
+        config = FragmentsConfig()
         key = file_path[len(os.path.split(config.directory)[0])+1:]
         uuid = config['files'][key]
         commit(file_name)
         forget(file_name)
-        config = FragmanConfig()
+        config = FragmentsConfig()
         key = file_path[len(os.path.split(config.directory)[0])+1:]
         self.assertNotIn(key, config['files'])
         self.assertFalse(os.path.exists(os.path.join(config.directory, uuid)))
@@ -268,7 +268,7 @@ class TestRenameCommand(CommandBase, PostInitCommandMixIn):
         self.assertEquals(rename(file1_name, 'other.ext'), [])
         self.assertFalse(os.access(file1_path, os.R_OK|os.W_OK))
         self.assertTrue(os.access('other.ext', os.R_OK|os.W_OK))
-        config = FragmanConfig()
+        config = FragmentsConfig()
         old_key = file1_path[len(config.root)+1:]
         new_key = os.path.realpath('other.ext')[len(config.root)+1:]
         self.assertNotIn(old_key, config['files'])
@@ -283,7 +283,7 @@ class TestRenameCommand(CommandBase, PostInitCommandMixIn):
         self.assertEquals(rename(file1_name, 'other.ext'), [])
         self.assertFalse(os.access(file1_path, os.R_OK|os.W_OK))
         self.assertTrue(os.access('other.ext', os.R_OK|os.W_OK))
-        config = FragmanConfig()
+        config = FragmentsConfig()
         old_key = file1_path[len(config.root)+1:]
         new_key = os.path.realpath('other.ext')[len(config.root)+1:]
         self.assertNotIn(old_key, config['files'])
@@ -299,7 +299,7 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         file_name, file_path = self._create_file()
         follow(file_name)
         commit(file_name)
-        config = FragmanConfig()
+        config = FragmentsConfig()
         prefix = os.path.split(config.directory)[0]
         key = file_path[len(prefix)+1:]
         self.assertIn(key, config['files'])
@@ -325,7 +325,7 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         f.write("GIBBERISH!\n")
         f.close()
 
-        config = FragmanConfig()
+        config = FragmentsConfig()
         prefix = os.path.split(config.directory)[0]
         key = file_path[len(prefix)+1:]
 
@@ -376,7 +376,7 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
         f.write("GIBBERISH!\n")
         f.close()
 
-        config = FragmanConfig()
+        config = FragmentsConfig()
         prefix = os.path.split(config.directory)[0]
         key = file_path[len(prefix)+1:]
 
@@ -624,7 +624,7 @@ table {
         file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
         follow(file1_name)
         commit(file1_name)
-        config = FragmanConfig()
+        config = FragmentsConfig()
         key = file1_path[len(config.root)+1:]
         uuid_path = os.path.join(config.directory, config['files'][key])
         os.unlink(uuid_path)

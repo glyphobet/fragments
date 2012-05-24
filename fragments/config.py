@@ -1,11 +1,11 @@
 import os, sys, json, uuid
-from . import FragmanError, __version__
+from . import FragmentsError, __version__
 
 configuration_file_name = 'config.json'
 configuration_directory_name = 'fragments'
 
 
-class ConfigurationError(FragmanError): pass
+class ConfigurationError(FragmentsError): pass
 class ConfigurationDirectoryNotFound(ConfigurationError): pass
 class ConfigurationFileNotFound(ConfigurationError): pass
 class ConfigurationFileCorrupt(ConfigurationError): pass
@@ -30,7 +30,7 @@ def find_configuration(current=None):
             raise ConfigurationDirectoryNotFound("Could not find fragments configuration directory in %r or any parent directories" % current)
 
 
-class FragmanConfig(dict):
+class FragmentsConfig(dict):
 
     defaults = {
         'files': {},
@@ -43,7 +43,7 @@ class FragmanConfig(dict):
         self.directory = directory
         self.path = os.path.join(self.directory, configuration_file_name)
         self.root = os.path.split(self.directory)[0]
-        self.update(FragmanConfig.defaults)
+        self.update(FragmentsConfig.defaults)
         if autoload:
             self.load()
 
