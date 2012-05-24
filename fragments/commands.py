@@ -220,7 +220,7 @@ def apply(file_name):
         yield q
 
 
-if __name__ == '__main__': # pragma: no cover
+def main(): # pragma: no cover
     print "%s version %s.%s.%s" % ((__package__,) + __version__)
     if len(sys.argv) > 1 and sys.argv[1][0] != '_':
         try:

@@ -2,20 +2,20 @@ import unittest
 import os, shutil, tempfile, types, time
 import pdb
 
-from fragments import __main__ as fragments_main
-from fragments.__main__ import ExecutionError
+from fragments import commands
+from fragments.commands import ExecutionError
 from fragments.config import configuration_file_name, configuration_directory_name, ConfigurationDirectoryNotFound, FragmentsConfig
 
-def help  (*a): return list(fragments_main.help  (*a))
-def init  (*a): return list(fragments_main.init  (*a))
-def stat  (*a): return list(fragments_main.stat  (*a))
-def follow(*a): return list(fragments_main.follow(*a))
-def forget(*a): return list(fragments_main.forget(*a))
-def rename(*a): return list(fragments_main.rename(*a))
-def commit(*a): return list(fragments_main.commit(*a))
-def revert(*a): return list(fragments_main.revert(*a))
-def diff  (*a): return list(fragments_main.diff  (*a))
-def apply (*a): return list(fragments_main.apply (*a))
+def help  (*a): return list(commands.help  (*a))
+def init  (*a): return list(commands.init  (*a))
+def stat  (*a): return list(commands.stat  (*a))
+def follow(*a): return list(commands.follow(*a))
+def forget(*a): return list(commands.forget(*a))
+def rename(*a): return list(commands.rename(*a))
+def commit(*a): return list(commands.commit(*a))
+def revert(*a): return list(commands.revert(*a))
+def diff  (*a): return list(commands.diff  (*a))
+def apply (*a): return list(commands.apply (*a))
 
 
 
