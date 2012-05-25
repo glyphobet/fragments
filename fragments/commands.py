@@ -125,7 +125,9 @@ def _visible_in_diff(merge_result, context_lines=3):
     while i < len(merge_result):
         line_or_tuple = merge_result[i]
         if isinstance(line_or_tuple, tuple):
-            yield line_or_tuple
+            yield old_line, new_line, line_or_tuple
+            old_line += len(line_or_tuple[0])
+            new_line += len(line_or_tuple[1])
         else:
             should_yield = False
             for ibefore in range(max(0, i-context_lines), i): # look behind
@@ -137,9 +139,11 @@ def _visible_in_diff(merge_result, context_lines=3):
                     should_yield = True
                     break
             if should_yield:
-                yield line_or_tuple
+                yield old_line, new_line, line_or_tuple
             else:
                 yield None
+            old_line += 1
+            new_line += 1
         i += 1
     yield None
 
@@ -157,23 +161,39 @@ def _diff_groups(merge_result, context_lines=3):
 
 def _full_diff(merge_result, key, context_lines=3):
     header_printed = False
-    # pdb.set_trace()
     for group in _diff_groups(merge_result, context_lines=context_lines):
         if not header_printed:
             header_printed = True
             yield '--- %s\n' % key
             yield '+++ %s\n' % key
-        for line_or_diff in group:
-            # if last_i is not None and last_i +1 < i:
-            #     yield '@@ -%s,%s +%s,%s @@\n'
-            if isinstance(line_or_diff, tuple):
-                old, new = line_or_diff
+
+        old_start = group[0][0]
+        new_start = group[0][1]
+        old_length = new_length = 0
+        for old_line, new_line, line_or_tuple in group:
+            if isinstance(line_or_tuple, tuple):
+                old, new = line_or_tuple
+                old_length += len(old)
+                new_length += len(new)
+            else:
+                old_length += 1
+                new_length += 1
+        if old_length:
+            old_start += 1
+        if new_length:
+            new_start += 1
+
+        yield '@@ -%s,%s +%s,%s @@\n' % (old_start, old_length, new_start, new_length)
+
+        for old_line, new_line, line_or_tuple in group:
+            if isinstance(line_or_tuple, tuple):
+                old, new = line_or_tuple
                 for o in old:
                     yield '-' + o
                 for n in new:
                     yield '+' + n
             else:
-                yield ' ' + line_or_diff
+                yield ' ' + line_or_tuple
 
 
 def diff(*args):
