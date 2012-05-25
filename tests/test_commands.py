@@ -459,6 +459,56 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
             ' Line Four\n',
             ' Line Five\n'])
 
+    def test_two_nearby_section_diff(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.original_file)
+        yestersecond = time.time() - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
+
+        follow(file1_name)
+        commit(file1_name)
+        file(file1_name, 'w').write(self.original_file.replace('Line One', 'Line 0.999999').replace('Line Five', 'Line 4.999999'))
+        self.assertEquals(list(diff(file1_name)), [
+            '--- test_content/file1.ext\n',
+            '+++ test_content/file1.ext\n',
+            '@@ -1,5 +1,5 @@\n',
+            '-Line One\n',
+            '+Line 0.999999\n',
+            ' Line Two\n',
+            ' Line Three\n',
+            ' Line Four\n',
+            '-Line Five\n',
+            '+Line 4.999999\n'])
+
+
+    def test_two_distant_section_diff(self):
+        self.maxDiff = None
+        original_file = "Line One\nLine Two\nLine Three\nLine Four\nLine Five\nLine Six\nLine Seven\nLine Eight\nLine Nine\n"
+        init()
+        file1_name, file1_path = self._create_file(contents=original_file)
+        yestersecond = time.time() - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
+
+        follow(file1_name)
+        commit(file1_name)
+        file(file1_name, 'w').write(original_file.replace('Line One', 'Line 0.999999').replace('Line Nine', 'Line 8.999999'))
+        self.assertEquals(list(diff(file1_name)), [
+            '--- test_content/file1.ext\n',
+            '+++ test_content/file1.ext\n',
+            '@@ -1,4 +1,4 @@\n',
+            '-Line One\n',
+            '+Line 0.999999\n',
+            ' Line Two\n',
+            ' Line Three\n',
+            ' Line Four\n',
+            '@@ -6,4 +6,4 @@\n',
+            ' Line Six\n',
+            ' Line Seven\n',
+            ' Line Eight\n',
+            '-Line Nine\n',
+            '+Line 8.999999\n'])
+
+
     def test_unmodified_file_diff(self):
         init()
         file1_name, file1_path = self._create_file(contents=self.original_file)

@@ -4,6 +4,8 @@ import pdb
 from . import __version__, FragmentsError
 from .config import FragmentsConfig, configuration_directory_name, find_configuration, ConfigurationFileCorrupt, ConfigurationFileNotFound, ConfigurationDirectoryNotFound
 from .apply import apply
+from .precisecodevillemerge import Weave
+
 
 class ExecutionError(FragmentsError): pass
 
@@ -118,9 +120,66 @@ def _iterate_over_files(args, config):
         return (os.path.join(config.root, f) for f in config['files'])
 
 
+def _visible_in_diff(merge_result, context_lines=3):
+    i = old_line = new_line = 0
+    while i < len(merge_result):
+        line_or_tuple = merge_result[i]
+        if isinstance(line_or_tuple, tuple):
+            yield line_or_tuple
+        else:
+            should_yield = False
+            for ibefore in range(max(0, i-context_lines), i): # look behind
+                if isinstance(merge_result[ibefore], tuple):
+                    should_yield = True
+                    break
+            for iafter in range(i+1, min(len(merge_result), i+1+context_lines)): # look ahead
+                if isinstance(merge_result[iafter], tuple):
+                    should_yield = True
+                    break
+            if should_yield:
+                yield line_or_tuple
+            else:
+                yield None
+        i += 1
+    yield None
+
+
+def _diff_groups(merge_result, context_lines=3):
+    collect = []
+    for item in _visible_in_diff(merge_result, context_lines=context_lines):
+        if item is None:
+            if collect:
+                yield collect
+            collect = []
+        else:
+            collect.append(item)
+
+
+def _full_diff(merge_result, key, context_lines=3):
+    header_printed = False
+    # pdb.set_trace()
+    for group in _diff_groups(merge_result, context_lines=context_lines):
+        if not header_printed:
+            header_printed = True
+            yield '--- %s\n' % key
+            yield '+++ %s\n' % key
+        for line_or_diff in group:
+            # if last_i is not None and last_i +1 < i:
+            #     yield '@@ -%s,%s +%s,%s @@\n'
+            if isinstance(line_or_diff, tuple):
+                old, new = line_or_diff
+                for o in old:
+                    yield '-' + o
+                for n in new:
+                    yield '+' + n
+            else:
+                yield ' ' + line_or_diff
+
+
 def diff(*args):
     """Show differences between committed and uncommitted versions"""
     config = FragmentsConfig()
+    context_line_count = 3
 
     for curr_path in _iterate_over_files(args, config):
         key = curr_path[len(config.root)+1:]
@@ -146,8 +205,13 @@ def diff(*args):
             curr_lines =[]
 
         if repo_mtime < curr_mtime:
-            for dl in difflib.unified_diff(repo_lines, curr_lines, fromfile=key, tofile=key):
-                yield dl
+            weave = Weave()
+            weave.add_revision(1, repo_lines, [])
+            weave.add_revision(2, curr_lines, [])
+            for l in _full_diff(weave.merge(1, 2), key, context_lines=3):
+                yield l
+            # for dl in difflib.unified_diff(repo_lines, curr_lines, fromfile=key, tofile=key):
+            #     yield dl
 
 
 def commit(*args):
