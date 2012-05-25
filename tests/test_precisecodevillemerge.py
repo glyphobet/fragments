@@ -248,4 +248,4 @@ class TestWeave(unittest.TestCase):
         w.add_revision(1, ['a', 'b', 'c', 'd', 'e', 'f'], [])
         w.add_revision(2, ['a', 'b', 'c', 'e', 'f'], [1])
         w.add_revision(3, ['a', 'b', 'd', 'e', 'f'], [1])
-        w.merge(2, 3) == ['a', 'b', (['c'], ['d']), 'e', 'f']
+        self.assertEquals(w.merge(2, 3), ['a', 'b', (['c'], ['d']), 'e', 'f'])
