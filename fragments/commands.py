@@ -1,7 +1,7 @@
 import sys, os, uuid, difflib
 import pdb
 
-from . import __version__, FragmentsError
+from . import __version__, FragmentsError, Prompt
 from .config import FragmentsConfig, configuration_directory_name, find_configuration, ConfigurationFileCorrupt, ConfigurationFileNotFound, ConfigurationDirectoryNotFound
 from .diff import _full_diff
 from .apply import apply
@@ -222,14 +222,23 @@ def revert(*args):
 
 
 def _main(): # pragma: no cover
+    from . import commands
     print "%s version %s.%s.%s" % ((__package__,) + __version__)
     if (len(sys.argv) > 1              and  # command was specified
         sys.argv[1][0] != '_'          and  # command does not start with _
-        sys.argv[1] in locals()        and  # command exists in namespace
-        callable(locals()[sys.argv[1]]) ):  # command is callable
+        sys.argv[1] in dir(commands)   and  # command exists in commands module
+        callable(getattr(commands, sys.argv[1]))):  # command is callable
         try:
-            for l in cmd(sys.argv[2:]):
-                print(l)
+            command_generator = getattr(commands, sys.argv[1])(*sys.argv[2:])
+            while True:
+                try:
+                    l = next(command_generator)
+                    if isinstance(l, Prompt):
+                        response = raw_input(l + ' ')
+                        l = command_generator.send(response.strip())
+                    print(l)
+                except StopIteration:
+                    break
         except ExecutionError, exc:
             sys.exit(exc.message)
     else:
