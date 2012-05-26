@@ -50,7 +50,7 @@ def _iterate_over_files(args, config):
 def _file_stat(config, curr_path):
     key = curr_path[len(config.root)+1:]
     if key not in config['files']:
-        return '?' # untracked
+        return '?' # unfollowed
 
     uuid = config['files'][key]
     repo_path = os.path.join(config.directory, uuid)
@@ -70,7 +70,7 @@ def _file_stat(config, curr_path):
     elif curr_exists:
         return 'A' # added
     else:
-        return '?' # unknown
+        return 'E' # error. this should never happen - both files on disk are missing, but file is being followed
 
 
 def stat(*args):
