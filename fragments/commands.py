@@ -76,9 +76,10 @@ def _file_stat(config, curr_path):
 def stat(*args):
     """Get status of a fragments repository."""
     config = FragmentsConfig()
-    yield "Configuration for %s version %s.%s.%s" % ((__package__,) + config['version'])
+    yield "%s configuration version %s.%s.%s" % ((__package__,) + config['version'])
+    yield "stored in %s" % config.directory
     for curr_path in _iterate_over_files(args, config):
-        yield '%s\t%s' % (_file_stat(config, curr_path), curr_path)
+        yield '%s\t%s' % (_file_stat(config, curr_path), curr_path[len(config.root)+1:])
 
 
 def follow(*args):
