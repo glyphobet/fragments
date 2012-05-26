@@ -2,7 +2,7 @@ import unittest
 import os, shutil, tempfile, types, time
 import pdb
 
-from fragments import commands
+from fragments import commands, __version__
 from fragments.commands import ExecutionError
 from fragments.config import configuration_file_name, configuration_directory_name, ConfigurationDirectoryNotFound, FragmentsConfig
 
@@ -125,6 +125,93 @@ class PostInitCommandMixIn(object):
 class TestStatCommand(CommandBase, PostInitCommandMixIn):
 
     command = staticmethod(stat)
+
+    def test_stat(self):
+        init()
+        config = FragmentsConfig()
+        self.assertEquals(stat(), [
+            'fragments configuration version %s.%s.%s' % __version__,
+            'stored in %s' % config.directory,
+        ])
+
+    def test_unknown_file_stat(self):
+        init()
+        file_name, file_path = self._create_file()
+        config = FragmentsConfig()
+        self.assertEquals(stat(file_name), [
+            'fragments configuration version %s.%s.%s' % __version__,
+            'stored in %s' % config.directory,
+            '?\t%s' % file_path[len(config.root)+1:]
+        ])
+
+    def test_new_file_stat(self):
+        init()
+        file_name, file_path = self._create_file()
+        follow(file_name)
+        config = FragmentsConfig()
+        self.assertEquals(stat(file_name), [
+            'fragments configuration version %s.%s.%s' % __version__,
+            'stored in %s' % config.directory,
+            'A\t%s' % file_path[len(config.root)+1:]
+        ])
+
+    def test_unmodified_file_stat(self):
+        init()
+        file_name, file_path = self._create_file()
+        follow(file_name)
+        commit(file_name)
+        config = FragmentsConfig()
+        self.assertEquals(stat(file_name), [
+            'fragments configuration version %s.%s.%s' % __version__,
+            'stored in %s' % config.directory,
+            ' \t%s' % file_path[len(config.root)+1:]
+        ])
+
+    def test_modified_file_stat(self):
+        init()
+        file_name, file_path = self._create_file()
+        yestersecond = time.time() - 2
+        os.utime(file_path, (yestersecond, yestersecond))
+        follow(file_name)
+        commit(file_name)
+        config = FragmentsConfig()
+        f = open(file_path, 'a')
+        f.write("CHICKENS\n")
+        f.close()
+        self.assertEquals(stat(file_name), [
+            'fragments configuration version %s.%s.%s' % __version__,
+            'stored in %s' % config.directory,
+            'M\t%s' % file_path[len(config.root)+1:]
+        ])
+
+    def test_removed_file_stat(self):
+        init()
+        file_name, file_path = self._create_file()
+        follow(file_name)
+        commit(file_name)
+
+        config = FragmentsConfig()
+        os.unlink(file_path)
+        self.assertEquals(stat(file_name), [
+            'fragments configuration version %s.%s.%s' % __version__,
+            'stored in %s' % config.directory,
+            'D\t%s' % file_path[len(config.root)+1:]
+        ])
+
+    def test_error_file_stat(self):
+        init()
+        file_name, file_path = self._create_file()
+        follow(file_name)
+        commit(file_name)
+        config = FragmentsConfig()
+        key = file_path[len(config.root)+1:]
+        os.unlink(file_path)
+        os.unlink(os.path.join(config.directory, config['files'][key]))
+        self.assertEquals(stat(file_name), [
+            'fragments configuration version %s.%s.%s' % __version__,
+            'stored in %s' % config.directory,
+            'E\t%s' % key
+        ])
 
 
 class TestFollowCommand(CommandBase, PostInitCommandMixIn):
