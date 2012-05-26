@@ -15,7 +15,7 @@ def rename(*a): return list(commands.rename(*a))
 def commit(*a): return list(commands.commit(*a))
 def revert(*a): return list(commands.revert(*a))
 def diff  (*a): return list(commands.diff  (*a))
-def apply (*a): return list(commands.apply (*a))
+def apply (*a, **kw): return list(commands.apply (*a, **kw))
 
 
 
@@ -649,7 +649,7 @@ table {
 
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         open(file1_name, 'w').write(new_file1_contents)
-        self.assertEqual(apply(file1_name), [
+        self.assertEqual(apply(file1_name, interactive=False), [
             '@@ -4,7 +4,8 @@\n',
             '         <title>\n',
             '             Page One\n',
@@ -665,6 +665,67 @@ table {
 
         target_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         self.assertEqual(open(file2_name, 'r').read(), target_file2_contents)
+
+    def test_apply_interactive_yes(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
+        follow(file1_name)
+        commit(file1_name)
+
+        file2_name, file2_path = self._create_file(contents=self.html_file2_contents)
+        follow(file2_name)
+        commit(file2_name)
+
+        new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
+        open(file1_name, 'w').write(new_file1_contents)
+
+        apply_generator = commands.apply(file1_name)
+
+        self.assertEqual(next(apply_generator), '@@ -4,7 +4,8 @@\n'                     )
+        self.assertEqual(next(apply_generator), '         <title>\n'                    )
+        self.assertEqual(next(apply_generator), '             Page One\n'               )
+        self.assertEqual(next(apply_generator), '         </title>\n'                   )
+        self.assertEqual(next(apply_generator), '-        <link href="default.css" />\n')
+        self.assertEqual(next(apply_generator), '+        <link href="layout.css" />\n' )
+        self.assertEqual(next(apply_generator), '+        <link href="colors.css" />\n' )
+        self.assertEqual(next(apply_generator), '         <link href="site.css" />\n'   )
+        self.assertEqual(next(apply_generator), '         <script href="script.js" />\n')
+        self.assertEqual(next(apply_generator), '         <script href="other.js" />\n' )
+        self.assertEqual(next(apply_generator), 'Apply this change? y/n')
+        self.assertEqual(apply_generator.send('y'), "Changes in 'test_content/file1.ext' applied cleanly to u'test_content/file2.ext'")
+
+        target_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
+        self.assertEqual(open(file2_name, 'r').read(), target_file2_contents)
+
+    def test_apply_interactive_no(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
+        follow(file1_name)
+        commit(file1_name)
+
+        file2_name, file2_path = self._create_file(contents=self.html_file2_contents)
+        follow(file2_name)
+        commit(file2_name)
+
+        new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
+        open(file1_name, 'w').write(new_file1_contents)
+
+        apply_generator = commands.apply(file1_name)
+
+        self.assertEqual(next(apply_generator), '@@ -4,7 +4,8 @@\n'                     )
+        self.assertEqual(next(apply_generator), '         <title>\n'                    )
+        self.assertEqual(next(apply_generator), '             Page One\n'               )
+        self.assertEqual(next(apply_generator), '         </title>\n'                   )
+        self.assertEqual(next(apply_generator), '-        <link href="default.css" />\n')
+        self.assertEqual(next(apply_generator), '+        <link href="layout.css" />\n' )
+        self.assertEqual(next(apply_generator), '+        <link href="colors.css" />\n' )
+        self.assertEqual(next(apply_generator), '         <link href="site.css" />\n'   )
+        self.assertEqual(next(apply_generator), '         <script href="script.js" />\n')
+        self.assertEqual(next(apply_generator), '         <script href="other.js" />\n' )
+        self.assertEqual(next(apply_generator), 'Apply this change? y/n')
+        self.assertEqual(apply_generator.send('n'), "Changes in 'test_content/file1.ext' applied cleanly to u'test_content/file2.ext'")
+
+        self.assertEqual(open(file2_name, 'r').read(), self.html_file2_contents)
 
     def test_cant_apply_nonexistent_file(self):
         init()
@@ -717,7 +778,7 @@ table {
         new_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         open(file2_name, 'w').write(new_file2_contents)
 
-        self.assertEqual(apply(file1_name), [
+        self.assertEqual(apply(file1_name, interactive=False), [
             '@@ -4,7 +4,8 @@\n',
             '         <title>\n',
             '             Page One\n',
@@ -750,7 +811,7 @@ table {
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         open(file1_name, 'w').write(new_file1_contents)
 
-        self.assertEqual(apply(file1_name), [
+        self.assertEqual(apply(file1_name, interactive=False), [
             '@@ -4,7 +4,8 @@\n',
             '         <title>\n',
             '             Page One\n',
@@ -781,7 +842,7 @@ table {
         new_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="colors.css" />')
         open(file2_name, 'w').write(new_file2_contents)
 
-        self.assertEqual(apply(file1_name), [
+        self.assertEqual(apply(file1_name, interactive=False), [
             '@@ -4,7 +4,7 @@\n',
             '         <title>\n',
             '             Page One\n',
