@@ -22,14 +22,13 @@ Integration with Version Control
 
 Fragments has no "history"; It only stores the previous committed state of a file. Storing history is up to your ("diachronic") version control system. Fragments stores its repository configuration in such a way to allow your version control system to manage it painlessly and obviously. Configuration is stored in a `_fragments` directory. This directory name is not preceded by a `.`, and all the files in it are stored as plain text. The configuration resides one directory above your actual content, so as to not interfere with template loading code, and so it is not accidentally deployed to production along with your actual content.
 
+Invisibility
+------------
+
+Fragments is invisible to people who don't know it's being used. If you (or someone else) makes more than one change to a file, Fragments allows you to perform chunk-based interactive application of changes, similar to `git commit --patch` or `hg record`. In other words, you can give a single HTML file to your web designer, let him or her modify it as desired, and then have a programmer selectively apply some of those changes across all other HTML files, while leaving other changes only in the modified file.
+
 Future Improvements
 -------------------
-
-### Invisibility
-
-Fragments is not yet ready to be invisible to people who don't know it's being used. Currently, all changes to a file are applied to other files as a single change. That means if you make *two* changes to a file, one of which should be merged across all other files, and another change which should *not* be merged, Fragments will only allow you to apply those changes or commit the file without applying them.
-
-The next release of Fragments will add chunk-based application of changes, similar to `git commit --patch` or `hg record`. Once this is done, it will be possible to use Fragments even when some contributors don't even know it's being used. In other words, you can give a single HTML file to your web designer, let him or her modify it as desired, and then have a programmer selectively apply some of those changes across all other HTML files, while leaving other changes only in the modified file.
 
 ### Preprocessors
 
@@ -40,15 +39,15 @@ Adding preprocessors for different file formats would potentially make Fragments
 Commands
 --------
 
-* `help`
+* `help [COMMAND]`
 
-    display help
+    display global help, or help for _COMMAND_ if specified
 
 * `init`
 
     initialize a new fragmentation manager repository
 
-* `stat`
+* `stat [FILENAME [FILENAME ...]]`
 
     get the current status of the repository
 
@@ -62,11 +61,13 @@ Commands
 
 * `rename OLD_FILENAME NEW_FILENAME`
 
-    rename OLD\_FILENAME to NEW\_FILENAME, moving the actual file on disk if has not already been moved
+    rename _OLD\_FILENAME_ to _NEW\_FILENAME_, moving the actual file on disk if it has not already been moved
 
-* `diff [FILENAME [FILENAME ...]]`
+* `diff [[-U | --unified] NUM] [FILENAME [FILENAME ...]]`
 
     show differences between committed and uncommitted versions
+
+    `-U NUM`, `--unified NUM` number of lines of context to show
 
 * `commit [FILENAME [FILENAME ...]]`
 
@@ -76,7 +77,13 @@ Commands
 
     revert changes to one or more files
 
-* `apply FILENAME`
+* `apply [-i | -a] [[-U | --unified] NUM] FILENAME`
 
-    apply changes in FILENAME that were made since last commit to as many other followed files as possible
+    apply changes in _FILENAME_ that were made since last commit to as many other followed files as possible
+
+    `-i, --interactive` interactively select changes to apply
+
+    `-a, --automatic` automatically apply all changes
+
+    `-U NUM`, `--unified NUM` number of lines of context to show
 
