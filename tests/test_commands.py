@@ -448,16 +448,16 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
         commit(file1_name)
         file(file1_name, 'w').write(self.original_file.replace('Line Three', 'Line 2.6666\nLine Three and One Third'))
         self.assertEquals(list(diff(file1_name)), [
-            '--- test_content/file1.ext\n',
-            '+++ test_content/file1.ext\n',
-            '@@ -1,5 +1,6 @@\n',
-            ' Line One\n',
-            ' Line Two\n',
-            '-Line Three\n',
-            '+Line 2.6666\n',
-            '+Line Three and One Third\n',
-            ' Line Four\n',
-            ' Line Five\n'])
+            '--- test_content/file1.ext',
+            '+++ test_content/file1.ext',
+            '@@ -1,5 +1,6 @@',
+            ' Line One',
+            ' Line Two',
+            '-Line Three',
+            '+Line 2.6666',
+            '+Line Three and One Third',
+            ' Line Four',
+            ' Line Five'])
 
     def test_two_nearby_section_diff(self):
         init()
@@ -469,16 +469,16 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
         commit(file1_name)
         file(file1_name, 'w').write(self.original_file.replace('Line One', 'Line 0.999999').replace('Line Five', 'Line 4.999999'))
         self.assertEquals(list(diff(file1_name)), [
-            '--- test_content/file1.ext\n',
-            '+++ test_content/file1.ext\n',
-            '@@ -1,5 +1,5 @@\n',
-            '-Line One\n',
-            '+Line 0.999999\n',
-            ' Line Two\n',
-            ' Line Three\n',
-            ' Line Four\n',
-            '-Line Five\n',
-            '+Line 4.999999\n'])
+            '--- test_content/file1.ext',
+            '+++ test_content/file1.ext',
+            '@@ -1,5 +1,5 @@',
+            '-Line One',
+            '+Line 0.999999',
+            ' Line Two',
+            ' Line Three',
+            ' Line Four',
+            '-Line Five',
+            '+Line 4.999999'])
 
 
     def test_two_distant_section_diff(self):
@@ -492,20 +492,20 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
         commit(file1_name)
         file(file1_name, 'w').write(original_file.replace('Line One', 'Line 0.999999').replace('Line Nine', 'Line 8.999999'))
         self.assertEquals(list(diff(file1_name)), [
-            '--- test_content/file1.ext\n',
-            '+++ test_content/file1.ext\n',
-            '@@ -1,4 +1,4 @@\n',
-            '-Line One\n',
-            '+Line 0.999999\n',
-            ' Line Two\n',
-            ' Line Three\n',
-            ' Line Four\n',
-            '@@ -6,4 +6,4 @@\n',
-            ' Line Six\n',
-            ' Line Seven\n',
-            ' Line Eight\n',
-            '-Line Nine\n',
-            '+Line 8.999999\n'])
+            '--- test_content/file1.ext',
+            '+++ test_content/file1.ext',
+            '@@ -1,4 +1,4 @@',
+            '-Line One',
+            '+Line 0.999999',
+            ' Line Two',
+            ' Line Three',
+            ' Line Four',
+            '@@ -6,4 +6,4 @@',
+            ' Line Six',
+            ' Line Seven',
+            ' Line Eight',
+            '-Line Nine',
+            '+Line 8.999999'])
 
 
     def test_unmodified_file_diff(self):
@@ -545,14 +545,14 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
 
         follow(file1_path)
         self.assertEquals(list(diff(file1_name)), [
-            '--- test_content/file1.ext\n',
-            '+++ test_content/file1.ext\n',
-            '@@ -0,0 +1,5 @@\n',
-            '+Line One\n',
-            '+Line Two\n',
-            '+Line Three\n',
-            '+Line Four\n',
-            '+Line Five\n'])
+            '--- test_content/file1.ext',
+            '+++ test_content/file1.ext',
+            '@@ -0,0 +1,5 @@',
+            '+Line One',
+            '+Line Two',
+            '+Line Three',
+            '+Line Four',
+            '+Line Five'])
 
     def test_diff_removed_file(self):
         init()
@@ -565,14 +565,14 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
         
         os.unlink(file1_path)
         self.assertEquals(list(diff(file1_name)), [
-            '--- test_content/file1.ext\n',
-            '+++ test_content/file1.ext\n',
-            '@@ -1,5 +0,0 @@\n',
-            '-Line One\n',
-            '-Line Two\n',
-            '-Line Three\n',
-            '-Line Four\n',
-            '-Line Five\n'])
+            '--- test_content/file1.ext',
+            '+++ test_content/file1.ext',
+            '@@ -1,5 +0,0 @@',
+            '-Line One',
+            '-Line Two',
+            '-Line Three',
+            '-Line Four',
+            '-Line Five'])
 
     def test_diff_uncommitted_removed_file(self):
         init()
@@ -650,16 +650,16 @@ table {
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         open(file1_name, 'w').write(new_file1_contents)
         self.assertEqual(apply(file1_name, interactive=False), [
-            '@@ -4,7 +4,8 @@\n',
-            '         <title>\n',
-            '             Page One\n',
-            '         </title>\n',
-            '-        <link href="default.css" />\n',
-            '+        <link href="layout.css" />\n',
-            '+        <link href="colors.css" />\n',
-            '         <link href="site.css" />\n',
-            '         <script href="script.js" />\n',
-            '         <script href="other.js" />\n',
+            '@@ -4,7 +4,8 @@',
+            '         <title>',
+            '             Page One',
+            '         </title>',
+            '-        <link href="default.css" />',
+            '+        <link href="layout.css" />',
+            '+        <link href="colors.css" />',
+            '         <link href="site.css" />',
+            '         <script href="script.js" />',
+            '         <script href="other.js" />',
             "Changes in 'test_content/file1.ext' applied cleanly to u'test_content/file2.ext'"
         ])
 
@@ -681,16 +681,16 @@ table {
 
         apply_generator = commands.apply(file1_name)
 
-        self.assertEqual(next(apply_generator), '@@ -4,7 +4,8 @@\n'                     )
-        self.assertEqual(next(apply_generator), '         <title>\n'                    )
-        self.assertEqual(next(apply_generator), '             Page One\n'               )
-        self.assertEqual(next(apply_generator), '         </title>\n'                   )
-        self.assertEqual(next(apply_generator), '-        <link href="default.css" />\n')
-        self.assertEqual(next(apply_generator), '+        <link href="layout.css" />\n' )
-        self.assertEqual(next(apply_generator), '+        <link href="colors.css" />\n' )
-        self.assertEqual(next(apply_generator), '         <link href="site.css" />\n'   )
-        self.assertEqual(next(apply_generator), '         <script href="script.js" />\n')
-        self.assertEqual(next(apply_generator), '         <script href="other.js" />\n' )
+        self.assertEqual(next(apply_generator), '@@ -4,7 +4,8 @@'                     )
+        self.assertEqual(next(apply_generator), '         <title>'                    )
+        self.assertEqual(next(apply_generator), '             Page One'               )
+        self.assertEqual(next(apply_generator), '         </title>'                   )
+        self.assertEqual(next(apply_generator), '-        <link href="default.css" />')
+        self.assertEqual(next(apply_generator), '+        <link href="layout.css" />' )
+        self.assertEqual(next(apply_generator), '+        <link href="colors.css" />' )
+        self.assertEqual(next(apply_generator), '         <link href="site.css" />'   )
+        self.assertEqual(next(apply_generator), '         <script href="script.js" />')
+        self.assertEqual(next(apply_generator), '         <script href="other.js" />' )
         self.assertEqual(next(apply_generator), 'Apply this change? y/n')
         self.assertEqual(apply_generator.send('y'), "Changes in 'test_content/file1.ext' applied cleanly to u'test_content/file2.ext'")
 
@@ -712,16 +712,16 @@ table {
 
         apply_generator = commands.apply(file1_name)
 
-        self.assertEqual(next(apply_generator), '@@ -4,7 +4,8 @@\n'                     )
-        self.assertEqual(next(apply_generator), '         <title>\n'                    )
-        self.assertEqual(next(apply_generator), '             Page One\n'               )
-        self.assertEqual(next(apply_generator), '         </title>\n'                   )
-        self.assertEqual(next(apply_generator), '-        <link href="default.css" />\n')
-        self.assertEqual(next(apply_generator), '+        <link href="layout.css" />\n' )
-        self.assertEqual(next(apply_generator), '+        <link href="colors.css" />\n' )
-        self.assertEqual(next(apply_generator), '         <link href="site.css" />\n'   )
-        self.assertEqual(next(apply_generator), '         <script href="script.js" />\n')
-        self.assertEqual(next(apply_generator), '         <script href="other.js" />\n' )
+        self.assertEqual(next(apply_generator), '@@ -4,7 +4,8 @@'                     )
+        self.assertEqual(next(apply_generator), '         <title>'                    )
+        self.assertEqual(next(apply_generator), '             Page One'               )
+        self.assertEqual(next(apply_generator), '         </title>'                   )
+        self.assertEqual(next(apply_generator), '-        <link href="default.css" />')
+        self.assertEqual(next(apply_generator), '+        <link href="layout.css" />' )
+        self.assertEqual(next(apply_generator), '+        <link href="colors.css" />' )
+        self.assertEqual(next(apply_generator), '         <link href="site.css" />'   )
+        self.assertEqual(next(apply_generator), '         <script href="script.js" />')
+        self.assertEqual(next(apply_generator), '         <script href="other.js" />' )
         self.assertEqual(next(apply_generator), 'Apply this change? y/n')
         self.assertEqual(apply_generator.send('n'), "Changes in 'test_content/file1.ext' applied cleanly to u'test_content/file2.ext'")
 
@@ -779,16 +779,16 @@ table {
         open(file2_name, 'w').write(new_file2_contents)
 
         self.assertEqual(apply(file1_name, interactive=False), [
-            '@@ -4,7 +4,8 @@\n',
-            '         <title>\n',
-            '             Page One\n',
-            '         </title>\n',
-            '-        <link href="default.css" />\n',
-            '+        <link href="layout.css" />\n',
-            '+        <link href="colors.css" />\n',
-            '         <link href="site.css" />\n',
-            '         <script href="script.js" />\n',
-            '         <script href="other.js" />\n',
+            '@@ -4,7 +4,8 @@',
+            '         <title>',
+            '             Page One',
+            '         </title>',
+            '-        <link href="default.css" />',
+            '+        <link href="layout.css" />',
+            '+        <link href="colors.css" />',
+            '         <link href="site.css" />',
+            '         <script href="script.js" />',
+            '         <script href="other.js" />',
             "Changes in 'test_content/file1.ext' applied cleanly to u'test_content/file2.ext'"
         ])
 
@@ -812,16 +812,16 @@ table {
         open(file1_name, 'w').write(new_file1_contents)
 
         self.assertEqual(apply(file1_name, interactive=False), [
-            '@@ -4,7 +4,8 @@\n',
-            '         <title>\n',
-            '             Page One\n',
-            '         </title>\n',
-            '-        <link href="default.css" />\n',
-            '+        <link href="layout.css" />\n',
-            '+        <link href="colors.css" />\n',
-            '         <link href="site.css" />\n',
-            '         <script href="script.js" />\n',
-            '         <script href="other.js" />\n',
+            '@@ -4,7 +4,8 @@',
+            '         <title>',
+            '             Page One',
+            '         </title>',
+            '-        <link href="default.css" />',
+            '+        <link href="layout.css" />',
+            '+        <link href="colors.css" />',
+            '         <link href="site.css" />',
+            '         <script href="script.js" />',
+            '         <script href="other.js" />',
             "Changes in 'test_content/file1.ext' cannot apply to u'test_content/file3.ext', skipping",
             "Changes in 'test_content/file1.ext' applied cleanly to u'test_content/file2.ext'"
         ])
@@ -843,15 +843,15 @@ table {
         open(file2_name, 'w').write(new_file2_contents)
 
         self.assertEqual(apply(file1_name, interactive=False), [
-            '@@ -4,7 +4,7 @@\n',
-            '         <title>\n',
-            '             Page One\n',
-            '         </title>\n',
-            '-        <link href="default.css" />\n',
-            '+        <link href="layout.css" />\n',
-            '         <link href="site.css" />\n',
-            '         <script href="script.js" />\n',
-            '         <script href="other.js" />\n',
+            '@@ -4,7 +4,7 @@',
+            '         <title>',
+            '             Page One',
+            '         </title>',
+            '-        <link href="default.css" />',
+            '+        <link href="layout.css" />',
+            '         <link href="site.css" />',
+            '         <script href="script.js" />',
+            '         <script href="other.js" />',
             "Conflict merging 'test_content/file1.ext' => u'test_content/file2.ext'"
         ])
         self.assertEqual(open(file2_name, 'r').read(), new_file2_contents.replace('        <link href="colors.css" />', '''>>>>>>>

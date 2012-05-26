@@ -57,7 +57,7 @@ def _diff_group_position(group):
     if new_length:
         new_start += 1
 
-    return '@@ -%s,%s +%s,%s @@\n' % (old_start, old_length, new_start, new_length)
+    return '@@ -%s,%s +%s,%s @@' % (old_start, old_length, new_start, new_length)
 
 
 def _diff_group(group):
@@ -68,11 +68,11 @@ def _diff_group(group):
         if isinstance(line_or_tuple, tuple):
             old, new = line_or_tuple
             for o in old:
-                yield '-' + o
+                yield '-' + o.strip('\n')
             for n in new:
-                yield '+' + n
+                yield '+' + n.strip('\n')
         else:
-            yield ' ' + line_or_tuple
+            yield ' ' + line_or_tuple.strip('\n')
 
 
 def _full_diff(merge_result, key, context_lines=3):
@@ -81,8 +81,8 @@ def _full_diff(merge_result, key, context_lines=3):
     for group in _split_diff(merge_result, context_lines=context_lines):
         if not header_printed:
             header_printed = True
-            yield '--- %s\n' % key
-            yield '+++ %s\n' % key
+            yield '--- %s' % key
+            yield '+++ %s' % key
 
         for l in _diff_group(group):
             yield l
