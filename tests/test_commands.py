@@ -810,7 +810,7 @@ table {
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         open(file1_name, 'w').write(new_file1_contents)
 
-        apply_generator = commands.apply(file1_name)
+        apply_generator = commands.apply(file1_name, '-i')
 
         self.assertEqual(next(apply_generator), '@@ -4,7 +4,8 @@'                     )
         self.assertEqual(next(apply_generator), '         <title>'                    )
@@ -841,7 +841,7 @@ table {
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         open(file1_name, 'w').write(new_file1_contents)
 
-        apply_generator = commands.apply(file1_name)
+        apply_generator = commands.apply(file1_name, '-i')
 
         self.assertEqual(next(apply_generator), '@@ -4,7 +4,8 @@'                     )
         self.assertEqual(next(apply_generator), '         <title>'                    )
@@ -860,13 +860,13 @@ table {
 
     def test_cant_apply_nonexistent_file(self):
         init()
-        self.assertEqual(apply("nonexistent.file"), ["Could not apply changes in 'test_content/nonexistent.file', it is not being followed"])
+        self.assertEqual(apply("nonexistent.file", '-a'), ["Could not apply changes in 'test_content/nonexistent.file', it is not being followed"])
 
     def test_cant_apply_unfollowed_file(self):
         init()
         file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
         os.unlink(file1_path)
-        self.assertEqual(apply(file1_name), ["Could not apply changes in 'test_content/file1.ext', it is not being followed"])
+        self.assertEqual(apply(file1_name, '-a'), ["Could not apply changes in 'test_content/file1.ext', it is not being followed"])
 
     def test_cant_apply_removed_file(self):
         init()
@@ -874,13 +874,13 @@ table {
         follow(file1_name)
         commit(file1_name)
         os.unlink(file1_path)
-        self.assertEqual(apply(file1_name), ["Could not apply changes in 'test_content/file1.ext', it no longer exists on disk"])
+        self.assertEqual(apply(file1_name, '-a'), ["Could not apply changes in 'test_content/file1.ext', it no longer exists on disk"])
 
     def test_cant_apply_uncommitted_file(self):
         init()
         file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
         follow(file1_name)
-        self.assertEqual(apply(file1_name), ["Could not apply changes in 'test_content/file1.ext', it has never been committed"])
+        self.assertEqual(apply(file1_name, '-a'), ["Could not apply changes in 'test_content/file1.ext', it has never been committed"])
 
     def test_cant_apply_missing_history_file(self):
         init()
@@ -891,7 +891,7 @@ table {
         key = file1_path[len(config.root)+1:]
         uuid_path = os.path.join(config.directory, config['files'][key])
         os.unlink(uuid_path)
-        self.assertEqual(apply(file1_name), ["Could not apply changes in 'test_content/file1.ext', it has never been committed"])
+        self.assertEqual(apply(file1_name, '-a'), ["Could not apply changes in 'test_content/file1.ext', it has never been committed"])
 
     def test_apply_detects_convergent_changes(self):
         init()
