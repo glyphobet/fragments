@@ -42,7 +42,7 @@ def apply(file_name):
             display_group = next(display_groups)
             for dl in _diff_group(display_group): # show the group
                 yield dl
-            
+
             while isinstance(display_group[0][-1], basestring):
                 display_group.pop(0) # preceeding context lines have already been added to the changes to apply
 
