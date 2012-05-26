@@ -187,7 +187,7 @@ def commit(*args):
             repo_file.write(file(curr_path, 'r').read())
             repo_file.close()
             os.utime(repo_path, (curr_atime, curr_mtime))
-            yield "%r committed"
+            yield "%r committed" % key
 
 
 def revert(*args):
