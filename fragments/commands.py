@@ -213,7 +213,7 @@ def _full_diff(merge_result, key, context_lines=3):
 def diff(*args):
     """Show differences between committed and uncommitted versions"""
     config = FragmentsConfig()
-    context_line_count = 3
+    context_line_count = 3 # TODO: specify with -U N, --unified N
 
     for curr_path in _iterate_over_files(args, config):
         key = curr_path[len(config.root)+1:]
