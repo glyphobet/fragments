@@ -55,6 +55,7 @@ class FragmentsConfig(dict):
             except Exception, exc:
                 raise ConfigurationFileCorrupt(exc.message)
             self.update(parsed_json)
+            self['version'] = tuple(self['version'])
         else:
             raise ConfigurationFileNotFound("Could not access %r, if the file exists, check its permissions" % self.path)
 
