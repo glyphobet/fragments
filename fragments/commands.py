@@ -223,7 +223,7 @@ def revert(*args):
 
 def _main(): # pragma: no cover
     from . import commands
-    print "%s version %s.%s.%s" % ((__package__,) + __version__)
+    print("%s version %s.%s.%s" % ((__package__,) + __version__))
     if (len(sys.argv) > 1              and  # command was specified
         sys.argv[1][0] != '_'          and  # command does not start with _
         sys.argv[1] in dir(commands)   and  # command exists in commands module
@@ -243,4 +243,4 @@ def _main(): # pragma: no cover
             sys.exit(exc.message)
     else:
         for l in help():
-            print l
+            print(l)
