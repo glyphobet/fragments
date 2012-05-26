@@ -221,10 +221,11 @@ class TestFollowCommand(CommandBase, PostInitCommandMixIn):
     def test_follow_file(self):
         init()
         file_name, file_path = self._create_file()
-        follow(file_name)
+        follow_output = follow(file_name)
         config = FragmentsConfig()
         key = file_path[len(os.path.split(config.directory)[0])+1:]
         self.assertIn(key, config['files'])
+        self.assertEquals(follow_output, ["'%s' is now being followed, UUID %s" % (file_name,config['files'][key])])
 
     def test_file_twice_on_the_command_line(self):
         init()
