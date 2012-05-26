@@ -261,13 +261,13 @@ class TestFollowCommand(CommandBase, PostInitCommandMixIn):
     def test_follow_nonexistent_file(self):
         init()
         nonexistent_path = os.path.join(os.getcwd(), 'nonexistent.file')
-        follow(nonexistent_path)
+        self.assertEquals(follow(nonexistent_path), ["Could not access %r to follow it" % nonexistent_path])
 
     def test_follow_file_outside_repository(self):
         init()
         outside_path = os.path.realpath(tempfile.mkdtemp())
         outside_file = os.path.join(outside_path, 'outside.repository')
-        follow(outside_path)
+        self.assertEquals(follow(outside_path), ["Could not follow %r; it is outside the repository" % outside_path])
 
 
 class TestForgetCommand(CommandBase, PostInitCommandMixIn):
