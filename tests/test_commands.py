@@ -1,5 +1,5 @@
 import unittest
-import os, shutil, tempfile, types, time
+import os, shutil, tempfile, types, time, json
 import pdb
 
 from fragments import commands, __version__
@@ -44,6 +44,21 @@ class CommandBase(unittest.TestCase):
         new_file = file(file_path, 'w')
         new_file.write(contents)
         return file_name, file_path
+
+
+
+class TestConfig(CommandBase):
+
+    def test_version_number_updated_on_dump(self):
+        init()
+        config = FragmentsConfig()
+        raw_config = json.loads(file(config.path, 'r').read())
+        raw_config['version'] = __version__[0:2] +(__version__[2] - 1,)
+        file(config.path, 'w').write(json.dumps(raw_config, sort_keys=True, indent=4))
+        config = FragmentsConfig()
+        config.dump()
+        config = FragmentsConfig()
+        self.assertEquals(config['version'], __version__)   
 
 
 class TestHelpCommand(CommandBase):
