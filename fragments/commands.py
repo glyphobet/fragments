@@ -19,14 +19,14 @@ def init(*a):
     """Initialize a fragments repository."""
     try:
         config = FragmentsConfig()
-    except ConfigurationFileCorrupt, exc:
+    except ConfigurationFileCorrupt as exc:
         config = FragmentsConfig(autoload=False)
         os.rename(config.path, config.path + '.corrupt')
         config.dump()
-    except ConfigurationFileNotFound, exc:
+    except ConfigurationFileNotFound as exc:
         config = FragmentsConfig(autoload=False)
         config.dump()
-    except ConfigurationDirectoryNotFound, exc:
+    except ConfigurationDirectoryNotFound as exc:
         configuration_parent = os.path.split(os.getcwd())[0]
         if os.access(configuration_parent, os.R_OK|os.W_OK):
             configuration_path = os.path.join(configuration_parent, configuration_directory_name)
@@ -267,7 +267,7 @@ def _main(): # pragma: no cover
                     print(l)
                 except StopIteration:
                     break
-        except ExecutionError, exc:
+        except ExecutionError as exc:
             sys.exit(exc.message)
     else:
         for l in help():

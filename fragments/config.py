@@ -52,7 +52,7 @@ class FragmentsConfig(dict):
             file_contents = open(self.path, 'r').read()
             try:
                 parsed_json = json.loads(file_contents)
-            except Exception, exc:
+            except Exception as exc:
                 raise ConfigurationFileCorrupt(exc.message)
             self.update(parsed_json)
             self['version'] = tuple(self['version'])
