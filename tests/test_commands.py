@@ -414,8 +414,7 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         f.close()
 
         config = FragmentsConfig()
-        prefix = os.path.split(config.directory)[0]
-        key = file_path[len(prefix)+1:]
+        key = file_path[len(config.root)+1:]
 
         self.assertIn(key, config['files'])
         self.assertTrue(os.access(os.path.join(config.directory, config['files'][key]), os.R_OK|os.W_OK))
