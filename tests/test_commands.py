@@ -70,7 +70,7 @@ class TestInitCommand(CommandBase):
         self.assertIn('files', config)
         self.assertIn('version', config)
         self.assertIsInstance(config['files'], dict)
-        self.assertIsInstance(config['version'], list)
+        self.assertIsInstance(config['version'], tuple)
 
     def test_init_raises_error_on_second_run(self):
         init()
