@@ -438,8 +438,9 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         init()
         file_name, file_path = self._create_file()
         follow(file_name)
+        commit(file_path)
         os.unlink(file_path)
-        commit(file_name)
+        commit(file_path)
 
 
 class TestRevertCommand(CommandBase, PostInitCommandMixIn):
