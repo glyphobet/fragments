@@ -23,16 +23,30 @@ def apply(file_name):
         yield "Could not apply changes in %r, it has never been committed" % changed_key
         return
 
-    weave.add_revision(1, file(old_path, 'r').readlines(), [])
-    weave.add_revision(2, file(changed_path, 'r').readlines(), [1])
+    old_revision = 1
+    weave.add_revision(old_revision, file(old_path, 'r').readlines(), [])
+    new_revision = 2
+    weave.add_revision(new_revision, file(changed_path, 'r').readlines(), [])
 
-    for i, other_key in enumerate(config['files']):
+    changes_to_apply = []
+    for i, line_or_tuple in enumerate(weave.merge(old_revision, new_revision)):
+        if isinstance(line_or_tuple, tuple):
+            for line in line_or_tuple[1]:
+                changes_to_apply.append(line)
+        else:
+            changes_to_apply.append(line_or_tuple)
+
+    changed_revision = 3
+    weave.add_revision(changed_revision, changes_to_apply, [1])
+
+    current_revision = changed_revision
+    for other_key in config['files']:
         other_path = os.path.join(config.root, other_key)
         if other_path == changed_path:
             continue # don't try to apply changes to ourself
-        revision = i + 3
-        weave.add_revision(revision, file(other_path, 'r').readlines(), [])
-        merge_result = weave.cherry_pick(2, revision) # Can I apply changes in revision 2 onto this other file?
+        current_revision += 1
+        weave.add_revision(current_revision, file(other_path, 'r').readlines(), [])
+        merge_result = weave.cherry_pick(changed_revision, current_revision) # Can I apply changes in changed_revision onto this other file?
         if tuple in (type(mr) for mr in merge_result):
             if len(merge_result) == 1:
                 # total conflict, skip
