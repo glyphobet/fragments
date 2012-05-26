@@ -446,6 +446,17 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         key = file_path[len(config.root)+1:]
         self.assertEquals(commit(file_path), ["Could not commit %r because it has been removed, instead revert or remove it" % key])
 
+    def test_commit_unchanged_file(self):
+        init()
+        file_name, file_path = self._create_file()
+        yestersecond = time.time() - 2
+        os.utime(file_path, (yestersecond, yestersecond))
+        original_content = file(file_path, 'r').read()
+
+        follow(file_name)
+        commit(file_name)
+        self.assertEquals(commit(file_name), [])
+
 
 class TestRevertCommand(CommandBase, PostInitCommandMixIn):
 
@@ -526,6 +537,15 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
             original_content,
             file(file_path, 'r').read(),
         )
+
+    def test_revert_unchanged_file(self):
+        init()
+        file_name, file_path = self._create_file()
+        original_content = file(file_path, 'r').read()
+
+        follow(file_name)
+        commit(file_name)
+        self.assertEquals(revert(file_name), [])
 
 
 class TestDiffCommand(CommandBase, PostInitCommandMixIn):
