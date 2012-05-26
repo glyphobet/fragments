@@ -434,8 +434,8 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
 
 class TestDiffCommand(CommandBase, PostInitCommandMixIn):
 
+    maxDiff = None
     command = staticmethod(diff)
-
     original_file = "Line One\nLine Two\nLine Three\nLine Four\nLine Five\n"
 
     def test_diff(self):
@@ -482,7 +482,6 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
 
 
     def test_two_distant_section_diff(self):
-        self.maxDiff = None
         original_file = "Line One\nLine Two\nLine Three\nLine Four\nLine Five\nLine Six\nLine Seven\nLine Eight\nLine Nine\n"
         init()
         file1_name, file1_path = self._create_file(contents=original_file)
@@ -587,6 +586,8 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
 
 
 class TestApplyCommand(CommandBase, PostInitCommandMixIn):
+    maxDiff = None
+    command = staticmethod(lambda : apply('file.ext'))
 
     html_file1_contents = """<!DOCTYPE html>
 <html>
@@ -636,8 +637,6 @@ table {
 }
 """
 
-    command = staticmethod(lambda : apply('file.ext'))
-
     def test_apply(self):
         init()
         file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
@@ -650,7 +649,19 @@ table {
 
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         open(file1_name, 'w').write(new_file1_contents)
-        apply(file1_name)
+        self.assertEqual(apply(file1_name), [
+            '@@ -4,7 +4,8 @@\n',
+            '         <title>\n',
+            '             Page One\n',
+            '         </title>\n',
+            '-        <link href="default.css" />\n',
+            '+        <link href="layout.css" />\n',
+            '+        <link href="colors.css" />\n',
+            '         <link href="site.css" />\n',
+            '         <script href="script.js" />\n',
+            '         <script href="other.js" />\n',
+            "Changes in 'test_content/file1.ext' applied cleanly to u'test_content/file2.ext'"
+        ])
 
         target_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         self.assertEqual(open(file2_name, 'r').read(), target_file2_contents)
@@ -706,7 +717,19 @@ table {
         new_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         open(file2_name, 'w').write(new_file2_contents)
 
-        apply(file1_name)
+        self.assertEqual(apply(file1_name), [
+            '@@ -4,7 +4,8 @@\n',
+            '         <title>\n',
+            '             Page One\n',
+            '         </title>\n',
+            '-        <link href="default.css" />\n',
+            '+        <link href="layout.css" />\n',
+            '+        <link href="colors.css" />\n',
+            '         <link href="site.css" />\n',
+            '         <script href="script.js" />\n',
+            '         <script href="other.js" />\n',
+            "Changes in 'test_content/file1.ext' applied cleanly to u'test_content/file2.ext'"
+        ])
 
         self.assertEqual(open(file2_name, 'r').read(), new_file2_contents)
 
@@ -727,7 +750,20 @@ table {
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         open(file1_name, 'w').write(new_file1_contents)
 
-        apply(file1_name)
+        self.assertEqual(apply(file1_name), [
+            '@@ -4,7 +4,8 @@\n',
+            '         <title>\n',
+            '             Page One\n',
+            '         </title>\n',
+            '-        <link href="default.css" />\n',
+            '+        <link href="layout.css" />\n',
+            '+        <link href="colors.css" />\n',
+            '         <link href="site.css" />\n',
+            '         <script href="script.js" />\n',
+            '         <script href="other.js" />\n',
+            "Changes in 'test_content/file1.ext' cannot apply to u'test_content/file3.ext', skipping",
+            "Changes in 'test_content/file1.ext' applied cleanly to u'test_content/file2.ext'"
+        ])
         self.assertEqual(open(css_name, 'r').read(), self.css_file1_contents)
 
     def test_apply_generates_conflict(self):
