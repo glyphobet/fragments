@@ -501,12 +501,16 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
         os.utime(file_path, (yestersecond, yestersecond))
 
         follow(file_name)
-        revert(file_name)
+        config = FragmentsConfig()
+        key = file_path[len(config.root)+1:]
+        self.assertEquals(revert(file_name), ["Could not revert %r because it has never been committed" % key])
 
     def test_revert_unfollowed_file(self):
         init()
         file_name, file_path = self._create_file()
-        revert(file_name)
+        config = FragmentsConfig()
+        key = file_path[len(config.root)+1:]
+        self.assertEquals(revert(file_name), ["Could not revert %r because it is not being followed" % key])
 
     def test_revert_removed_file(self):
         init()
