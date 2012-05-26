@@ -161,24 +161,14 @@ def diff(*args):
             yield "Could not diff %r, it is not being followed" % key
             continue
 
-        uuid = config['files'][key]
-        repo_path = os.path.join(config.directory, uuid)
-
-        if os.access(repo_path, os.R_OK|os.W_OK):
-            repo_mtime = os.stat(repo_path)[8]
-            repo_lines = file(repo_path, 'r').readlines()
-        else:
-            repo_mtime = -1 # diffing an uncommitted file
+        s = _file_stat(config, curr_path)
+        if s in 'MAD':
             repo_lines = []
-
-        if os.access(curr_path, os.R_OK|os.W_OK):
-            curr_mtime = os.stat(curr_path)[8]
-            curr_lines = file(curr_path, 'r').readlines()
-        else:
-            curr_mtime = float('+Inf') # trying to diff a file that's been removed
-            curr_lines =[]
-
-        if repo_mtime < curr_mtime:
+            curr_lines = []
+            if s in 'MA':
+                curr_lines = open(curr_path, 'r').readlines()
+            if s in 'MD':
+                repo_lines = open(os.path.join(config.directory, config['files'][key]), 'r').readlines()
             weave = Weave()
             weave.add_revision(1, repo_lines, [])
             weave.add_revision(2, curr_lines, [])
@@ -197,26 +187,18 @@ def commit(*args):
         if key not in config['files']:
             yield "Could not commit %r because it is not being followed" % key
             continue
-        uuid = config['files'][key]
 
-        repo_path = os.path.join(config.directory, uuid)
-        if os.access(repo_path, os.R_OK|os.W_OK):
-            repo_mtime = os.stat(repo_path)[8]
-        else:
-            repo_mtime = -1 # committing a file for the first time
-
-        if os.access(curr_path, os.R_OK|os.W_OK):
-            curr_atime, curr_mtime = os.stat(curr_path)[7:9]
-        else:
-            yield "Could not commit %r because it has been removed, instead revert or remove it" % key
-            continue
-
-        if repo_mtime < curr_mtime:
+        s = _file_stat(config, curr_path)
+        if s in 'MA':
+            repo_path = os.path.join(config.directory, config['files'][key])
             repo_file = file(repo_path, 'w')
             repo_file.write(file(curr_path, 'r').read())
             repo_file.close()
-            os.utime(repo_path, (curr_atime, curr_mtime))
+            os.utime(repo_path, os.stat(curr_path)[7:9])
             yield "%r committed" % key
+        elif s in 'D':
+            yield "Could not commit %r because it has been removed, instead revert or remove it" % key
+            continue
 
 
 def revert(*args):
@@ -228,26 +210,17 @@ def revert(*args):
         if key not in config['files']:
             yield "Could not revert %r because it is not being followed" % key
             continue
-        uuid = config['files'][key]
 
-        repo_path = os.path.join(config.directory, uuid)
-        if os.access(repo_path, os.R_OK|os.W_OK):
-            repo_atime, repo_mtime = os.stat(repo_path)[7:9]
-        else:
-            yield "Could not revert %r because it has never been committed" % key
-            continue
-
-        if os.access(curr_path, os.R_OK|os.W_OK):
-            curr_atime, curr_mtime = os.stat(curr_path)[7:9]
-        else:
-            curr_mtime = float('+Inf') # trying to revert a file that's been removed
-
-        if repo_mtime < curr_mtime:
+        s = _file_stat(config, curr_path)
+        if s in 'MD':
+            repo_path = os.path.join(config.directory,  config['files'][key])
             curr_file = file(curr_path, 'w')
             curr_file.write(file(repo_path, 'r').read())
             curr_file.close()
-            os.utime(curr_path, (repo_atime, repo_mtime))
+            os.utime(curr_path, os.stat(repo_path)[7:9])
             yield "%r reverted" % key
+        elif s in 'A':
+            yield "Could not revert %r because it has never been committed" % key
 
 
 def _main(): # pragma: no cover
