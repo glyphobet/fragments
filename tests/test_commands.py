@@ -745,5 +745,20 @@ table {
         new_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="colors.css" />')
         open(file2_name, 'w').write(new_file2_contents)
 
-        self.assertEqual(apply(file1_name), ["Conflict merging 'test_content/file1.ext' => u'test_content/file2.ext'"])
-        self.assertEqual(apply(file2_name), ["Conflict merging 'test_content/file2.ext' => u'test_content/file1.ext'"])
+        self.assertEqual(apply(file1_name), [
+            '@@ -4,7 +4,7 @@\n',
+            '         <title>\n',
+            '             Page One\n',
+            '         </title>\n',
+            '-        <link href="default.css" />\n',
+            '+        <link href="layout.css" />\n',
+            '         <link href="site.css" />\n',
+            '         <script href="script.js" />\n',
+            '         <script href="other.js" />\n',
+            "Conflict merging 'test_content/file1.ext' => u'test_content/file2.ext'"
+        ])
+        self.assertEqual(open(file2_name, 'r').read(), new_file2_contents.replace('        <link href="colors.css" />', '''>>>>>>>
+        <link href="layout.css" />
+=======
+        <link href="colors.css" />
+>>>>>>>'''))
