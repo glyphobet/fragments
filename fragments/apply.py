@@ -1,16 +1,26 @@
 import os
+import argparse
 import pdb
+
 from .precisecodevillemerge import Weave
 from .config import FragmentsConfig
 from .diff import _diff_group, _split_diff
 from . import Prompt
 
 
-def apply(file_name, interactive=True):
+def apply(*args):
     """Revert changes to fragments repository"""
+    parser = argparse.ArgumentParser(prog="%s apply" % __package__, description="Apply changes in FILENAME that were made since last commit to as many other followed files as possible.")
+    parser.add_argument('FILENAME', help="file containing changes to be applied")
+    parser.add_argument('-U', '--unified', type=int, dest="NUM", default=3, action="store", help="number of lines of context to show")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-i", "--interactive", action="store_true" , default=True , dest="interactive", help="interactively select changes to apply")
+    group.add_argument("-a", "--automatic"  , action="store_false", default=False, dest="interactive", help="automatically apply all changes")
+    args = parser.parse_args(args)
+
     config = FragmentsConfig()
     weave = Weave()
-    changed_path = os.path.realpath(file_name)
+    changed_path = os.path.realpath(args.FILENAME)
     changed_key = changed_path[len(config.root)+1:]
     if changed_key not in config['files']:
         yield "Could not apply changes in %r, it is not being followed" % changed_key
@@ -33,7 +43,7 @@ def apply(file_name, interactive=True):
 
     changes_to_apply = []
     diff = weave.merge(old_revision, new_revision)
-    display_groups = _split_diff(diff)
+    display_groups = _split_diff(diff, context_lines=args.NUM)
 
     i = 0
     old_line = 0 # not sure I need to be keeping track of these
@@ -44,7 +54,7 @@ def apply(file_name, interactive=True):
             display_group = next(display_groups)
             for dl in _diff_group(display_group): # show the group
                 yield dl
-            if interactive:
+            if args.interactive:
                 response = (yield Prompt("Apply this change? y/n"))
                 if response.lower().startswith('y'):
                     apply_change = True

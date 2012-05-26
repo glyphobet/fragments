@@ -780,7 +780,7 @@ table {
 
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         open(file1_name, 'w').write(new_file1_contents)
-        self.assertEqual(apply(file1_name, interactive=False), [
+        self.assertEqual(apply(file1_name, '-a'), [
             '@@ -4,7 +4,8 @@',
             '         <title>',
             '             Page One',
@@ -909,7 +909,7 @@ table {
         new_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         open(file2_name, 'w').write(new_file2_contents)
 
-        self.assertEqual(apply(file1_name, interactive=False), [
+        self.assertEqual(apply(file1_name, '-a'), [
             '@@ -4,7 +4,8 @@',
             '         <title>',
             '             Page One',
@@ -942,7 +942,7 @@ table {
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         open(file1_name, 'w').write(new_file1_contents)
 
-        self.assertEqual(apply(file1_name, interactive=False), [
+        self.assertEqual(apply(file1_name, '-a'), [
             '@@ -4,7 +4,8 @@',
             '         <title>',
             '             Page One',
@@ -973,7 +973,7 @@ table {
         new_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="colors.css" />')
         open(file2_name, 'w').write(new_file2_contents)
 
-        self.assertEqual(apply(file1_name, interactive=False), [
+        self.assertEqual(apply(file1_name, '-a'), [
             '@@ -4,7 +4,7 @@',
             '         <title>',
             '             Page One',

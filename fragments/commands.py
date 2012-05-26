@@ -1,4 +1,6 @@
-import sys, os, uuid, difflib
+import sys, os, uuid
+import argparse
+#import difflib
 import pdb
 
 from . import __version__, FragmentsError, Prompt
@@ -152,10 +154,14 @@ def rename(old_name, new_name):
 
 def diff(*args):
     """Show differences between committed and uncommitted versions"""
-    config = FragmentsConfig()
-    context_line_count = 3 # TODO: specify with -U N, --unified N
+    parser = argparse.ArgumentParser(prog="%s diff" % __package__, description="Show changes to the specified file(s).")
+    parser.add_argument('FILENAME', help="file(s) to show changes in", nargs="*")
+    parser.add_argument('-U', '--unified', type=int, dest="NUM", default=3, action="store", help="number of lines of context to show")
+    args = parser.parse_args(args)
 
-    for curr_path in _iterate_over_files(args, config):
+    config = FragmentsConfig()
+
+    for curr_path in _iterate_over_files(args.FILENAME, config):
         key = curr_path[len(config.root)+1:]
         if key not in config['files']:
             yield "Could not diff %r, it is not being followed" % key
@@ -172,7 +178,7 @@ def diff(*args):
             weave = Weave()
             weave.add_revision(1, repo_lines, [])
             weave.add_revision(2, curr_lines, [])
-            for l in _full_diff(weave.merge(1, 2), key, context_lines=3):
+            for l in _full_diff(weave.merge(1, 2), key, context_lines=args.NUM):
                 yield l
             # for dl in difflib.unified_diff(repo_lines, curr_lines, fromfile=key, tofile=key):
             #     yield dl
