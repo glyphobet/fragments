@@ -2,6 +2,7 @@ import os
 import pdb
 from .precisecodevillemerge import Weave
 from .config import FragmentsConfig
+from .diff import _diff_group, _split_diff
 
 def apply(file_name):
     """Revert changes to fragments repository"""
@@ -29,11 +30,38 @@ def apply(file_name):
     weave.add_revision(new_revision, file(changed_path, 'r').readlines(), [])
 
     changes_to_apply = []
-    for i, line_or_tuple in enumerate(weave.merge(old_revision, new_revision)):
+    diff = weave.merge(old_revision, new_revision)
+    display_groups = _split_diff(diff)
+
+    i = 0
+    old_line = 0 # not sure I need to be keeping track of these
+    new_line = 0
+    while i < len(diff):
+        line_or_tuple = diff[i]
         if isinstance(line_or_tuple, tuple):
-            for line in line_or_tuple[1]:
-                changes_to_apply.append(line)
+            display_group = next(display_groups)
+            for dl in _diff_group(display_group): # show the group
+                yield dl
+            
+            while isinstance(display_group[0][-1], basestring):
+                display_group.pop(0) # preceeding context lines have already been added to the changes to apply
+
+            for display_line_or_tuple in display_group:
+                if isinstance(display_line_or_tuple[-1], tuple):
+                    old, new = display_line_or_tuple[-1]
+                    old_line += len(old)
+                    new_line += len(new)
+                    i += 1
+                    changes_to_apply.extend(new)
+                else:
+                    old_line += 1
+                    new_line += 1
+                    i += 1
+                    changes_to_apply.append(display_line_or_tuple[-1])
         else:
+            old_line += 1
+            new_line += 1
+            i += 1
             changes_to_apply.append(line_or_tuple)
 
     changed_revision = 3
