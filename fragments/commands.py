@@ -96,7 +96,7 @@ def follow(*args):
             if os.access(fullpath, os.W_OK|os.R_OK):
                 file_uuid = uuid.uuid5(random_uuid, key)
                 config['files'][key] = file_uuid
-                yield "%r is now being followed, UUID %r" % (filename, file_uuid)
+                yield "%r is now being followed, UUID %s" % (filename, file_uuid)
             else:
                 yield "Could not access %r to follow it" % filename
         else:
