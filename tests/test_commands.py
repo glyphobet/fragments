@@ -433,7 +433,9 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
     def test_commit_unfollowed_file(self):
         init()
         file_name, file_path = self._create_file()
-        commit(file_path)
+        config = FragmentsConfig()
+        key = file_path[len(config.root)+1:]
+        self.assertEquals(commit(file_path), ["Could not commit %r because it is not being followed" % key])
 
     def test_commit_removed_file(self):
         init()
@@ -441,7 +443,9 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         follow(file_name)
         commit(file_path)
         os.unlink(file_path)
-        commit(file_path)
+        config = FragmentsConfig()
+        key = file_path[len(config.root)+1:]
+        self.assertEquals(commit(file_path), ["Could not commit %r because it has been removed, instead revert or remove it" % key])
 
 
 class TestRevertCommand(CommandBase, PostInitCommandMixIn):
