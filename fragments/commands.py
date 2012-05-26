@@ -40,10 +40,45 @@ def init(*a):
     yield "Fragments configuration created in %r" % config.path
 
 
-def stat(*a):
+def _iterate_over_files(args, config):
+    if args:
+        return (os.path.realpath(a) for a in set(args))
+    else:
+        return (os.path.join(config.root, f) for f in config['files'])
+
+
+def _file_stat(config, curr_path):
+    key = curr_path[len(config.root)+1:]
+    if key not in config['files']:
+        return '?' # untracked
+
+    uuid = config['files'][key]
+    repo_path = os.path.join(config.directory, uuid)
+
+    repo_exists = os.access(repo_path, os.R_OK|os.W_OK)
+    curr_exists = os.access(curr_path, os.R_OK|os.W_OK)
+
+    if repo_exists and curr_exists:
+        repo_mtime = os.stat(repo_path)[8]
+        curr_mtime = os.stat(curr_path)[8]
+        if curr_mtime > repo_mtime:
+            return 'M' # modified
+        else:
+            return ' ' # unmodified
+    elif repo_exists:
+        return 'D' # deleted
+    elif curr_exists:
+        return 'A' # added
+    else:
+        return '?' # unknown
+
+
+def stat(*args):
     """Get status of a fragments repository."""
     config = FragmentsConfig()
-    yield repr(config)
+    yield "Configuration for %s version %s.%s.%s" % ((__package__,) + config['version'])
+    for curr_path in _iterate_over_files(args, config):
+        yield '%s\t%s' % (_file_stat(config, curr_path), curr_path)
 
 
 def follow(*args):
@@ -112,13 +147,6 @@ def rename(old_name, new_name):
         if os.access(old_path, os.W_OK|os.R_OK):
             os.rename(old_path, new_path)
     config.dump()
-
-
-def _iterate_over_files(args, config):
-    if args:
-        return (os.path.realpath(a) for a in set(args))
-    else:
-        return (os.path.join(config.root, f) for f in config['files'])
 
 
 def diff(*args):
