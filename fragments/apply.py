@@ -76,7 +76,7 @@ def apply(file_name):
         weave.add_revision(current_revision, file(other_path, 'r').readlines(), [])
         merge_result = weave.cherry_pick(changed_revision, current_revision) # Can I apply changes in changed_revision onto this other file?
         if tuple in (type(mr) for mr in merge_result):
-            if len(merge_result) == 1:
+            if len(merge_result) == 1 and isinstance(merge_result[0], tuple):
                 # total conflict, skip
                 yield "Changes in %r cannot apply to %r, skipping" % (changed_key, other_key)
                 continue
