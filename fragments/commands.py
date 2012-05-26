@@ -198,7 +198,6 @@ def commit(*args):
             yield "%r committed" % key
         elif s in 'D':
             yield "Could not commit %r because it has been removed, instead revert or remove it" % key
-            continue
 
 
 def revert(*args):
