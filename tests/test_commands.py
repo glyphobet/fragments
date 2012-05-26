@@ -277,7 +277,7 @@ class TestForgetCommand(CommandBase, PostInitCommandMixIn):
     def test_forget_unfollowed_file(self):
         init()
         file_name, file_path = self._create_file()
-        forget(file_name)
+        self.assertEquals(forget(file_name), ["Could not forget %r, it was not being followed" % file_name])
 
     def test_follow_forget_file(self):
         init()
@@ -310,7 +310,7 @@ class TestForgetCommand(CommandBase, PostInitCommandMixIn):
         init()
         outside_path = os.path.realpath(tempfile.mkdtemp())
         outside_file = os.path.join(outside_path, 'outside.repository')
-        forget(outside_path)
+        self.assertEquals(forget(outside_file), ["Could not forget %r; it is outside the repository" % outside_file])
 
 
 class TestRenameCommand(CommandBase, PostInitCommandMixIn):
