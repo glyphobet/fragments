@@ -43,19 +43,20 @@ Fragments is invisible to people who don't know it's being used. If you (or some
 Future Improvements
 -------------------
 
-### Colorized output
-
-Colorized diff and status output is coming soon.
-
-### Better interactive chunk picking
-
-A better interactive mode including the ability to skip and return to hunks like git does with `j/J/k/K` may be added.
-
 ### Preprocessors
 
 Since Fragments is diff-based, it will not do well with minified or otherwise compressed content. Do not expect it to handle changes to your 1,000 character, single line, über-compressed CSS file. The more newlines in your files, the more robust Fragments' merging will be.
 
 Adding preprocessors for different file formats would potentially make Fragments' merging even more robust. Running a preprocessor before `commit` and `apply` would make the merging more robust by ensuring that XML tags, (some) HTML tags, and CSS declarations get their own lines, and by placing a canonical number of newlines around CSS rules, functions and any other structures in the document.
+
+### Miscellaneous
+
+* Colorized `diff` and `stat` output
+* A better interactive mode including the ability to skip and return to hunks (like git does with `j/J/k/K`)
+* Command-line completion modes for bash and/or zsh
+* Short command resolution, so you can type `fragments st` for `fragments stat`, &c.
+* Command aliasing and default configuration
+* Pluggable merge algorithms, if they prove useful
 
 Commands
 --------
