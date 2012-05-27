@@ -15,7 +15,7 @@ def rename(*a): return list(commands.rename(*a))
 def commit(*a): return list(commands.commit(*a))
 def revert(*a): return list(commands.revert(*a))
 def diff  (*a): return list(commands.diff  (*a))
-def apply (*a, **kw): return list(commands.apply (*a, **kw))
+def apply (*a): return list(commands.apply (*a))
 
 
 
