@@ -90,7 +90,7 @@ def stat(*args):
     yield "%s configuration version %s.%s.%s" % ((__package__,) + config['version'])
     yield "stored in %s" % config.directory
     for curr_path in _iterate_over_files(args.FILENAME, config):
-        yield '%s\t%s' % (_file_stat(config, curr_path), curr_path[len(config.root)+1:])
+        yield '%s\t%s' % (_file_stat(config, curr_path), os.path.relpath(curr_path))
 
 
 def follow(*args):

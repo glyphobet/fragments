@@ -175,7 +175,7 @@ class TestStatCommand(CommandBase, PostInitCommandMixIn):
         self.assertEquals(stat(file_name), [
             'fragments configuration version %s.%s.%s' % __version__,
             'stored in %s' % config.directory,
-            '?\t%s' % file_path[len(config.root)+1:]
+            '?\t%s' % file_name
         ])
 
     def test_new_file_stat(self):
@@ -186,7 +186,7 @@ class TestStatCommand(CommandBase, PostInitCommandMixIn):
         self.assertEquals(stat(file_name), [
             'fragments configuration version %s.%s.%s' % __version__,
             'stored in %s' % config.directory,
-            'A\t%s' % file_path[len(config.root)+1:]
+            'A\t%s' % file_name
         ])
 
     def test_unmodified_file_stat(self):
@@ -198,7 +198,7 @@ class TestStatCommand(CommandBase, PostInitCommandMixIn):
         self.assertEquals(stat(file_name), [
             'fragments configuration version %s.%s.%s' % __version__,
             'stored in %s' % config.directory,
-            ' \t%s' % file_path[len(config.root)+1:]
+            ' \t%s' % file_name
         ])
 
     def test_modified_file_stat(self):
@@ -215,7 +215,7 @@ class TestStatCommand(CommandBase, PostInitCommandMixIn):
         self.assertEquals(stat(file_name), [
             'fragments configuration version %s.%s.%s' % __version__,
             'stored in %s' % config.directory,
-            'M\t%s' % file_path[len(config.root)+1:]
+            'M\t%s' % file_name
         ])
 
     def test_removed_file_stat(self):
@@ -229,7 +229,7 @@ class TestStatCommand(CommandBase, PostInitCommandMixIn):
         self.assertEquals(stat(file_name), [
             'fragments configuration version %s.%s.%s' % __version__,
             'stored in %s' % config.directory,
-            'D\t%s' % file_path[len(config.root)+1:]
+            'D\t%s' % file_name
         ])
 
     def test_error_file_stat(self):
@@ -244,7 +244,7 @@ class TestStatCommand(CommandBase, PostInitCommandMixIn):
         self.assertEquals(stat(file_name), [
             'fragments configuration version %s.%s.%s' % __version__,
             'stored in %s' % config.directory,
-            'E\t%s' % key
+            'E\t%s' % file_name
         ])
 
 
