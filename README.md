@@ -28,7 +28,7 @@ The merge algorithm is a version of [Precise Codeville Merge](http://revctrl.org
 
 Fragments is also not HTML specific. If it's got newlines, Fragments can manage it. That means XML, CSS, JSON, YAML, or even source code from any programming language where newlines are common (sorry, Perl). Fragments is even smart enough to know not to merge totally different files together. It could even conceivably replace simpler CMS-managed websites with pure static HTML.
 
-Integration with Version Control
+Integration with version control
 --------------------------------
 
 Fragments has no history; It only stores the previous committed state of a file. Storing history is up to your version control system. But Fragments stores its repository configuration in such a way to allow your version control system to manage it painlessly and obviously. Configuration is stored in a `_fragments` directory. This directory name is not preceded by a `.`, and all the files in it are stored as plain text. The configuration resides one directory above your actual content, so it does not interfere with template loading code, and so it is not accidentally deployed to production along with your actual content.
@@ -39,24 +39,6 @@ Invisibility
 ------------
 
 Fragments is invisible to people who don't know it's being used. If you (or someone else) makes more than one change to a file, Fragments allows you to perform chunk-based interactive application of changes, similar to `git commit --patch` or `hg record`. In other words, you can give a single HTML file to your web designer, let him or her modify it as desired, and then have a programmer selectively apply some of those changes across all other HTML files, while leaving other changes only in the modified file.
-
-Future Improvements
--------------------
-
-### Preprocessors
-
-Since Fragments is diff-based, it will not do well with minified or otherwise compressed content. Do not expect it to handle changes to your 1,000 character, single line, über-compressed CSS file. The more newlines in your files, the more robust Fragments' merging will be.
-
-Adding preprocessors for different file formats would potentially make Fragments' merging even more robust. Running a preprocessor before `commit` and `apply` would make the merging more robust by ensuring that XML tags, (some) HTML tags, and CSS declarations get their own lines, and by placing a canonical number of newlines around CSS rules, functions and any other structures in the document.
-
-### Miscellaneous
-
-* Colorized `diff` and `stat` output
-* A better interactive mode including the ability to skip and return to hunks (like git does with `j/J/k/K`)
-* Command-line completion modes for bash and/or zsh
-* Short command resolution, so you can type `fragments st` for `fragments stat`, &c.
-* Command aliasing and default configuration
-* Pluggable merge algorithms, if they prove useful
 
 Commands
 --------
@@ -117,3 +99,20 @@ Commands
 
     `-U NUM`, `--unified NUM` number of lines of context to show
 
+Future improvements
+-------------------
+
+### Preprocessors
+
+Since Fragments is diff-based, it will not do well with minified or otherwise compressed content. Do not expect it to handle changes to your 1,000 character, single line, über-compressed CSS file. The more newlines in your files, the more robust Fragments' merging will be.
+
+Adding preprocessors for different file formats would potentially make Fragments' merging even more robust. Running a preprocessor before `commit` and `apply` would make the merging more robust by ensuring that XML tags, (some) HTML tags, and CSS declarations get their own lines, and by placing a canonical number of newlines around CSS rules, functions and any other structures in the document.
+
+### Miscellaneous improvements
+
+* Colorized `diff` and `stat` output
+* A better interactive mode including the ability to skip and return to hunks (like git does with `j/J/k/K`)
+* Command-line completion modes for bash and/or zsh
+* Short command resolution, so you can type `fragments st` for `fragments stat`, &c.
+* Command aliasing and default configuration
+* Pluggable merge algorithms, if they prove useful
