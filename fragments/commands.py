@@ -27,7 +27,7 @@ def help(*args):
 
 
 def init(*args):
-    """Initialize a fragments repository."""
+    """Initialize a new fragments repository, in a directory named _fragments/."""
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, init.__name__), description=init.__doc__)
     args = parser.parse_args(args)
 
