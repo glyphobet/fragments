@@ -15,10 +15,15 @@ class ExecutionError(FragmentsError): pass
 
 def help(*args):
     """Prints help."""
+    from . import commands
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="Prints help")
-    parser.add_argument('COMMAND', help="command to show help for", nargs="?")
+    parser.add_argument('COMMAND', help="command to show help for", nargs="?", choices=__all__)
     args = parser.parse_args(args)
-    yield "help!"
+    if args.COMMAND:
+        for l in getattr(commands, args.COMMAND)('-h'):
+            yield l
+    else:
+        parser.parse_args(['-h'])
 
 
 def init(*args):
@@ -265,10 +270,7 @@ def revert(*args):
 def _main(): # pragma: no cover
     from . import commands
     print("%s version %s.%s.%s" % ((__package__,) + __version__))
-    if (len(sys.argv) > 1              and  # command was specified
-        sys.argv[1][0] != '_'          and  # command does not start with _
-        sys.argv[1] in dir(commands)   and  # command exists in commands module
-        callable(getattr(commands, sys.argv[1]))):  # command is callable
+    if (sys.argv[1] in __all__): # command is legit
         try:
             command_generator = getattr(commands, sys.argv[1])(*sys.argv[2:])
             while True:
@@ -285,3 +287,6 @@ def _main(): # pragma: no cover
     else:
         for l in help():
             print(l)
+
+
+__all__ = ['help', 'init', 'stat', 'follow', 'forget', 'rename', 'diff', 'commit', 'revert', 'apply']
