@@ -104,7 +104,7 @@ def follow(*args):
     for filename in set(args.FILENAME):
         fullpath = os.path.realpath(filename)
         if fullpath.startswith(config.root):
-            key = fullpath[len(config.root)+1:]
+            key = os.path.relpath(fullpath, config.root)
             if key in config['files']:
                 yield "%r is already being followed" % filename
                 continue
@@ -129,7 +129,7 @@ def forget(*args):
     for filename in set(args.FILENAME):
         fullpath = os.path.realpath(filename)
         if fullpath.startswith(config.root):
-            key = fullpath[len(config.root)+1:]
+            key = os.path.relpath(fullpath, config.root)
             if key in config['files']:
                 file_uuid = config['files'][key]
                 uuid_path = os.path.join(config.directory, file_uuid)
@@ -157,9 +157,9 @@ def rename(*args):
 
     config = FragmentsConfig()
     old_path = os.path.realpath(old_name)
-    old_key = old_path[len(config.root)+1:]
+    old_key = os.path.relpath(old_path, config.root)
     new_path = os.path.realpath(new_name)
-    new_key = new_path[len(config.root)+1:]
+    new_key = os.path.relpath(new_path, config.root)
     if old_key not in config['files']:
         yield "Could not rename %r, it is not being tracked" % old_name
     elif new_key in config['files']:
@@ -186,7 +186,7 @@ def diff(*args):
     config = FragmentsConfig()
 
     for curr_path in _iterate_over_files(args.FILENAME, config):
-        key = curr_path[len(config.root)+1:]
+        key = os.path.relpath(curr_path, config.root)
         if key not in config['files']:
             yield "Could not diff %r, it is not being followed" % key
             continue
@@ -217,7 +217,7 @@ def commit(*args):
     config = FragmentsConfig()
 
     for curr_path in _iterate_over_files(args.FILENAME, config):
-        key = curr_path[len(config.root)+1:]
+        key = os.path.relpath(curr_path, config.root)
         if key not in config['files']:
             yield "Could not commit %r because it is not being followed" % key
             continue
@@ -243,7 +243,7 @@ def revert(*args):
     config = FragmentsConfig()
 
     for curr_path in _iterate_over_files(args.FILENAME, config):
-        key = curr_path[len(config.root)+1:]
+        key = os.path.relpath(curr_path, config.root)
         if key not in config['files']:
             yield "Could not revert %r because it is not being followed" % key
             continue
@@ -272,7 +272,7 @@ def fork(*args):
 
     config = FragmentsConfig()
     new_path = os.path.realpath(args.TARGET_FILENAME)
-    new_key = new_path[len(config.root)+1:]
+    new_key = os.path.relpath(new_path, config.root)
     if new_key in config['files']:
         yield "Could not fork into %r, it is already followed" % args.TARGET_FILENAME
         return
@@ -283,7 +283,7 @@ def fork(*args):
     old_filenames = []
     for old_name in args.SOURCE_FILENAME:
         old_path = os.path.realpath(old_name)
-        old_key = old_path[len(config.root)+1:]
+        old_key = os.path.relpath(old_path, config.root)
         if os.access(old_path, os.R_OK|os.W_OK):
             old_filenames.append(old_path)
             if old_key not in config['files']:

@@ -26,7 +26,7 @@ def apply(*args):
     config = FragmentsConfig()
     weave = Weave()
     changed_path = os.path.realpath(args.SOURCE_FILENAME)
-    changed_key = changed_path[len(config.root)+1:]
+    changed_key = os.path.relpath(changed_path, config.root)
     if changed_key not in config['files']:
         yield "Could not apply changes in %r, it is not being followed" % changed_key
         return
@@ -97,7 +97,7 @@ def apply(*args):
 
     current_revision = changed_revision
     for other_path in _iterate_over_files(args.TARGET_FILENAME, config):
-        other_key = other_path[len(config.root)+1:]
+        other_key = os.path.relpath(other_path, config.root)
         if other_path == changed_path:
             continue # don't try to apply changes to ourself
         current_revision += 1

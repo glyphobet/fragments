@@ -238,7 +238,7 @@ class TestStatCommand(CommandBase, PostInitCommandMixIn):
         follow(file_name)
         commit(file_name)
         config = FragmentsConfig()
-        key = file_path[len(config.root)+1:]
+        key = os.path.relpath(file_path, config.root)
         os.unlink(file_path)
         os.unlink(os.path.join(config.directory, config['files'][key]))
         self.assertEquals(stat(file_name), [
