@@ -48,10 +48,10 @@ def init(*args):
             config = FragmentsConfig(configuration_path, autoload=False)
             config.dump()
         else:
-            raise ExecutionError("Could not create fragments directory in %r, aborting.\n(Do you have the correct permissions?)" % configuration_parent)
+            raise ExecutionError("Could not create fragments directory in '%s', aborting.\n(Do you have the correct permissions?)" % configuration_parent)
     else:
-        raise ExecutionError("Current fragments configuration found in %r, aborting." % config.path)
-    yield "Fragments configuration created in %r" % config.path
+        raise ExecutionError("Current fragments configuration found in '%s', aborting." % config.path)
+    yield "Fragments configuration created in '%s'" % config.path
 
 
 def _file_stat(config, curr_path):
@@ -106,16 +106,16 @@ def follow(*args):
         if fullpath.startswith(config.root):
             key = os.path.relpath(fullpath, config.root)
             if key in config['files']:
-                yield "%r is already being followed" % filename
+                yield "'%s' is already being followed" % os.path.relpath(filename)
                 continue
             if os.access(fullpath, os.W_OK|os.R_OK):
                 file_uuid = uuid.uuid5(random_uuid, key)
                 config['files'][key] = file_uuid
-                yield "%r is now being followed, UUID %s" % (filename, file_uuid)
+                yield "'%s' is now being followed, UUID %s" % (os.path.relpath(filename), file_uuid)
             else:
-                yield "Could not access %r to follow it" % filename
+                yield "Could not access '%s' to follow it" % os.path.relpath(filename)
         else:
-            yield "Could not follow %r; it is outside the repository" % filename
+            yield "Could not follow '%s'; it is outside the repository" % os.path.relpath(filename)
     config.dump()
 
 
@@ -135,14 +135,14 @@ def forget(*args):
                 uuid_path = os.path.join(config.directory, file_uuid)
                 if os.access(os.path.join(config.directory, file_uuid), os.W_OK|os.R_OK):
                     os.unlink(uuid_path)
-                    yield "%r is no longer being followed" % filename
+                    yield "'%s' is no longer being followed" % os.path.relpath(filename)
                 else:
-                    yield "%r was never committed and will not be followed" % filename
+                    yield "'%s' was never committed and will not be followed" % os.path.relpath(filename)
                 del config['files'][key]
             else:
-                yield "Could not forget %r, it was not being followed" % filename
+                yield "Could not forget '%s', it was not being followed" % os.path.relpath(filename)
         else:
-            yield "Could not forget %r; it is outside the repository" % filename
+            yield "Could not forget '%s'; it is outside the repository" % os.path.relpath(filename)
     config.dump()
 
 
@@ -153,7 +153,7 @@ def rename(*args):
     parser.add_argument('NEW_FILENAME', help="new file name")
     args = parser.parse_args(args)
 
-    old_name, new_name = args.OLD_FILENAME, args.NEW_FILENAME
+    old_name, new_name = os.path.relpath(args.OLD_FILENAME), os.path.relpath(args.NEW_FILENAME)
 
     config = FragmentsConfig()
     old_path = os.path.realpath(old_name)
@@ -161,13 +161,13 @@ def rename(*args):
     new_path = os.path.realpath(new_name)
     new_key = os.path.relpath(new_path, config.root)
     if old_key not in config['files']:
-        yield "Could not rename %r, it is not being tracked" % old_name
+        yield "Could not rename '%s', it is not being tracked" % old_name
     elif new_key in config['files']:
-        yield "Could not rename %r to %r, %r is already being tracked" % (old_name, new_name, new_name)
+        yield "Could not rename '%s' to '%s', '%s' is already being tracked" % (old_name, new_name, new_name)
     elif os.access(old_path, os.W_OK|os.R_OK) and os.access(new_path, os.W_OK|os.R_OK):
-        yield "Could not rename %r to %r, both files already exist" % (old_name, new_name)
+        yield "Could not rename '%s' to '%s', both files already exist" % (old_name, new_name)
     elif not os.access(old_path, os.W_OK|os.R_OK) and not os.access(new_path, os.W_OK|os.R_OK):
-        yield "Could not rename %r to %r, neither file exists" % (old_name, new_name)
+        yield "Could not rename '%s' to '%s', neither file exists" % (old_name, new_name)
     else:
         config['files'][new_key] = config['files'][old_key]
         del config['files'][old_key]
@@ -188,7 +188,7 @@ def diff(*args):
     for curr_path in _iterate_over_files(args.FILENAME, config):
         key = os.path.relpath(curr_path, config.root)
         if key not in config['files']:
-            yield "Could not diff %r, it is not being followed" % key
+            yield "Could not diff '%s', it is not being followed" % os.path.relpath(curr_path)
             continue
 
         s = _file_stat(config, curr_path)
@@ -219,7 +219,7 @@ def commit(*args):
     for curr_path in _iterate_over_files(args.FILENAME, config):
         key = os.path.relpath(curr_path, config.root)
         if key not in config['files']:
-            yield "Could not commit %r because it is not being followed" % key
+            yield "Could not commit '%s' because it is not being followed" % os.path.relpath(curr_path)
             continue
 
         s = _file_stat(config, curr_path)
@@ -229,9 +229,9 @@ def commit(*args):
             repo_file.write(file(curr_path, 'r').read())
             repo_file.close()
             os.utime(repo_path, os.stat(curr_path)[7:9])
-            yield "%r committed" % key
+            yield "'%s' committed" % os.path.relpath(curr_path)
         elif s in 'D':
-            yield "Could not commit %r because it has been removed, instead revert or remove it" % key
+            yield "Could not commit '%s' because it has been removed, instead revert or remove it" % os.path.relpath(curr_path)
 
 
 def revert(*args):
@@ -245,7 +245,7 @@ def revert(*args):
     for curr_path in _iterate_over_files(args.FILENAME, config):
         key = os.path.relpath(curr_path, config.root)
         if key not in config['files']:
-            yield "Could not revert %r because it is not being followed" % key
+            yield "Could not revert '%s' because it is not being followed" % os.path.relpath(curr_path)
             continue
 
         s = _file_stat(config, curr_path)
@@ -255,9 +255,9 @@ def revert(*args):
             curr_file.write(file(repo_path, 'r').read())
             curr_file.close()
             os.utime(curr_path, os.stat(repo_path)[7:9])
-            yield "%r reverted" % key
+            yield "'%s' reverted" % key
         elif s in 'A':
-            yield "Could not revert %r because it has never been committed" % key
+            yield "Could not revert '%s' because it has never been committed" % os.path.relpath(curr_path)
 
 
 def fork(*args):
@@ -274,10 +274,10 @@ def fork(*args):
     new_path = os.path.realpath(args.TARGET_FILENAME)
     new_key = os.path.relpath(new_path, config.root)
     if new_key in config['files']:
-        yield "Could not fork into %r, it is already followed" % args.TARGET_FILENAME
+        yield "Could not fork into '%s', it is already followed" % os.path.relpath(args.TARGET_FILENAME)
         return
     if os.access(new_path, os.R_OK|os.W_OK):
-        yield "Could not fork into %r, the file already exists" % args.TARGET_FILENAME
+        yield "Could not fork into '%s', the file already exists" % os.path.relpath(args.TARGET_FILENAME)
         return
 
     old_filenames = []
@@ -287,9 +287,9 @@ def fork(*args):
         if os.access(old_path, os.R_OK|os.W_OK):
             old_filenames.append(old_path)
             if old_key not in config['files']:
-                yield "Warning, %r not being followed" % old_name
+                yield "Warning, '%s' not being followed" % os.path.relpath(old_path)
         else:
-            yield "Skipping %r while forking, it does not exist" % old_name
+            yield "Skipping '%s' while forking, it does not exist" % os.path.relpath(old_path)
 
     if not old_filenames:
         yield "Could not fork; no valid source files specified"
@@ -308,7 +308,7 @@ def fork(*args):
         weave.add_revision(previous_revision, new_lines, [])
 
     open(new_path, 'w').writelines(new_lines)
-    yield "Forked new file in %r, remember to follow and commit it" % args.TARGET_FILENAME
+    yield "Forked new file in '%s', remember to follow and commit it" % os.path.relpath(args.TARGET_FILENAME)
     config.dump()
 
 

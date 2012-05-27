@@ -295,13 +295,13 @@ class TestFollowCommand(CommandBase, PostInitCommandMixIn):
     def test_follow_nonexistent_file(self):
         init()
         nonexistent_path = os.path.join(os.getcwd(), 'nonexistent.file')
-        self.assertEquals(follow(nonexistent_path), ["Could not access %r to follow it" % nonexistent_path])
+        self.assertEquals(follow(nonexistent_path), ["Could not access 'nonexistent.file' to follow it"])
 
     def test_follow_file_outside_repository(self):
         init()
         outside_path = os.path.realpath(tempfile.mkdtemp())
         outside_file = os.path.join(outside_path, 'outside.repository')
-        self.assertEquals(follow(outside_path), ["Could not follow %r; it is outside the repository" % outside_path])
+        self.assertEquals(follow(outside_file), ["Could not follow '%s'; it is outside the repository" % os.path.relpath(outside_file)])
 
 
 class TestForgetCommand(CommandBase, PostInitCommandMixIn):
@@ -311,7 +311,7 @@ class TestForgetCommand(CommandBase, PostInitCommandMixIn):
     def test_forget_unfollowed_file(self):
         init()
         file_name, file_path = self._create_file()
-        self.assertEquals(forget(file_name), ["Could not forget %r, it was not being followed" % file_name])
+        self.assertEquals(forget(file_name), ["Could not forget '%s', it was not being followed" % file_name])
 
     def test_follow_forget_file(self):
         init()
@@ -344,7 +344,7 @@ class TestForgetCommand(CommandBase, PostInitCommandMixIn):
         init()
         outside_path = os.path.realpath(tempfile.mkdtemp())
         outside_file = os.path.join(outside_path, 'outside.repository')
-        self.assertEquals(forget(outside_file), ["Could not forget %r; it is outside the repository" % outside_file])
+        self.assertEquals(forget(outside_file), ["Could not forget '%s'; it is outside the repository" % os.path.relpath(outside_file)])
 
 
 class TestRenameCommand(CommandBase, PostInitCommandMixIn):
@@ -354,7 +354,7 @@ class TestRenameCommand(CommandBase, PostInitCommandMixIn):
     def test_cant_rename_followed_file(self):
         init()
         file_name, file_path = self._create_file()
-        self.assertEquals(rename(file_name, 'new_file'), ["Could not rename %r, it is not being tracked" % file_name])
+        self.assertEquals(rename(file_name, 'new_file'), ["Could not rename '%s', it is not being tracked" % file_name])
 
     def test_cant_rename_onto_other_followed_file(self):
         init()
@@ -362,7 +362,7 @@ class TestRenameCommand(CommandBase, PostInitCommandMixIn):
         file2_name, file2_path = self._create_file()
         follow(file1_name, file2_name)
         commit(file1_name, file2_name)
-        self.assertEquals(rename(file1_name, file2_name), ["Could not rename %r to %r, %r is already being tracked" % (file1_name, file2_name, file2_name)])
+        self.assertEquals(rename(file1_name, file2_name), ["Could not rename '%s' to '%s', '%s' is already being tracked" % (file1_name, file2_name, file2_name)])
 
     def test_cant_rename_onto_existing_file(self):
         init()
@@ -370,7 +370,7 @@ class TestRenameCommand(CommandBase, PostInitCommandMixIn):
         file2_name, file2_path = self._create_file()
         follow(file1_name)
         commit(file1_name)
-        self.assertEquals(rename(file1_name, file2_name), ["Could not rename %r to %r, both files already exist" % (file1_name, file2_name)])
+        self.assertEquals(rename(file1_name, file2_name), ["Could not rename '%s' to '%s', both files already exist" % (file1_name, file2_name)])
 
     def test_cant_rename_if_neither_file_exists(self):
         init()
@@ -380,7 +380,7 @@ class TestRenameCommand(CommandBase, PostInitCommandMixIn):
         commit(file1_name)
         os.unlink(file1_path)
         os.unlink(file2_path)
-        self.assertEquals(rename(file1_name, file2_name), ["Could not rename %r to %r, neither file exists" % (file1_name, file2_name)])
+        self.assertEquals(rename(file1_name, file2_name), ["Could not rename '%s' to '%s', neither file exists" % (file1_name, file2_name)])
 
     def test_rename_moves_file_if_not_already_moved(self):
         init()
@@ -515,7 +515,7 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
         file1_name, file1_path = self._create_file(contents=self.original_file)
         yestersecond = time.time() - 2
         os.utime(file1_path, (yestersecond, yestersecond))
-        self.assertEquals(list(diff(file1_name)), ["Could not diff 'test_content/file1.ext', it is not being followed"])
+        self.assertEquals(list(diff(file1_name)), ["Could not diff 'file1.ext', it is not being followed"])
 
     def test_diff_uncommitted_file(self):
         init()
@@ -621,7 +621,7 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         file_name, file_path = self._create_file()
         config = FragmentsConfig()
         key = file_path[len(config.root)+1:]
-        self.assertEquals(commit(file_path), ["Could not commit %r because it is not being followed" % key])
+        self.assertEquals(commit(file_path), ["Could not commit '%s' because it is not being followed" % os.path.relpath(file_path)])
 
     def test_commit_removed_file(self):
         init()
@@ -631,7 +631,7 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         os.unlink(file_path)
         config = FragmentsConfig()
         key = file_path[len(config.root)+1:]
-        self.assertEquals(commit(file_path), ["Could not commit %r because it has been removed, instead revert or remove it" % key])
+        self.assertEquals(commit(file_path), ["Could not commit '%s' because it has been removed, instead revert or remove it" % os.path.relpath(file_path)])
 
     def test_commit_unchanged_file(self):
         init()
@@ -701,14 +701,14 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
         follow(file_name)
         config = FragmentsConfig()
         key = file_path[len(config.root)+1:]
-        self.assertEquals(revert(file_name), ["Could not revert %r because it has never been committed" % key])
+        self.assertEquals(revert(file_name), ["Could not revert '%s' because it has never been committed" % os.path.relpath(file_path)])
 
     def test_revert_unfollowed_file(self):
         init()
         file_name, file_path = self._create_file()
         config = FragmentsConfig()
         key = file_path[len(config.root)+1:]
-        self.assertEquals(revert(file_name), ["Could not revert %r because it is not being followed" % key])
+        self.assertEquals(revert(file_name), ["Could not revert '%s' because it is not being followed" % os.path.relpath(file_path)])
 
     def test_revert_removed_file(self):
         init()
@@ -745,7 +745,7 @@ class TestForkCommand(CommandBase, PostInitCommandMixIn):
         follow(file1_name)
         commit(file1_name)
         forked_file_name = 'forked.file'
-        self.assertEquals(fork(file1_name, forked_file_name), ["Forked new file in %r, remember to follow and commit it" % forked_file_name])
+        self.assertEquals(fork(file1_name, forked_file_name), ["Forked new file in '%s', remember to follow and commit it" % forked_file_name])
         self.assertEquals(open(forked_file_name, 'r').read(), open(file1_name, 'r').read())
 
     def test_basic_fork(self):
@@ -755,7 +755,7 @@ class TestForkCommand(CommandBase, PostInitCommandMixIn):
         follow(file1_name, file2_name)
         commit(file1_name, file2_name)
         forked_file_name = 'forked.file'
-        self.assertEquals(fork(file1_name, file2_name, forked_file_name), ["Forked new file in %r, remember to follow and commit it" % forked_file_name])
+        self.assertEquals(fork(file1_name, file2_name, forked_file_name), ["Forked new file in '%s', remember to follow and commit it" % forked_file_name])
         self.assertEquals(open(forked_file_name, 'r').read(), "Line One\n\nLine Three\n\nLine Five\n")
 
     def test_fork_from_unfollowed_files(self):
@@ -764,9 +764,9 @@ class TestForkCommand(CommandBase, PostInitCommandMixIn):
         file2_name, file2_path = self._create_file(contents="Line One\nLine 2\nLine Three\nLine 4\nLine Five\n")
         forked_file_name = 'forked.file'
         self.assertEquals(fork(file1_name, file2_name, forked_file_name), [
-            "Warning, %r not being followed" % file1_name,
-            "Warning, %r not being followed" % file2_name,
-            "Forked new file in %r, remember to follow and commit it" % forked_file_name
+            "Warning, '%s' not being followed" % file1_name,
+            "Warning, '%s' not being followed" % file2_name,
+            "Forked new file in '%s', remember to follow and commit it" % forked_file_name
         ])
         self.assertEquals(open(forked_file_name, 'r').read(), "Line One\n\nLine Three\n\nLine Five\n")
 
@@ -778,7 +778,7 @@ class TestForkCommand(CommandBase, PostInitCommandMixIn):
         follow(file1_name, file2_name, file3_name)
         commit(file1_name, file2_name)
 
-        self.assertEquals(fork(file1_name, file2_name, file3_name), ["Could not fork into %r, it is already followed" % file3_name])
+        self.assertEquals(fork(file1_name, file2_name, file3_name), ["Could not fork into '%s', it is already followed" % file3_name])
         self.assertEquals(open(file3_path, 'r').read(), "Line 3\nLine 3\nLine 3\nLine 3\nLine 3\n")
 
     def test_cant_fork_onto_existing_file(self):
@@ -789,7 +789,7 @@ class TestForkCommand(CommandBase, PostInitCommandMixIn):
         follow(file1_name, file2_name)
         commit(file1_name, file2_name)
 
-        self.assertEquals(fork(file1_name, file2_name, file3_name), ["Could not fork into %r, the file already exists" % file3_name])
+        self.assertEquals(fork(file1_name, file2_name, file3_name), ["Could not fork into '%s', the file already exists" % file3_name])
         self.assertEquals(open(file3_path, 'r').read(), "Line 3\nLine 3\nLine 3\nLine 3\nLine 3\n")
 
     def test_cant_fork_from_nothing(self):
