@@ -45,7 +45,7 @@ Commands
 
 * `init`
 
-    Initialize a new fragments repository, in `\_fragments`.
+    Initialize a new fragments repository, in a directory named `_fragments/`.
 
 * `stat [FILENAME [FILENAME ...]]`
 
@@ -63,9 +63,9 @@ Commands
 
     Rename _OLD\_FILENAME_ to _NEW\_FILENAME_, moving the actual file on disk if it has not already been moved.
 
-* `fork SOURCE\_FILENAME [SOURCE\_FILENAME ...] DESTINATION\_FILENAME`
+* `fork SOURCE_FILENAME [SOURCE_FILENAME ...] DESTINATION_FILENAME`
 
-    Create a new file in _DESTINATION\_FILENAME_ based on one or more _SOURCE\_FILENAME_s. Common sections are preserved; differing sections are replaced with a single newline.
+    Create a new file in _DESTINATION\_FILENAME_ based on one or more _SOURCE\_FILENAMEs_. Common sections are preserved; differing sections are replaced with a single newline.
 
 * `diff [[-U | --unified] NUM] [FILENAME [FILENAME ...]]`
 
