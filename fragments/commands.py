@@ -1,7 +1,6 @@
 import os
 import sys
 import uuid
-import inspect
 import argparse
 #import difflib
 
@@ -17,7 +16,7 @@ class ExecutionError(FragmentsError): pass
 def help(*args):
     """Prints help."""
     from . import commands
-    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="Prints help")
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, help.__name__), description=help.__doc__)
     parser.add_argument('COMMAND', help="command to show help for", nargs="?", choices=__all__)
     args = parser.parse_args(args)
     if args.COMMAND:
@@ -29,7 +28,7 @@ def help(*args):
 
 def init(*args):
     """Initialize a fragments repository."""
-    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="Initialize a fragments repository")
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, init.__name__), description=init.__doc__)
     args = parser.parse_args(args)
 
     try:
@@ -83,8 +82,7 @@ def _file_stat(config, curr_path):
 
 def stat(*args):
     """Get the current status of the fragments repository, limited to FILENAME(s) if specified."""
-    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]),
-        description="Get the current status of the fragments repository, limited to FILENAME(s) if specified.")
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, stat.__name__), description=stat.__doc__)
     parser.add_argument('FILENAME', help="files to show status for", nargs="*")
     args = parser.parse_args(args)
 
@@ -97,8 +95,7 @@ def stat(*args):
 
 def follow(*args):
     """Start following changes to one or more FILENAME(s)."""
-    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]),
-        description="Start following changes to one or more FILENAME(s).")
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, follow.__name__), description=follow.__doc__)
     parser.add_argument('FILENAME', help="files to follow", nargs="+")
     args = parser.parse_args(args)
 
@@ -124,8 +121,7 @@ def follow(*args):
 
 def forget(*args):
     """Stop following changes to one or more FILENAME(s)."""
-    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]),
-        description="Stop following changes to one or more FILENAME(s).")
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, forget.__name__), description=forget.__doc__)
     parser.add_argument('FILENAME', help="files to forget", nargs="+")
     args = parser.parse_args(args)
 
@@ -152,8 +148,7 @@ def forget(*args):
 
 def rename(*args):
     """Rename OLD_FILENAME to NEW_FILENAME, moving the actual file on disk if it has not already been moved."""
-    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]),
-        description="Rename OLD_FILENAME to NEW_FILENAME, moving the actual file on disk if it has not already been moved.")
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, rename.__name__), description=rename.__doc__)
     parser.add_argument('OLD_FILENAME', help="old file name")
     parser.add_argument('NEW_FILENAME', help="new file name")
     args = parser.parse_args(args)
@@ -186,10 +181,7 @@ def fork(*args):
     Create a new file in TARGET_FILENAME based on one or more SOURCE_FILENAME(s).
     Common sections are preserved; differing sections are replaced with a single newline.
     """
-    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="""
-        Create a new file in TARGET_FILENAME based on one or more SOURCE_FILENAME(s).
-        Common sections are preserved; differing sections are replaced with a single newline.
-    """)
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, fork.__name__), description=fork.__doc__)
     parser.add_argument('SOURCE_FILENAME', help="old file names", nargs="+")
     parser.add_argument('TARGET_FILENAME', help="new file name")
     args = parser.parse_args(args)
@@ -238,8 +230,7 @@ def fork(*args):
 
 def diff(*args):
     """Show differences between committed and uncommitted versions, limited to FILENAME(s) if specified."""
-    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]),
-        description="Show differences between committed and uncommitted versions, limited to FILENAME(s) if specified.")
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, diff.__name__), description=diff.__doc__)
     parser.add_argument('FILENAME', help="file(s) to show changes in", nargs="*")
     parser.add_argument('-U', '--unified', type=int, dest="NUM", default=3, action="store", help="number of lines of context to show")
     args = parser.parse_args(args)
@@ -271,8 +262,7 @@ def diff(*args):
 
 def commit(*args):
     """Commit changes to the fragments repository, limited to FILENAME(s) if specified."""
-    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]),
-        description="Commit changes to the fragments repository, limited to FILENAME(s) if specified.")
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, commit.__name__), description=commit.__doc__)
     parser.add_argument('FILENAME', help="file(s) to commit", nargs="*")
     args = parser.parse_args(args)
 
@@ -298,8 +288,7 @@ def commit(*args):
 
 def revert(*args):
     """Revert changes to the fragments repository, limited to FILENAME(s) if specified."""
-    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]),
-        description="Revert changes to the fragments repository, limited to FILENAME(s) if specified.")
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, revert.__name__), description=revert.__doc__)
     parser.add_argument('FILENAME', help="file(s) to revert", nargs="*")
     args = parser.parse_args(args)
 

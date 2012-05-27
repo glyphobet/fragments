@@ -1,5 +1,4 @@
 import os
-import inspect
 import argparse
 
 from .precisecodevillemerge import Weave
@@ -14,11 +13,7 @@ def apply(*args):
     Apply changes to TARGET_FILENAME if specified, otherwise apply to as many other followed files as possible.
     Files that conflict in their entirety will be skipped, and smaller conflicts will be written to the file as conflict sections.
     """
-    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="""
-        Apply changes in SOURCE_FILENAME that were made since last commit.
-        Apply changes to TARGET_FILENAME if specified, otherwise apply to as many other followed files as possible.
-        Files that conflict in their entirety will be skipped, and smaller conflicts will be written to the file as conflict sections.
-    """)
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, apply.__name__), description=apply.__doc__)
     parser.add_argument('SOURCE_FILENAME', help="file containing changes to be applied")
     parser.add_argument('TARGET_FILENAME', help="file(s) to apply changes to", nargs='*')
     parser.add_argument('-U', '--unified', type=int, dest="NUM", default=3, action="store", help="number of lines of context to show")
