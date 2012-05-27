@@ -33,7 +33,7 @@ Integration with Version Control
 
 Fragments has no history; It only stores the previous committed state of a file. Storing history is up to your version control system. But Fragments stores its repository configuration in such a way to allow your version control system to manage it painlessly and obviously. Configuration is stored in a `_fragments` directory. This directory name is not preceded by a `.`, and all the files in it are stored as plain text. The configuration resides one directory above your actual content, so it does not interfere with template loading code, and so it is not accidentally deployed to production along with your actual content.
 
-The `rename` and `forget` commands in Fragments are also written to not interfere with what rename and remove commands do to the same files, as they may sometimes need to be used in tandem.
+The `rename` and `forget` commands in Fragments are also written to not interfere with a version control's rename and remove commands, as these commands will sometimes need to be used in tandem.
 
 Invisibility
 ------------
