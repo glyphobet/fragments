@@ -41,27 +41,27 @@ Commands
 
 * `help [COMMAND]`
 
-    display global help, or help for _COMMAND_ if specified
+    Display global help, or help for _COMMAND_ if specified.
 
 * `init`
 
-    initialize a new fragmentation manager repository
+    Initialize a new fragments repository, in `\_fragments`.
 
 * `stat [FILENAME [FILENAME ...]]`
 
-    get the current status of the repository
+    Get the current status of the fragments repository.
 
 * `follow FILENAME [FILENAME ...]`
 
-    start following changes to one or more files
+    Start following changes to one or more files.
 
 * `forget FILENAME [FILENAME ...]`
 
-    stop following changes to one or more files
+    Stop following changes to one or more files.
 
 * `rename OLD_FILENAME NEW_FILENAME`
 
-    rename _OLD\_FILENAME_ to _NEW\_FILENAME_, moving the actual file on disk if it has not already been moved
+    Rename _OLD\_FILENAME_ to _NEW\_FILENAME_, moving the actual file on disk if it has not already been moved.
 
 * `fork SOURCE\_FILENAME [SOURCE\_FILENAME ...] DESTINATION\_FILENAME`
 
@@ -69,21 +69,21 @@ Commands
 
 * `diff [[-U | --unified] NUM] [FILENAME [FILENAME ...]]`
 
-    show differences between committed and uncommitted versions
+    Show differences between committed and uncommitted versions.
 
     `-U NUM`, `--unified NUM` number of lines of context to show
 
 * `commit [FILENAME [FILENAME ...]]`
 
-    commit changes to one or more files
+    Commit changes to one or more files.
 
 * `revert [FILENAME [FILENAME ...]]`
 
-    revert changes to one or more files
+    Revert changes to one or more files.
 
 * `apply [-i | -a] [[-U | --unified] NUM] FILENAME`
 
-    apply changes in _FILENAME_ that were made since last commit to as many other followed files as possible
+    Apply changes in _FILENAME_ that were made since last commit to as many other followed files as possible.
 
     `-i, --interactive` interactively select changes to apply
 
