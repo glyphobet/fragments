@@ -5,19 +5,22 @@ import argparse
 from .precisecodevillemerge import Weave
 from .config import FragmentsConfig
 from .diff import _diff_group, _split_diff
-from . import Prompt
+from . import Prompt, _iterate_over_files
 
 
 def apply(*args):
     """
-    Apply changes in _FILENAME_ that were made since last commit to as many other followed files as possible. 
+    Apply changes in SOURCE_FILENAME that were made since last commit.
+    Apply changes to TARGET_FILENAME if specified, otherwise apply to as many other followed files as possible.
     Files that conflict in their entirety will be skipped, and smaller conflicts will be written to the file as conflict sections.
     """
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="""
-        Apply changes in _FILENAME_ that were made since last commit to as many other followed files as possible. 
+        Apply changes in SOURCE_FILENAME that were made since last commit.
+        Apply changes to TARGET_FILENAME if specified, otherwise apply to as many other followed files as possible.
         Files that conflict in their entirety will be skipped, and smaller conflicts will be written to the file as conflict sections.
     """)
-    parser.add_argument('FILENAME', help="file containing changes to be applied")
+    parser.add_argument('SOURCE_FILENAME', help="file containing changes to be applied")
+    parser.add_argument('TARGET_FILENAME', help="file(s) to apply changes to", nargs='*')
     parser.add_argument('-U', '--unified', type=int, dest="NUM", default=3, action="store", help="number of lines of context to show")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-i", "--interactive", action="store_true" , default=True , dest="interactive", help="interactively select changes to apply")
@@ -26,7 +29,7 @@ def apply(*args):
 
     config = FragmentsConfig()
     weave = Weave()
-    changed_path = os.path.realpath(args.FILENAME)
+    changed_path = os.path.realpath(args.SOURCE_FILENAME)
     changed_key = changed_path[len(config.root)+1:]
     if changed_key not in config['files']:
         yield "Could not apply changes in %r, it is not being followed" % changed_key
@@ -97,8 +100,8 @@ def apply(*args):
     weave.add_revision(changed_revision, changes_to_apply, [1])
 
     current_revision = changed_revision
-    for other_key in config['files']:
-        other_path = os.path.join(config.root, other_key)
+    for other_path in _iterate_over_files(args.TARGET_FILENAME, config):
+        other_key = other_path[len(config.root)+1:]
         if other_path == changed_path:
             continue # don't try to apply changes to ourself
         current_revision += 1

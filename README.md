@@ -102,9 +102,9 @@ Commands
 
     Revert changes to one or more files.
 
-* `apply [-i | -a] [[-U | --unified] NUM] FILENAME`
+* `apply [-i | -a] [[-U | --unified] NUM] SOURCE_FILENAME [TARGET_FILENAME [TARGET_FILENAME ...]]`
 
-    Apply changes in _FILENAME_ that were made since last commit to as many other followed files as possible. Files that conflict in their entirety will be skipped, and smaller conflicts will be written to the file as conflict sections.
+    Apply changes in _SOURCE\_FILENAME_ that were made since last commit. Apply changes to _TARGET\_FILENAME_ if specified, otherwise apply to as many other followed files as possible. Files that conflict in their entirety will be skipped, and smaller conflicts will be written to the file as conflict sections.
 
     `-i, --interactive` interactively select changes to apply
 
