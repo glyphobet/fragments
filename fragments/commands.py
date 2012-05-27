@@ -5,7 +5,7 @@ import inspect
 import argparse
 #import difflib
 
-from . import __version__, FragmentsError, Prompt
+from . import __version__, FragmentsError, Prompt, _iterate_over_files
 from .config import FragmentsConfig, configuration_directory_name, find_configuration, ConfigurationFileCorrupt, ConfigurationFileNotFound, ConfigurationDirectoryNotFound
 from .diff import _full_diff
 from .apply import apply
@@ -53,13 +53,6 @@ def init(*args):
     else:
         raise ExecutionError("Current fragments configuration found in %r, aborting." % config.path)
     yield "Fragments configuration created in %r" % config.path
-
-
-def _iterate_over_files(args, config):
-    if args:
-        return (os.path.realpath(a) for a in set(args))
-    else:
-        return (os.path.join(config.root, f) for f in config['files'])
 
 
 def _file_stat(config, curr_path):
