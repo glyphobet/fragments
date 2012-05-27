@@ -883,6 +883,43 @@ table {
         target_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         self.assertEqual(open(file2_name, 'r').read(), target_file2_contents)
 
+
+    def test_selective_apply(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
+        follow(file1_name)
+        commit(file1_name)
+
+        file2_name, file2_path = self._create_file(contents=self.html_file2_contents)
+        follow(file2_name)
+        commit(file2_name)
+
+        file3_name, file3_path = self._create_file(contents=self.html_file2_contents)
+        follow(file3_name)
+        commit(file3_name)
+
+        new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
+        open(file1_name, 'w').write(new_file1_contents)
+        self.assertEqual(apply('-a', file1_name, file2_name), [
+            '@@ -4,7 +4,8 @@',
+            '         <title>',
+            '             Page One',
+            '         </title>',
+            '-        <link href="default.css" />',
+            '+        <link href="layout.css" />',
+            '+        <link href="colors.css" />',
+            '         <link href="site.css" />',
+            '         <script href="script.js" />',
+            '         <script href="other.js" />',
+            "Changes in 'test_content/file1.ext' applied cleanly to 'test_content/file2.ext'"
+        ])
+
+        target_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
+        self.assertEqual(open(file2_name, 'r').read(), target_file2_contents)
+
+        self.assertEqual(open(file3_name, 'r').read(), self.html_file2_contents)
+
+
     def test_apply_interactive_yes(self):
         init()
         file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
