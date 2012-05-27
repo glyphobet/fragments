@@ -1,10 +1,17 @@
+import os
+import json
+import time
+import types
+import shutil
+import argparse
+import StringIO
+import tempfile
 import unittest
-import os, shutil, tempfile, types, time, json, argparse, StringIO
-import pdb
 
 from fragments import commands, __version__
 from fragments.commands import ExecutionError
 from fragments.config import configuration_file_name, configuration_directory_name, ConfigurationDirectoryNotFound, FragmentsConfig
+
 
 def help  (*a): return list(commands.help  (*a))
 def init  (*a): return list(commands.init  (*a))
@@ -16,7 +23,6 @@ def commit(*a): return list(commands.commit(*a))
 def revert(*a): return list(commands.revert(*a))
 def diff  (*a): return list(commands.diff  (*a))
 def apply (*a): return list(commands.apply (*a))
-
 
 
 class CommandBase(unittest.TestCase):

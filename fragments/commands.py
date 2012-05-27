@@ -1,8 +1,9 @@
-import sys, os, uuid
+import os
+import sys
+import uuid
 import inspect
 import argparse
 #import difflib
-import pdb
 
 from . import __version__, FragmentsError, Prompt
 from .config import FragmentsConfig, configuration_directory_name, find_configuration, ConfigurationFileCorrupt, ConfigurationFileNotFound, ConfigurationDirectoryNotFound

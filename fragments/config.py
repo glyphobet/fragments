@@ -1,5 +1,10 @@
-import os, sys, json, uuid
+import os
+import sys
+import json
+import uuid
+
 from . import FragmentsError, __version__
+
 
 configuration_file_name = 'config.json'
 configuration_directory_name = '_fragments'
