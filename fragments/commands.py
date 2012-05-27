@@ -184,6 +184,61 @@ def rename(*args):
     config.dump()
 
 
+def fork(*args):
+    """
+    Create a new file based on one or more existing files. 
+    Common sections are preserved; differing sections are replaced with a single newline.
+    """
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="""
+        Create a new file based on one or more existing files. 
+        Common sections are preserved; differing sections are replaced with a single newline.
+    """)
+    parser.add_argument('SOURCE_FILENAME', help="old file names", nargs="+")
+    parser.add_argument('DESTINATION_FILENAME', help="new file name")
+    args = parser.parse_args(args)
+
+    config = FragmentsConfig()
+    new_path = os.path.realpath(args.DESTINATION_FILENAME)
+    new_key = new_path[len(config.root)+1:]
+    if new_key in config['files']:
+        yield "Could not fork into %r, it is already followed" % args.DESTINATION_FILENAME
+        return
+    if os.access(new_path, os.R_OK|os.W_OK):
+        yield "Could not fork into %r, the file already exists" % args.DESTINATION_FILENAME
+        return
+
+    old_filenames = []
+    for old_name in args.SOURCE_FILENAME:
+        old_path = os.path.realpath(old_name)
+        old_key = old_path[len(config.root)+1:]
+        if os.access(old_path, os.R_OK|os.W_OK):
+            old_filenames.append(old_path)
+            if old_key not in config['files']:
+                yield "Warning, %r not being followed" % old_name
+        else:
+            yield "Skipping %r while forking, it does not exist" % old_name
+
+    if not old_filenames:
+        yield "Could not fork; no valid source files specified"
+        return
+
+    weave = Weave()
+
+    new_lines = open(old_filenames[0], 'r').readlines()
+    previous_revision = 1
+    weave.add_revision(previous_revision, new_lines, [])
+    for old_name in old_filenames[1:]:
+        current_revision = previous_revision + 1
+        weave.add_revision(current_revision, open(old_name, 'r').readlines(), [])
+        new_lines = [l if isinstance(l, basestring) else '\n' for l in weave.merge(previous_revision, current_revision)]
+        previous_revision = current_revision + 1
+        weave.add_revision(previous_revision, new_lines, [])
+
+    open(new_path, 'w').writelines(new_lines)
+    yield "Forked new file in %r, remember to follow and commit it" % args.DESTINATION_FILENAME
+    config.dump()
+
+
 def diff(*args):
     """Show differences between committed and uncommitted versions"""
     parser = argparse.ArgumentParser(prog="%s diff" % __package__, description="Show changes to the specified file(s).")
@@ -290,4 +345,4 @@ def _main(): # pragma: no cover
             print(l)
 
 
-__all__ = ['help', 'init', 'stat', 'follow', 'forget', 'rename', 'diff', 'commit', 'revert', 'apply']
+__all__ = ['help', 'init', 'stat', 'follow', 'forget', 'rename', 'fork', 'diff', 'commit', 'revert', 'apply']

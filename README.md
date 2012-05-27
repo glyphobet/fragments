@@ -63,6 +63,10 @@ Commands
 
     rename _OLD\_FILENAME_ to _NEW\_FILENAME_, moving the actual file on disk if it has not already been moved
 
+* `fork SOURCE\_FILENAME [SOURCE\_FILENAME ...] DESTINATION\_FILENAME`
+
+    Create a new file in _DESTINATION\_FILENAME_ based on one or more _SOURCE\_FILENAME_s. Common sections are preserved; differing sections are replaced with a single newline.
+
 * `diff [[-U | --unified] NUM] [FILENAME [FILENAME ...]]`
 
     show differences between committed and uncommitted versions

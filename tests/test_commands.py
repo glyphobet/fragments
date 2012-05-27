@@ -19,6 +19,7 @@ def stat  (*a): return list(commands.stat  (*a))
 def follow(*a): return list(commands.follow(*a))
 def forget(*a): return list(commands.forget(*a))
 def rename(*a): return list(commands.rename(*a))
+def fork  (*a): return list(commands.fork  (*a))
 def commit(*a): return list(commands.commit(*a))
 def revert(*a): return list(commands.revert(*a))
 def diff  (*a): return list(commands.diff  (*a))
@@ -409,6 +410,73 @@ class TestRenameCommand(CommandBase, PostInitCommandMixIn):
         new_key = os.path.realpath('other.ext')[len(config.root)+1:]
         self.assertNotIn(old_key, config['files'])
         self.assertIn(new_key, config['files'])
+
+
+class TestForkCommand(CommandBase, PostInitCommandMixIn):
+
+    command = staticmethod(lambda: fork('file1.ext', 'file2.ext', 'new_file.ext'))
+
+    def test_unitary_fork(self):
+        init()
+        file1_name, file1_path = self._create_file(contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\n")
+        follow(file1_name)
+        commit(file1_name)
+        forked_file_name = 'forked.file'
+        self.assertEquals(fork(file1_name, forked_file_name), ["Forked new file in %r, remember to follow and commit it" % forked_file_name])
+        self.assertEquals(open(forked_file_name, 'r').read(), open(file1_name, 'r').read())
+
+    def test_basic_fork(self):
+        init()
+        file1_name, file1_path = self._create_file(contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\n")
+        file2_name, file2_path = self._create_file(contents="Line One\nLine 2\nLine Three\nLine 4\nLine Five\n")
+        follow(file1_name, file2_name)
+        commit(file1_name, file2_name)
+        forked_file_name = 'forked.file'
+        self.assertEquals(fork(file1_name, file2_name, forked_file_name), ["Forked new file in %r, remember to follow and commit it" % forked_file_name])
+        self.assertEquals(open(forked_file_name, 'r').read(), "Line One\n\nLine Three\n\nLine Five\n")
+
+    def test_fork_from_unfollowed_files(self):
+        init()
+        file1_name, file1_path = self._create_file(contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\n")
+        file2_name, file2_path = self._create_file(contents="Line One\nLine 2\nLine Three\nLine 4\nLine Five\n")
+        forked_file_name = 'forked.file'
+        self.assertEquals(fork(file1_name, file2_name, forked_file_name), [
+            "Warning, %r not being followed" % file1_name,
+            "Warning, %r not being followed" % file2_name,
+            "Forked new file in %r, remember to follow and commit it" % forked_file_name
+        ])
+        self.assertEquals(open(forked_file_name, 'r').read(), "Line One\n\nLine Three\n\nLine Five\n")
+
+    def test_cant_fork_onto_followed_file(self):
+        init()
+        file1_name, file1_path = self._create_file(contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\n")
+        file2_name, file2_path = self._create_file(contents="Line One\nLine 2\nLine Three\nLine 4\nLine Five\n")
+        file3_name, file3_path = self._create_file(contents="Line 3\nLine 3\nLine 3\nLine 3\nLine 3\n")
+        follow(file1_name, file2_name, file3_name)
+        commit(file1_name, file2_name)
+
+        self.assertEquals(fork(file1_name, file2_name, file3_name), ["Could not fork into %r, it is already followed" % file3_name])
+        self.assertEquals(open(file3_path, 'r').read(), "Line 3\nLine 3\nLine 3\nLine 3\nLine 3\n")
+
+    def test_cant_fork_onto_existing_file(self):
+        init()
+        file1_name, file1_path = self._create_file(contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\n")
+        file2_name, file2_path = self._create_file(contents="Line One\nLine 2\nLine Three\nLine 4\nLine Five\n")
+        file3_name, file3_path = self._create_file(contents="Line 3\nLine 3\nLine 3\nLine 3\nLine 3\n")
+        follow(file1_name, file2_name)
+        commit(file1_name, file2_name)
+
+        self.assertEquals(fork(file1_name, file2_name, file3_name), ["Could not fork into %r, the file already exists" % file3_name])
+        self.assertEquals(open(file3_path, 'r').read(), "Line 3\nLine 3\nLine 3\nLine 3\nLine 3\n")
+
+    def test_cant_fork_from_nothing(self):
+        init()
+        self.assertEquals(fork('file1.ext', 'file2.ext', 'file3.ext'), [
+            "Skipping 'file1.ext' while forking, it does not exist",
+            "Skipping 'file2.ext' while forking, it does not exist",
+            'Could not fork; no valid source files specified'
+        ])
+        self.assertFalse(os.path.exists('file3.ext'))
 
 
 class TestCommitCommand(CommandBase, PostInitCommandMixIn):
