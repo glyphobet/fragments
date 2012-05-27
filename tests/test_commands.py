@@ -1,5 +1,5 @@
 import unittest
-import os, shutil, tempfile, types, time, json
+import os, shutil, tempfile, types, time, json, argparse, StringIO
 import pdb
 
 from fragments import commands, __version__
@@ -63,8 +63,20 @@ class TestConfig(CommandBase):
 
 class TestHelpCommand(CommandBase):
 
+    def setUp(self):
+        super(TestHelpCommand, self).setUp()
+        self.argparse_sys_stdout = argparse._sys.stdout
+        argparse._sys.stdout = StringIO.StringIO()
+
+    def tearDown(self):
+        argparse._sys.stdout = self.argparse_sys_stdout
+        super(TestHelpCommand, self).tearDown()
+
     def test_help(self):
-        help()
+        self.assertRaises(SystemExit, help)
+
+    def test_help_command(self):
+        self.assertRaises(SystemExit, help, 'init')
 
 
 class TestInitCommand(CommandBase):
