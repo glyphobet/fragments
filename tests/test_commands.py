@@ -65,7 +65,7 @@ class TestConfig(CommandBase):
         config = FragmentsConfig()
         config.dump()
         config = FragmentsConfig()
-        self.assertEquals(config['version'], __version__)   
+        self.assertEquals(config['version'], __version__)
 
 
 class TestHelpCommand(CommandBase):
