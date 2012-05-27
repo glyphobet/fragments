@@ -412,71 +412,157 @@ class TestRenameCommand(CommandBase, PostInitCommandMixIn):
         self.assertIn(new_key, config['files'])
 
 
-class TestForkCommand(CommandBase, PostInitCommandMixIn):
+class TestDiffCommand(CommandBase, PostInitCommandMixIn):
 
-    command = staticmethod(lambda: fork('file1.ext', 'file2.ext', 'new_file.ext'))
+    maxDiff = None
+    command = staticmethod(diff)
+    original_file = "Line One\nLine Two\nLine Three\nLine Four\nLine Five\n"
 
-    def test_unitary_fork(self):
+    def test_diff(self):
         init()
-        file1_name, file1_path = self._create_file(contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\n")
+        file1_name, file1_path = self._create_file(contents=self.original_file)
+        yestersecond = time.time() - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
+
         follow(file1_name)
         commit(file1_name)
-        forked_file_name = 'forked.file'
-        self.assertEquals(fork(file1_name, forked_file_name), ["Forked new file in %r, remember to follow and commit it" % forked_file_name])
-        self.assertEquals(open(forked_file_name, 'r').read(), open(file1_name, 'r').read())
+        file(file1_name, 'w').write(self.original_file.replace('Line Three', 'Line 2.6666\nLine Three and One Third'))
+        self.assertEquals(list(diff(file1_name)), [
+            '--- test_content/file1.ext',
+            '+++ test_content/file1.ext',
+            '@@ -1,5 +1,6 @@',
+            ' Line One',
+            ' Line Two',
+            '-Line Three',
+            '+Line 2.6666',
+            '+Line Three and One Third',
+            ' Line Four',
+            ' Line Five'])
 
-    def test_basic_fork(self):
+    def test_two_nearby_section_diff(self):
         init()
-        file1_name, file1_path = self._create_file(contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\n")
-        file2_name, file2_path = self._create_file(contents="Line One\nLine 2\nLine Three\nLine 4\nLine Five\n")
-        follow(file1_name, file2_name)
-        commit(file1_name, file2_name)
-        forked_file_name = 'forked.file'
-        self.assertEquals(fork(file1_name, file2_name, forked_file_name), ["Forked new file in %r, remember to follow and commit it" % forked_file_name])
-        self.assertEquals(open(forked_file_name, 'r').read(), "Line One\n\nLine Three\n\nLine Five\n")
+        file1_name, file1_path = self._create_file(contents=self.original_file)
+        yestersecond = time.time() - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
 
-    def test_fork_from_unfollowed_files(self):
+        follow(file1_name)
+        commit(file1_name)
+        file(file1_name, 'w').write(self.original_file.replace('Line One', 'Line 0.999999').replace('Line Five', 'Line 4.999999'))
+        self.assertEquals(list(diff(file1_name)), [
+            '--- test_content/file1.ext',
+            '+++ test_content/file1.ext',
+            '@@ -1,5 +1,5 @@',
+            '-Line One',
+            '+Line 0.999999',
+            ' Line Two',
+            ' Line Three',
+            ' Line Four',
+            '-Line Five',
+            '+Line 4.999999'])
+
+
+    def test_two_distant_section_diff(self):
+        original_file = "Line One\nLine Two\nLine Three\nLine Four\nLine Five\nLine Six\nLine Seven\nLine Eight\nLine Nine\n"
         init()
-        file1_name, file1_path = self._create_file(contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\n")
-        file2_name, file2_path = self._create_file(contents="Line One\nLine 2\nLine Three\nLine 4\nLine Five\n")
-        forked_file_name = 'forked.file'
-        self.assertEquals(fork(file1_name, file2_name, forked_file_name), [
-            "Warning, %r not being followed" % file1_name,
-            "Warning, %r not being followed" % file2_name,
-            "Forked new file in %r, remember to follow and commit it" % forked_file_name
-        ])
-        self.assertEquals(open(forked_file_name, 'r').read(), "Line One\n\nLine Three\n\nLine Five\n")
+        file1_name, file1_path = self._create_file(contents=original_file)
+        yestersecond = time.time() - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
 
-    def test_cant_fork_onto_followed_file(self):
+        follow(file1_name)
+        commit(file1_name)
+        file(file1_name, 'w').write(original_file.replace('Line One', 'Line 0.999999').replace('Line Nine', 'Line 8.999999'))
+        self.assertEquals(list(diff(file1_name)), [
+            '--- test_content/file1.ext',
+            '+++ test_content/file1.ext',
+            '@@ -1,4 +1,4 @@',
+            '-Line One',
+            '+Line 0.999999',
+            ' Line Two',
+            ' Line Three',
+            ' Line Four',
+            '@@ -6,4 +6,4 @@',
+            ' Line Six',
+            ' Line Seven',
+            ' Line Eight',
+            '-Line Nine',
+            '+Line 8.999999'])
+
+
+    def test_unmodified_file_diff(self):
         init()
-        file1_name, file1_path = self._create_file(contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\n")
-        file2_name, file2_path = self._create_file(contents="Line One\nLine 2\nLine Three\nLine 4\nLine Five\n")
-        file3_name, file3_path = self._create_file(contents="Line 3\nLine 3\nLine 3\nLine 3\nLine 3\n")
-        follow(file1_name, file2_name, file3_name)
-        commit(file1_name, file2_name)
+        file1_name, file1_path = self._create_file(contents=self.original_file)
+        yestersecond = time.time() - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
 
-        self.assertEquals(fork(file1_name, file2_name, file3_name), ["Could not fork into %r, it is already followed" % file3_name])
-        self.assertEquals(open(file3_path, 'r').read(), "Line 3\nLine 3\nLine 3\nLine 3\nLine 3\n")
+        follow(file1_name)
+        commit(file1_name)
+        self.assertEquals(list(diff(file1_name)), [])
 
-    def test_cant_fork_onto_existing_file(self):
+    def test_mtime_different_but_not_contents_diff(self):
         init()
-        file1_name, file1_path = self._create_file(contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\n")
-        file2_name, file2_path = self._create_file(contents="Line One\nLine 2\nLine Three\nLine 4\nLine Five\n")
-        file3_name, file3_path = self._create_file(contents="Line 3\nLine 3\nLine 3\nLine 3\nLine 3\n")
-        follow(file1_name, file2_name)
-        commit(file1_name, file2_name)
+        file1_name, file1_path = self._create_file(contents=self.original_file)
+        now = time.time()
+        yestersecond = now - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
 
-        self.assertEquals(fork(file1_name, file2_name, file3_name), ["Could not fork into %r, the file already exists" % file3_name])
-        self.assertEquals(open(file3_path, 'r').read(), "Line 3\nLine 3\nLine 3\nLine 3\nLine 3\n")
+        follow(file1_name)
+        commit(file1_name)
+        os.utime(file1_path, (now, now))
+        self.assertEquals(list(diff(file1_name)), [])
 
-    def test_cant_fork_from_nothing(self):
+    def test_diff_unfollowed_file(self):
         init()
-        self.assertEquals(fork('file1.ext', 'file2.ext', 'file3.ext'), [
-            "Skipping 'file1.ext' while forking, it does not exist",
-            "Skipping 'file2.ext' while forking, it does not exist",
-            'Could not fork; no valid source files specified'
-        ])
-        self.assertFalse(os.path.exists('file3.ext'))
+        file1_name, file1_path = self._create_file(contents=self.original_file)
+        yestersecond = time.time() - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
+        self.assertEquals(list(diff(file1_name)), ["Could not diff 'test_content/file1.ext', it is not being followed"])
+
+    def test_diff_uncommitted_file(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.original_file)
+        yestersecond = time.time() - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
+
+        follow(file1_path)
+        self.assertEquals(list(diff(file1_name)), [
+            '--- test_content/file1.ext',
+            '+++ test_content/file1.ext',
+            '@@ -0,0 +1,5 @@',
+            '+Line One',
+            '+Line Two',
+            '+Line Three',
+            '+Line Four',
+            '+Line Five'])
+
+    def test_diff_removed_file(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.original_file)
+        yestersecond = time.time() - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
+
+        follow(file1_path)
+        commit(file1_path)
+        
+        os.unlink(file1_path)
+        self.assertEquals(list(diff(file1_name)), [
+            '--- test_content/file1.ext',
+            '+++ test_content/file1.ext',
+            '@@ -1,5 +0,0 @@',
+            '-Line One',
+            '-Line Two',
+            '-Line Three',
+            '-Line Four',
+            '-Line Five'])
+
+    def test_diff_uncommitted_removed_file(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.original_file)
+        yestersecond = time.time() - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
+
+        follow(file1_path)
+        os.unlink(file1_path)
+        self.assertEquals(list(diff(file1_name)), [])
 
 
 class TestCommitCommand(CommandBase, PostInitCommandMixIn):
@@ -649,157 +735,71 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
         self.assertEquals(revert(file_name), [])
 
 
-class TestDiffCommand(CommandBase, PostInitCommandMixIn):
+class TestForkCommand(CommandBase, PostInitCommandMixIn):
 
-    maxDiff = None
-    command = staticmethod(diff)
-    original_file = "Line One\nLine Two\nLine Three\nLine Four\nLine Five\n"
+    command = staticmethod(lambda: fork('file1.ext', 'file2.ext', 'new_file.ext'))
 
-    def test_diff(self):
+    def test_unitary_fork(self):
         init()
-        file1_name, file1_path = self._create_file(contents=self.original_file)
-        yestersecond = time.time() - 2
-        os.utime(file1_path, (yestersecond, yestersecond))
-
+        file1_name, file1_path = self._create_file(contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\n")
         follow(file1_name)
         commit(file1_name)
-        file(file1_name, 'w').write(self.original_file.replace('Line Three', 'Line 2.6666\nLine Three and One Third'))
-        self.assertEquals(list(diff(file1_name)), [
-            '--- test_content/file1.ext',
-            '+++ test_content/file1.ext',
-            '@@ -1,5 +1,6 @@',
-            ' Line One',
-            ' Line Two',
-            '-Line Three',
-            '+Line 2.6666',
-            '+Line Three and One Third',
-            ' Line Four',
-            ' Line Five'])
+        forked_file_name = 'forked.file'
+        self.assertEquals(fork(file1_name, forked_file_name), ["Forked new file in %r, remember to follow and commit it" % forked_file_name])
+        self.assertEquals(open(forked_file_name, 'r').read(), open(file1_name, 'r').read())
 
-    def test_two_nearby_section_diff(self):
+    def test_basic_fork(self):
         init()
-        file1_name, file1_path = self._create_file(contents=self.original_file)
-        yestersecond = time.time() - 2
-        os.utime(file1_path, (yestersecond, yestersecond))
+        file1_name, file1_path = self._create_file(contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\n")
+        file2_name, file2_path = self._create_file(contents="Line One\nLine 2\nLine Three\nLine 4\nLine Five\n")
+        follow(file1_name, file2_name)
+        commit(file1_name, file2_name)
+        forked_file_name = 'forked.file'
+        self.assertEquals(fork(file1_name, file2_name, forked_file_name), ["Forked new file in %r, remember to follow and commit it" % forked_file_name])
+        self.assertEquals(open(forked_file_name, 'r').read(), "Line One\n\nLine Three\n\nLine Five\n")
 
-        follow(file1_name)
-        commit(file1_name)
-        file(file1_name, 'w').write(self.original_file.replace('Line One', 'Line 0.999999').replace('Line Five', 'Line 4.999999'))
-        self.assertEquals(list(diff(file1_name)), [
-            '--- test_content/file1.ext',
-            '+++ test_content/file1.ext',
-            '@@ -1,5 +1,5 @@',
-            '-Line One',
-            '+Line 0.999999',
-            ' Line Two',
-            ' Line Three',
-            ' Line Four',
-            '-Line Five',
-            '+Line 4.999999'])
-
-
-    def test_two_distant_section_diff(self):
-        original_file = "Line One\nLine Two\nLine Three\nLine Four\nLine Five\nLine Six\nLine Seven\nLine Eight\nLine Nine\n"
+    def test_fork_from_unfollowed_files(self):
         init()
-        file1_name, file1_path = self._create_file(contents=original_file)
-        yestersecond = time.time() - 2
-        os.utime(file1_path, (yestersecond, yestersecond))
+        file1_name, file1_path = self._create_file(contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\n")
+        file2_name, file2_path = self._create_file(contents="Line One\nLine 2\nLine Three\nLine 4\nLine Five\n")
+        forked_file_name = 'forked.file'
+        self.assertEquals(fork(file1_name, file2_name, forked_file_name), [
+            "Warning, %r not being followed" % file1_name,
+            "Warning, %r not being followed" % file2_name,
+            "Forked new file in %r, remember to follow and commit it" % forked_file_name
+        ])
+        self.assertEquals(open(forked_file_name, 'r').read(), "Line One\n\nLine Three\n\nLine Five\n")
 
-        follow(file1_name)
-        commit(file1_name)
-        file(file1_name, 'w').write(original_file.replace('Line One', 'Line 0.999999').replace('Line Nine', 'Line 8.999999'))
-        self.assertEquals(list(diff(file1_name)), [
-            '--- test_content/file1.ext',
-            '+++ test_content/file1.ext',
-            '@@ -1,4 +1,4 @@',
-            '-Line One',
-            '+Line 0.999999',
-            ' Line Two',
-            ' Line Three',
-            ' Line Four',
-            '@@ -6,4 +6,4 @@',
-            ' Line Six',
-            ' Line Seven',
-            ' Line Eight',
-            '-Line Nine',
-            '+Line 8.999999'])
-
-
-    def test_unmodified_file_diff(self):
+    def test_cant_fork_onto_followed_file(self):
         init()
-        file1_name, file1_path = self._create_file(contents=self.original_file)
-        yestersecond = time.time() - 2
-        os.utime(file1_path, (yestersecond, yestersecond))
+        file1_name, file1_path = self._create_file(contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\n")
+        file2_name, file2_path = self._create_file(contents="Line One\nLine 2\nLine Three\nLine 4\nLine Five\n")
+        file3_name, file3_path = self._create_file(contents="Line 3\nLine 3\nLine 3\nLine 3\nLine 3\n")
+        follow(file1_name, file2_name, file3_name)
+        commit(file1_name, file2_name)
 
-        follow(file1_name)
-        commit(file1_name)
-        self.assertEquals(list(diff(file1_name)), [])
+        self.assertEquals(fork(file1_name, file2_name, file3_name), ["Could not fork into %r, it is already followed" % file3_name])
+        self.assertEquals(open(file3_path, 'r').read(), "Line 3\nLine 3\nLine 3\nLine 3\nLine 3\n")
 
-    def test_mtime_different_but_not_contents_diff(self):
+    def test_cant_fork_onto_existing_file(self):
         init()
-        file1_name, file1_path = self._create_file(contents=self.original_file)
-        now = time.time()
-        yestersecond = now - 2
-        os.utime(file1_path, (yestersecond, yestersecond))
+        file1_name, file1_path = self._create_file(contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\n")
+        file2_name, file2_path = self._create_file(contents="Line One\nLine 2\nLine Three\nLine 4\nLine Five\n")
+        file3_name, file3_path = self._create_file(contents="Line 3\nLine 3\nLine 3\nLine 3\nLine 3\n")
+        follow(file1_name, file2_name)
+        commit(file1_name, file2_name)
 
-        follow(file1_name)
-        commit(file1_name)
-        os.utime(file1_path, (now, now))
-        self.assertEquals(list(diff(file1_name)), [])
+        self.assertEquals(fork(file1_name, file2_name, file3_name), ["Could not fork into %r, the file already exists" % file3_name])
+        self.assertEquals(open(file3_path, 'r').read(), "Line 3\nLine 3\nLine 3\nLine 3\nLine 3\n")
 
-    def test_diff_unfollowed_file(self):
+    def test_cant_fork_from_nothing(self):
         init()
-        file1_name, file1_path = self._create_file(contents=self.original_file)
-        yestersecond = time.time() - 2
-        os.utime(file1_path, (yestersecond, yestersecond))
-        self.assertEquals(list(diff(file1_name)), ["Could not diff 'test_content/file1.ext', it is not being followed"])
-
-    def test_diff_uncommitted_file(self):
-        init()
-        file1_name, file1_path = self._create_file(contents=self.original_file)
-        yestersecond = time.time() - 2
-        os.utime(file1_path, (yestersecond, yestersecond))
-
-        follow(file1_path)
-        self.assertEquals(list(diff(file1_name)), [
-            '--- test_content/file1.ext',
-            '+++ test_content/file1.ext',
-            '@@ -0,0 +1,5 @@',
-            '+Line One',
-            '+Line Two',
-            '+Line Three',
-            '+Line Four',
-            '+Line Five'])
-
-    def test_diff_removed_file(self):
-        init()
-        file1_name, file1_path = self._create_file(contents=self.original_file)
-        yestersecond = time.time() - 2
-        os.utime(file1_path, (yestersecond, yestersecond))
-
-        follow(file1_path)
-        commit(file1_path)
-        
-        os.unlink(file1_path)
-        self.assertEquals(list(diff(file1_name)), [
-            '--- test_content/file1.ext',
-            '+++ test_content/file1.ext',
-            '@@ -1,5 +0,0 @@',
-            '-Line One',
-            '-Line Two',
-            '-Line Three',
-            '-Line Four',
-            '-Line Five'])
-
-    def test_diff_uncommitted_removed_file(self):
-        init()
-        file1_name, file1_path = self._create_file(contents=self.original_file)
-        yestersecond = time.time() - 2
-        os.utime(file1_path, (yestersecond, yestersecond))
-
-        follow(file1_path)
-        os.unlink(file1_path)
-        self.assertEquals(list(diff(file1_name)), [])
+        self.assertEquals(fork('file1.ext', 'file2.ext', 'file3.ext'), [
+            "Skipping 'file1.ext' while forking, it does not exist",
+            "Skipping 'file2.ext' while forking, it does not exist",
+            'Could not fork; no valid source files specified'
+        ])
+        self.assertFalse(os.path.exists('file3.ext'))
 
 
 class TestApplyCommand(CommandBase, PostInitCommandMixIn):

@@ -84,11 +84,6 @@ Commands
 
     Rename _OLD\_FILENAME_ to _NEW\_FILENAME_, moving the actual file on disk if it has not already been moved.
 
-* `fork SOURCE_FILENAME [SOURCE_FILENAME ...] TARGET_FILENAME`
-
-    Create a new file in _TARGET\_FILENAME_ based on one or more _SOURCE\_FILENAME_(s).
-    Common sections are preserved; differing sections are replaced with a single newline.
-
 * `diff [[-U | --unified] NUM] [FILENAME [FILENAME ...]]`
 
     Show differences between committed and uncommitted versions, limited to _FILENAME_(s) if specified.
@@ -102,6 +97,11 @@ Commands
 * `revert [FILENAME [FILENAME ...]]`
 
     Revert changes to the fragments repository, limited to _FILENAME_(s) if specified.
+
+* `fork SOURCE_FILENAME [SOURCE_FILENAME ...] TARGET_FILENAME`
+
+    Create a new file in _TARGET\_FILENAME_ based on one or more _SOURCE\_FILENAME_(s).
+    Common sections are preserved; differing sections are replaced with a single newline.
 
 * `apply [-i | -a] [[-U | --unified] NUM] SOURCE_FILENAME [TARGET_FILENAME [TARGET_FILENAME ...]]`
 
