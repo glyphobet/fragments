@@ -225,9 +225,8 @@ def commit(*args):
         s = _file_stat(config, curr_path)
         if s in 'MA':
             repo_path = os.path.join(config.directory, config['files'][key])
-            repo_file = file(repo_path, 'w')
-            repo_file.write(file(curr_path, 'r').read())
-            repo_file.close()
+            with file(repo_path, 'w') as repo_file:
+                repo_file.write(open(curr_path, 'r').read())
             os.utime(repo_path, os.stat(curr_path)[7:9])
             yield "'%s' committed" % os.path.relpath(curr_path)
         elif s in 'D':
@@ -251,9 +250,8 @@ def revert(*args):
         s = _file_stat(config, curr_path)
         if s in 'MD':
             repo_path = os.path.join(config.directory,  config['files'][key])
-            curr_file = file(curr_path, 'w')
-            curr_file.write(file(repo_path, 'r').read())
-            curr_file.close()
+            with file(curr_path, 'w') as curr_file:
+                curr_file.write(open(repo_path, 'r').read())
             os.utime(curr_path, os.stat(repo_path)[7:9])
             yield "'%s' reverted" % key
         elif s in 'A':
@@ -307,7 +305,8 @@ def fork(*args):
         previous_revision = current_revision + 1
         weave.add_revision(previous_revision, new_lines, [])
 
-    open(new_path, 'w').writelines(new_lines)
+    with file(new_path, 'w') as new_file:
+        new_file.writelines(new_lines)
     yield "Forked new file in '%s', remember to follow and commit it" % os.path.relpath(args.TARGET_FILENAME)
     config.dump()
 

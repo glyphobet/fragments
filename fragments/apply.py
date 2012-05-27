@@ -42,9 +42,9 @@ def apply(*args):
         return
 
     old_revision = 1
-    weave.add_revision(old_revision, file(old_path, 'r').readlines(), [])
+    weave.add_revision(old_revision, open(old_path, 'r').readlines(), [])
     new_revision = 2
-    weave.add_revision(new_revision, file(changed_path, 'r').readlines(), [])
+    weave.add_revision(new_revision, open(changed_path, 'r').readlines(), [])
 
     changes_to_apply = []
     diff = weave.merge(old_revision, new_revision)
@@ -101,30 +101,28 @@ def apply(*args):
         if other_path == changed_path:
             continue # don't try to apply changes to ourself
         current_revision += 1
-        weave.add_revision(current_revision, file(other_path, 'r').readlines(), [])
+        weave.add_revision(current_revision, open(other_path, 'r').readlines(), [])
         merge_result = weave.cherry_pick(changed_revision, current_revision) # Can I apply changes in changed_revision onto this other file?
         if tuple in (type(mr) for mr in merge_result):
             if len(merge_result) == 1 and isinstance(merge_result[0], tuple):
                 # total conflict, skip
                 yield "Changes in %r cannot apply to %r, skipping" % (changed_key, other_key)
                 continue
-            other_file = file(other_path, 'w')
-            for line_or_conflict in merge_result:
-                if isinstance(line_or_conflict, basestring):
-                    other_file.write(line_or_conflict)
-                else:
-                    other_file.write('>'*7 + '\n')
-                    for line in line_or_conflict[0]:
-                        other_file.write(line)
-                    other_file.write('='*7 + '\n')
-                    for line in line_or_conflict[1]:
-                        other_file.write(line)
-                    other_file.write('>'*7 + '\n')
-            other_file.close()
+            with file(other_path, 'w') as other_file:
+                for line_or_conflict in merge_result:
+                    if isinstance(line_or_conflict, basestring):
+                        other_file.write(line_or_conflict)
+                    else:
+                        other_file.write('>'*7 + '\n')
+                        for line in line_or_conflict[0]:
+                            other_file.write(line)
+                        other_file.write('='*7 + '\n')
+                        for line in line_or_conflict[1]:
+                            other_file.write(line)
+                        other_file.write('>'*7 + '\n')
             yield "Conflict merging %r => %r" % (changed_key, other_key)
         else:
             # Merge is clean:
-            other_file = file(other_path, 'w')
-            other_file.writelines(merge_result)
-            other_file.close()
+            with file(other_path, 'w') as other_file:
+                other_file.writelines(merge_result)
             yield "Changes in %r applied cleanly to %r" % (changed_key, other_key)
