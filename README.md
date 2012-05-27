@@ -1,26 +1,39 @@
 Fragments
 =========
 
-Fragments is neither a templating language, nor a version control system, but it combines aspects of both. It enables a programmer to violate the [DRY (Don't Repeat Yourself)](http://en.wikipedia.org/wiki/Don't_repeat_yourself) principle; it is a [Multiple Source of Truth](http://en.wikipedia.org/wiki/Single_Source_of_Truth) engine. You could think of it as "fragmentation control".
+Fragments uses concepts from version control to replace many uses of templating languages. It provides diff-based templating, instead of a templating language; It is "fragmentation control" instead of revision control.
 
-What is Fragmentation Control?
----------------------------------------------
+Fragments enables a programmer to violate the [DRY (Don't Repeat Yourself)](http://en.wikipedia.org/wiki/Don't_repeat_yourself) principle; it is a [Multiple Source of Truth](http://en.wikipedia.org/wiki/Single_Source_of_Truth) engine.
 
-Generating HTML with templating languages is difficult because HTML templates often have two semi-incompatible purposes. The first purpose is sometimes called page "inheritance": managing common HTML elements & structure: headers, sidebars, and footers; across multiple templates. The second purpose is to perform idiosyncratic display logic on variable data coming from some sort of backend. Separate these two tasks and your templates become much simpler. Fragments takes care of common HTML elements and structure, leaving the actual display logic to your templating language or application.
+What is diff-based templating?
+------------------------------
 
-The machinery to manage common code fragments across multiple files already exists in modern version control systems. Instead of a "diachronic" system, which manages many changes to a single file over time, Fragments is a "synchronic" system, which can apply a single change to many files synchronously. Each HTML file (or any other type of file, really) is in effect its own "branch", and whenever you modify a file ("branch") you can apply ("merge") that change into whichever other files ("branches") you choose. In this sense Fragments is a different kind of "source control"--rather than controlling versions/revisions, it controls fragments. Hence the term "fragmentation control".
+Generating HTML with templating languages is difficult because templating languages often have two semi-incompatible purposes. The first purpose is sometimes called page "inheritance": managing common HTML elements & structure: headers, sidebars, and footers; across multiple templates. The second purpose is to perform idiosyncratic display logic on data coming from another source. When these two purposes can be separated, templates can be much simpler.
+
+Fragments manages this first purpose, common HTML elements and structure, with diff and merge algorithms. The actual display logic is left to your application, or to a templating language whose templates are themselves managed by Fragments.
+
+What is fragmentation control?
+------------------------------
+
+The machinery to manage common and different code fragments across multiple versions of _a single file_ already exists in modern version control systems. Fragments adapts these tools to manage common and different versions of _several different files_.
+
+Each file is in effect its own "branch", and whenever you modify a file ("branch") you can apply ("merge") that change into whichever other files ("branches") you choose. In this sense Fragments is a different kind of "source control"--rather than controlling versions/revisions over time, it controls fragments across many files that all exist simultaneously. Hence the term "fragmentation control".
+
+As I am a linguist, I have to point out that the distinction between [Synchronic](http://en.wikipedia.org/wiki/Synchronic_analysis) and [Diachronic](http://en.wikipedia.org/wiki/Diachronics) Linguistics gave me this idea in the first place.
 
 How does it work?
 -----------------
 
-The merge algorithm is a version of [Precise Codeville Merge](http://revctrl.org/PreciseCodevilleMerge) modified to support cherry-picking. Precise Codeville Merge was chosen because it supports [convergence](http://revctrl.org/Convergence). That is, if two files are independently modified in the same way, they merge together cleanly. This makes adding new files easy; just copy an existing file, change it as desired, and commit it. Subsequent changes to any un-modified, common sections, in that file or in its siblings, will be applicable across the rest of the repository.
+The merge algorithm is a version of [Precise Codeville Merge](http://revctrl.org/PreciseCodevilleMerge) modified to support cherry-picking. Precise Codeville Merge was chosen because it supports [convergence](http://revctrl.org/Convergence). That is, if two files are independently modified in the same way, they merge together cleanly. This makes adding new files easy; just copy an existing file (or use Fragment's `fork` command), change it as desired, and commit it. Subsequent changes to any un-modified, common sections, in that file or in its siblings, will be applicable across the rest of the repository.
 
-Fragments is also not HTML specific. XML, CSS, JSON, YAML, source code from your favorite obscure programming language; if it's got newlines, Fragments can manage it. Fragments is even smart enough to know not to merge totally different files together. It could even conceivably replace some CMS-managed websites with pure static HTML.
+Fragments is also not HTML specific. If it's got newlines, Fragments can manage it. That means XML, CSS, JSON, YAML, or even source code from any programming language where newlines are common (sorry, Perl). Fragments is even smart enough to know not to merge totally different files together. It could even conceivably replace simpler CMS-managed websites with pure static HTML.
 
 Integration with Version Control
 --------------------------------
 
-Fragments has no "history"; It only stores the previous committed state of a file. Storing history is up to your ("diachronic") version control system. Fragments stores its repository configuration in such a way to allow your version control system to manage it painlessly and obviously. Configuration is stored in a `_fragments` directory. This directory name is not preceded by a `.`, and all the files in it are stored as plain text. The configuration resides one directory above your actual content, so as to not interfere with template loading code, and so it is not accidentally deployed to production along with your actual content.
+Fragments has no history; It only stores the previous committed state of a file. Storing history is up to your version control system. But Fragments stores its repository configuration in such a way to allow your version control system to manage it painlessly and obviously. Configuration is stored in a `_fragments` directory. This directory name is not preceded by a `.`, and all the files in it are stored as plain text. The configuration resides one directory above your actual content, so it does not interfere with template loading code, and so it is not accidentally deployed to production along with your actual content.
+
+The `rename` and `forget` commands in Fragments are also written to not interfere with what rename and remove commands do to the same files, as they may sometimes need to be used in tandem.
 
 Invisibility
 ------------
@@ -29,6 +42,14 @@ Fragments is invisible to people who don't know it's being used. If you (or some
 
 Future Improvements
 -------------------
+
+### Colorized output
+
+Colorized diff and status output is coming soon.
+
+### Better interactive chunk picking
+
+A better interactive mode including the ability to skip and return to hunks like git does with `j/J/k/K` may be added.
 
 ### Preprocessors
 
@@ -83,7 +104,7 @@ Commands
 
 * `apply [-i | -a] [[-U | --unified] NUM] FILENAME`
 
-    Apply changes in _FILENAME_ that were made since last commit to as many other followed files as possible.
+    Apply changes in _FILENAME_ that were made since last commit to as many other followed files as possible. Files that conflict in their entirety will be skipped, and smaller conflicts will be written to the file as conflict sections.
 
     `-i, --interactive` interactively select changes to apply
 

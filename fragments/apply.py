@@ -9,8 +9,14 @@ from . import Prompt
 
 
 def apply(*args):
-    """Apply changes in one file that were made since last commit to as many other followed files as possible."""
-    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="Apply changes in FILENAME that were made since last commit to as many other followed files as possible.")
+    """
+    Apply changes in _FILENAME_ that were made since last commit to as many other followed files as possible. 
+    Files that conflict in their entirety will be skipped, and smaller conflicts will be written to the file as conflict sections.
+    """
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="""
+        Apply changes in _FILENAME_ that were made since last commit to as many other followed files as possible. 
+        Files that conflict in their entirety will be skipped, and smaller conflicts will be written to the file as conflict sections.
+    """)
     parser.add_argument('FILENAME', help="file containing changes to be applied")
     parser.add_argument('-U', '--unified', type=int, dest="NUM", default=3, action="store", help="number of lines of context to show")
     group = parser.add_mutually_exclusive_group()
