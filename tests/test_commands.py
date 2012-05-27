@@ -877,7 +877,7 @@ table {
             '         <link href="site.css" />',
             '         <script href="script.js" />',
             '         <script href="other.js" />',
-            "Changes in 'test_content/file1.ext' applied cleanly to u'test_content/file2.ext'"
+            "Changes in '%s' applied cleanly to '%s'" % (os.path.relpath(file1_path), os.path.relpath(file2_path))
         ])
 
         target_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
@@ -911,7 +911,7 @@ table {
             '         <link href="site.css" />',
             '         <script href="script.js" />',
             '         <script href="other.js" />',
-            "Changes in 'test_content/file1.ext' applied cleanly to 'test_content/file2.ext'"
+            "Changes in '%s' applied cleanly to '%s'" % (os.path.relpath(file1_path), os.path.relpath(file2_path))
         ])
 
         target_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
@@ -946,7 +946,8 @@ table {
         self.assertEqual(next(apply_generator), '         <script href="script.js" />')
         self.assertEqual(next(apply_generator), '         <script href="other.js" />' )
         self.assertEqual(next(apply_generator), 'Apply this change? y/n')
-        self.assertEqual(apply_generator.send('y'), "Changes in 'test_content/file1.ext' applied cleanly to u'test_content/file2.ext'")
+        self.assertEqual(apply_generator.send('y'), "Changes in '%s' applied cleanly to '%s'" % (os.path.relpath(file1_path), os.path.relpath(file2_path))
+)
 
         target_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         self.assertEqual(open(file2_name, 'r').read(), target_file2_contents)
@@ -977,19 +978,20 @@ table {
         self.assertEqual(next(apply_generator), '         <script href="script.js" />')
         self.assertEqual(next(apply_generator), '         <script href="other.js" />' )
         self.assertEqual(next(apply_generator), 'Apply this change? y/n')
-        self.assertEqual(apply_generator.send('n'), "Changes in 'test_content/file1.ext' applied cleanly to u'test_content/file2.ext'")
+        self.assertEqual(apply_generator.send('n'), "Changes in '%s' applied cleanly to '%s'" % (os.path.relpath(file1_path), os.path.relpath(file2_path))
+)
 
         self.assertEqual(open(file2_name, 'r').read(), self.html_file2_contents)
 
     def test_cant_apply_nonexistent_file(self):
         init()
-        self.assertEqual(apply("nonexistent.file", '-a'), ["Could not apply changes in 'test_content/nonexistent.file', it is not being followed"])
+        self.assertEqual(apply("nonexistent.file", '-a'), ["Could not apply changes in 'nonexistent.file', it is not being followed"])
 
     def test_cant_apply_unfollowed_file(self):
         init()
         file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
         os.unlink(file1_path)
-        self.assertEqual(apply(file1_name, '-a'), ["Could not apply changes in 'test_content/file1.ext', it is not being followed"])
+        self.assertEqual(apply(file1_name, '-a'), ["Could not apply changes in '%s', it is not being followed" % os.path.relpath(file1_path)])
 
     def test_cant_apply_removed_file(self):
         init()
@@ -997,13 +999,13 @@ table {
         follow(file1_name)
         commit(file1_name)
         os.unlink(file1_path)
-        self.assertEqual(apply(file1_name, '-a'), ["Could not apply changes in 'test_content/file1.ext', it no longer exists on disk"])
+        self.assertEqual(apply(file1_name, '-a'), ["Could not apply changes in '%s', it no longer exists on disk" % os.path.relpath(file1_path)])
 
     def test_cant_apply_uncommitted_file(self):
         init()
         file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
         follow(file1_name)
-        self.assertEqual(apply(file1_name, '-a'), ["Could not apply changes in 'test_content/file1.ext', it has never been committed"])
+        self.assertEqual(apply(file1_name, '-a'), ["Could not apply changes in '%s', it has never been committed" % os.path.relpath(file1_path)])
 
     def test_cant_apply_missing_history_file(self):
         init()
@@ -1014,7 +1016,7 @@ table {
         key = file1_path[len(config.root)+1:]
         uuid_path = os.path.join(config.directory, config['files'][key])
         os.unlink(uuid_path)
-        self.assertEqual(apply(file1_name, '-a'), ["Could not apply changes in 'test_content/file1.ext', it has never been committed"])
+        self.assertEqual(apply(file1_name, '-a'), ["Could not apply changes in '%s', it has never been committed" % os.path.relpath(file1_path)])
 
     def test_apply_detects_convergent_changes(self):
         init()
@@ -1043,7 +1045,7 @@ table {
             '         <link href="site.css" />',
             '         <script href="script.js" />',
             '         <script href="other.js" />',
-            "Changes in 'test_content/file1.ext' applied cleanly to u'test_content/file2.ext'"
+            "Changes in '%s' applied cleanly to '%s'" % (os.path.relpath(file1_path), os.path.relpath(file2_path))
         ])
 
         self.assertEqual(open(file2_name, 'r').read(), new_file2_contents)
@@ -1076,8 +1078,8 @@ table {
             '         <link href="site.css" />',
             '         <script href="script.js" />',
             '         <script href="other.js" />',
-            "Changes in 'test_content/file1.ext' cannot apply to u'test_content/file3.ext', skipping",
-            "Changes in 'test_content/file1.ext' applied cleanly to u'test_content/file2.ext'"
+            "Changes in '%s' cannot apply to '%s', skipping" % (os.path.relpath(file1_path), os.path.relpath(css_path)),
+            "Changes in '%s' applied cleanly to '%s'" % (os.path.relpath(file1_path), os.path.relpath(file2_path))
         ])
         self.assertEqual(open(css_name, 'r').read(), self.css_file1_contents)
 
@@ -1106,7 +1108,7 @@ table {
             '         <link href="site.css" />',
             '         <script href="script.js" />',
             '         <script href="other.js" />',
-            "Conflict merging 'test_content/file1.ext' => u'test_content/file2.ext'"
+            "Conflict merging '%s' into '%s'" % (os.path.relpath(file1_path), os.path.relpath(file2_path))
         ])
         self.assertEqual(open(file2_name, 'r').read(), new_file2_contents.replace('        <link href="colors.css" />', '''>>>>>>>
         <link href="layout.css" />
