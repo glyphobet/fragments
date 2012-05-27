@@ -70,15 +70,15 @@ Commands
 
 * `stat [FILENAME [FILENAME ...]]`
 
-    Get the current status of FILENAME if specified, otherwise of the fragments repository.
+    Get the current status of the fragments repository, limited to _FILENAME_(s) if specified.
 
 * `follow FILENAME [FILENAME ...]`
 
-    Start following changes to one or more files.
+    Start following changes to one or more _FILENAME_(s).
 
 * `forget FILENAME [FILENAME ...]`
 
-    Stop following changes to one or more files.
+    Stop following changes to one or more _FILENAME_(s).
 
 * `rename OLD_FILENAME NEW_FILENAME`
 
@@ -91,21 +91,24 @@ Commands
 
 * `diff [[-U | --unified] NUM] [FILENAME [FILENAME ...]]`
 
-    Show differences between committed and uncommitted versions.
+    Show differences between committed and uncommitted versions, limited to _FILENAME_(s) if specified.
 
     `-U NUM`, `--unified NUM` number of lines of context to show
 
 * `commit [FILENAME [FILENAME ...]]`
 
-    Commit changes to one or more files.
+    Commit changes to the fragments repository, limited to _FILENAME_(s) if specified.
 
 * `revert [FILENAME [FILENAME ...]]`
 
-    Revert changes to one or more files.
+    Revert changes to the fragments repository, limited to _FILENAME_(s) if specified.
 
 * `apply [-i | -a] [[-U | --unified] NUM] SOURCE_FILENAME [TARGET_FILENAME [TARGET_FILENAME ...]]`
 
-    Apply changes in _SOURCE\_FILENAME_ that were made since last commit. Apply changes to _TARGET\_FILENAME_ if specified, otherwise apply to as many other followed files as possible. Files that conflict in their entirety will be skipped, and smaller conflicts will be written to the file as conflict sections.
+    Apply changes in _SOURCE\_FILENAME_ that were made since last commit, where possible.
+    Limit application to _TARGET\_FILENAME_(s) if specified.
+    Files that conflict in their entirety will be skipped.
+    Smaller conflicts will be written to the file as conflict sections.
 
     `-i, --interactive` interactively select changes to apply
 
