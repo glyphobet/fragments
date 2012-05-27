@@ -179,25 +179,25 @@ def rename(*args):
 
 def fork(*args):
     """
-    Create a new file based on one or more existing files. 
+    Create a new file in TARGET_FILENAME based on one or more SOURCE_FILENAME(s).
     Common sections are preserved; differing sections are replaced with a single newline.
     """
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="""
-        Create a new file based on one or more existing files. 
+        Create a new file in TARGET_FILENAME based on one or more SOURCE_FILENAME(s).
         Common sections are preserved; differing sections are replaced with a single newline.
     """)
     parser.add_argument('SOURCE_FILENAME', help="old file names", nargs="+")
-    parser.add_argument('DESTINATION_FILENAME', help="new file name")
+    parser.add_argument('TARGET_FILENAME', help="new file name")
     args = parser.parse_args(args)
 
     config = FragmentsConfig()
-    new_path = os.path.realpath(args.DESTINATION_FILENAME)
+    new_path = os.path.realpath(args.TARGET_FILENAME)
     new_key = new_path[len(config.root)+1:]
     if new_key in config['files']:
-        yield "Could not fork into %r, it is already followed" % args.DESTINATION_FILENAME
+        yield "Could not fork into %r, it is already followed" % args.TARGET_FILENAME
         return
     if os.access(new_path, os.R_OK|os.W_OK):
-        yield "Could not fork into %r, the file already exists" % args.DESTINATION_FILENAME
+        yield "Could not fork into %r, the file already exists" % args.TARGET_FILENAME
         return
 
     old_filenames = []
@@ -228,7 +228,7 @@ def fork(*args):
         weave.add_revision(previous_revision, new_lines, [])
 
     open(new_path, 'w').writelines(new_lines)
-    yield "Forked new file in %r, remember to follow and commit it" % args.DESTINATION_FILENAME
+    yield "Forked new file in %r, remember to follow and commit it" % args.TARGET_FILENAME
     config.dump()
 
 
