@@ -89,8 +89,8 @@ def _file_stat(config, curr_path):
 
 
 def stat(*args):
-    """Get status of a fragments repository."""
-    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="Get status of a fragments repository")
+    """Get the current status of FILENAME if specified, otherwise of the fragments repository."""
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="Get the current status of FILENAME if specified, otherwise of the fragments repository")
     parser.add_argument('FILENAME', help="files to show status for", nargs="*")
     args = parser.parse_args(args)
 

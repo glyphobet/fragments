@@ -70,7 +70,7 @@ Commands
 
 * `stat [FILENAME [FILENAME ...]]`
 
-    Get the current status of the fragments repository.
+    Get the current status of FILENAME if specified, otherwise of the fragments repository.
 
 * `follow FILENAME [FILENAME ...]`
 
