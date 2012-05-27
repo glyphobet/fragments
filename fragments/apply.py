@@ -1,4 +1,5 @@
 import os
+import inspect
 import argparse
 import pdb
 
@@ -10,7 +11,7 @@ from . import Prompt
 
 def apply(*args):
     """Apply changes in one file that were made since last commit to as many other followed files as possible."""
-    parser = argparse.ArgumentParser(prog="%s apply" % __package__, description="Apply changes in FILENAME that were made since last commit to as many other followed files as possible.")
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="Apply changes in FILENAME that were made since last commit to as many other followed files as possible.")
     parser.add_argument('FILENAME', help="file containing changes to be applied")
     parser.add_argument('-U', '--unified', type=int, dest="NUM", default=3, action="store", help="number of lines of context to show")
     group = parser.add_mutually_exclusive_group()

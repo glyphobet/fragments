@@ -231,7 +231,7 @@ class TestStatCommand(CommandBase, PostInitCommandMixIn):
 
 class TestFollowCommand(CommandBase, PostInitCommandMixIn):
 
-    command = staticmethod(follow)
+    command = staticmethod(lambda : follow('file.ext'))
 
     def test_follow_file(self):
         init()
@@ -287,7 +287,7 @@ class TestFollowCommand(CommandBase, PostInitCommandMixIn):
 
 class TestForgetCommand(CommandBase, PostInitCommandMixIn):
 
-    command = staticmethod(forget)
+    command = staticmethod(lambda : forget('file.ext'))
 
     def test_forget_unfollowed_file(self):
         init()

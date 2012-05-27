@@ -1,4 +1,5 @@
 import sys, os, uuid
+import inspect
 import argparse
 #import difflib
 import pdb
@@ -12,13 +13,19 @@ from .precisecodevillemerge import Weave
 
 class ExecutionError(FragmentsError): pass
 
-def help(*a):
+def help(*args):
     """Prints help."""
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="Prints help")
+    parser.add_argument('COMMAND', help="command to show help for", nargs="?")
+    args = parser.parse_args(args)
     yield "help!"
 
 
-def init(*a):
+def init(*args):
     """Initialize a fragments repository."""
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="Initialize a fragments repository")
+    args = parser.parse_args(args)
+
     try:
         config = FragmentsConfig()
     except ConfigurationFileCorrupt as exc:
@@ -77,18 +84,26 @@ def _file_stat(config, curr_path):
 
 def stat(*args):
     """Get status of a fragments repository."""
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="Get status of a fragments repository")
+    parser.add_argument('FILENAME', help="files to show status for", nargs="*")
+    args = parser.parse_args(args)
+
     config = FragmentsConfig()
     yield "%s configuration version %s.%s.%s" % ((__package__,) + config['version'])
     yield "stored in %s" % config.directory
-    for curr_path in _iterate_over_files(args, config):
+    for curr_path in _iterate_over_files(args.FILENAME, config):
         yield '%s\t%s' % (_file_stat(config, curr_path), curr_path[len(config.root)+1:])
 
 
 def follow(*args):
     """Add files to fragments following."""
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="Add files to fragments following")
+    parser.add_argument('FILENAME', help="files to follow", nargs="+")
+    args = parser.parse_args(args)
+
     config = FragmentsConfig()
     random_uuid = uuid.uuid4()
-    for filename in set(args):
+    for filename in set(args.FILENAME):
         fullpath = os.path.realpath(filename)
         if fullpath.startswith(config.root):
             key = fullpath[len(config.root)+1:]
@@ -108,8 +123,12 @@ def follow(*args):
 
 def forget(*args):
     """Remove files from fragments following"""
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="Remove files from fragments following")
+    parser.add_argument('FILENAME', help="files to forget", nargs="+")
+    args = parser.parse_args(args)
+
     config = FragmentsConfig()
-    for filename in set(args):
+    for filename in set(args.FILENAME):
         fullpath = os.path.realpath(filename)
         if fullpath.startswith(config.root):
             key = fullpath[len(config.root)+1:]
@@ -129,8 +148,15 @@ def forget(*args):
     config.dump()
 
 
-def rename(old_name, new_name):
+def rename(*args):
     """Rename one file to another"""
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="Rename one file to another")
+    parser.add_argument('OLD_FILENAME', help="old file name")
+    parser.add_argument('NEW_FILENAME', help="new file name")
+    args = parser.parse_args(args)
+
+    old_name, new_name = args.OLD_FILENAME, args.NEW_FILENAME
+
     config = FragmentsConfig()
     old_path = os.path.realpath(old_name)
     old_key = old_path[len(config.root)+1:]
@@ -186,9 +212,13 @@ def diff(*args):
 
 def commit(*args):
     """Commit changes to fragments repository"""
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]),   description="Commit changes to fragments repository.")
+    parser.add_argument('FILENAME', help="file(s) to commit", nargs="*")
+    args = parser.parse_args(args)
+
     config = FragmentsConfig()
 
-    for curr_path in _iterate_over_files(args, config):
+    for curr_path in _iterate_over_files(args.FILENAME, config):
         key = curr_path[len(config.root)+1:]
         if key not in config['files']:
             yield "Could not commit %r because it is not being followed" % key
@@ -208,9 +238,13 @@ def commit(*args):
 
 def revert(*args):
     """Revert changes to fragments repository"""
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, inspect.stack()[0][3]), description="Revert changes to fragments repository")
+    parser.add_argument('FILENAME', help="file(s) to revert", nargs="*")
+    args = parser.parse_args(args)
+
     config = FragmentsConfig()
 
-    for curr_path in _iterate_over_files(args, config):
+    for curr_path in _iterate_over_files(args.FILENAME, config):
         key = curr_path[len(config.root)+1:]
         if key not in config['files']:
             yield "Could not revert %r because it is not being followed" % key
