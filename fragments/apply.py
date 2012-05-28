@@ -34,8 +34,7 @@ def apply(*args):
         yield "Could not apply changes in '%s', it no longer exists on disk" % os.path.relpath(changed_path)
         return
 
-    changed_uuid = config['files'][changed_key]
-    old_path = os.path.join(config.directory, changed_uuid)
+    old_path = os.path.join(config.directory, config['files'][changed_key])
 
     if not os.access(old_path, os.R_OK|os.W_OK):
         yield "Could not apply changes in '%s', it has never been committed" % os.path.relpath(changed_path)

@@ -59,8 +59,7 @@ def _file_stat(config, curr_path):
     if key not in config['files']:
         return '?' # unfollowed
 
-    uuid = config['files'][key]
-    repo_path = os.path.join(config.directory, uuid)
+    repo_path = os.path.join(config.directory, config['files'][key])
 
     repo_exists = os.access(repo_path, os.R_OK|os.W_OK)
     curr_exists = os.access(curr_path, os.R_OK|os.W_OK)
