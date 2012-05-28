@@ -260,7 +260,8 @@ def revert(*args):
 def fork(*args):
     """
     Create a new file in TARGET_FILENAME based on one or more SOURCE_FILENAME(s).
-    Common sections are preserved; differing sections are replaced with a single newline.
+    Large common sections are preserved;
+    differing sections, and common sections shorter than NUM lines between differing sections, are replaced with one newline for each line or conflict.
     """
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, fork.__name__), description=fork.__doc__)
     parser.add_argument('SOURCE_FILENAME', help="old file names", nargs="+")

@@ -84,7 +84,8 @@ Commands
 * `fork SOURCE_FILENAME [SOURCE_FILENAME ...] TARGET_FILENAME`
 
     Create a new file in _TARGET\_FILENAME_ based on one or more _SOURCE\_FILENAME_(s).
-    Common sections are preserved; differing sections are replaced with a single newline.
+    Large common sections are preserved;
+    differing sections, and common sections shorter than _NUM_ lines between differing sections, are replaced with one newline for each line or conflict.
 
 * `apply [-i | -a] [[-U | --unified] NUM] SOURCE_FILENAME [TARGET_FILENAME [TARGET_FILENAME ...]]`
 
