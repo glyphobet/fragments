@@ -2,11 +2,11 @@ def _visible_in_diff(merge_result, context_lines=3):
     """Collects the set of lines that should be visible in a diff with a certain number of context lines"""
     i = old_line = new_line = 0
     while i < len(merge_result):
-        line_or_tuple = merge_result[i]
-        if isinstance(line_or_tuple, tuple):
-            yield old_line, new_line, line_or_tuple
-            old_line += len(line_or_tuple[0])
-            new_line += len(line_or_tuple[1])
+        line_or_conflict = merge_result[i]
+        if isinstance(line_or_conflict, tuple):
+            yield old_line, new_line, line_or_conflict
+            old_line += len(line_or_conflict[0])
+            new_line += len(line_or_conflict[1])
         else:
             should_yield = False
             for ibefore in range(max(0, i-context_lines), i): # look behind
@@ -18,7 +18,7 @@ def _visible_in_diff(merge_result, context_lines=3):
                     should_yield = True
                     break
             if should_yield:
-                yield old_line, new_line, line_or_tuple
+                yield old_line, new_line, line_or_conflict
             else:
                 yield None
             old_line += 1
@@ -44,9 +44,9 @@ def _diff_group_position(group):
     old_start = group[0][0]
     new_start = group[0][1]
     old_length = new_length = 0
-    for old_line, new_line, line_or_tuple in group:
-        if isinstance(line_or_tuple, tuple):
-            old, new = line_or_tuple
+    for old_line, new_line, line_or_conflict in group:
+        if isinstance(line_or_conflict, tuple):
+            old, new = line_or_conflict
             old_length += len(old)
             new_length += len(new)
         else:
@@ -64,15 +64,15 @@ def _diff_group(group):
     """Generate a diff section for diff group"""
     yield _diff_group_position(group)
 
-    for old_line, new_line, line_or_tuple in group:
-        if isinstance(line_or_tuple, tuple):
-            old, new = line_or_tuple
+    for old_line, new_line, line_or_conflict in group:
+        if isinstance(line_or_conflict, tuple):
+            old, new = line_or_conflict
             for o in old:
                 yield '-' + o.strip('\n')
             for n in new:
                 yield '+' + n.strip('\n')
         else:
-            yield ' ' + line_or_tuple.strip('\n')
+            yield ' ' + line_or_conflict.strip('\n')
 
 
 def _full_diff(merge_result, key, context_lines=3):
