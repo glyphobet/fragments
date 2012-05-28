@@ -59,11 +59,14 @@ def apply(*args):
             for dl in _diff_group(display_group): # show the group
                 yield dl
             if args.interactive:
-                response = (yield Prompt("Apply this change? y/n"))
-                if response.lower().startswith('y'):
-                    apply_change = True
-                elif response.lower().startswith('n'):
-                    apply_change = False
+                while True:
+                    response = (yield Prompt("Apply this change? y/n"))
+                    if response.lower().startswith('y'):
+                        apply_change = True
+                        break
+                    elif response.lower().startswith('n'):
+                        apply_change = False
+                        break
             else:
                 apply_change = True
 
