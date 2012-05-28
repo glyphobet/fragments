@@ -756,7 +756,17 @@ class TestForkCommand(CommandBase, PostInitCommandMixIn):
         commit(file1_name, file2_name)
         forked_file_name = 'forked.file'
         self.assertEquals(fork(file1_name, file2_name, forked_file_name), ["Forked new file in '%s', remember to follow and commit it" % forked_file_name])
-        self.assertEquals(open(forked_file_name, 'r').read(), "Line One\n\nLine Three\n\nLine Five\n")
+        self.assertEquals(open(forked_file_name, 'r').read(), "Line One\n\n\n\nLine Five\n")
+
+    def test_bigger_fork(self):
+        init()
+        file1_name, file1_path = self._create_file(contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\nLine Six\nLine Seven\nLine Eight\nLine Nine\nLine Ten\nLine Twelve\n")
+        file2_name, file2_path = self._create_file(contents="Line One\nLine Two\nLine Three\nLine 4\nLine Five\nLine Six\nLine Seven\nLine 8\nLine Nine\nLine Ten\nLine Twelve\n")
+        follow(file1_name, file2_name)
+        commit(file1_name, file2_name)
+        forked_file_name = 'forked.file'
+        self.assertEquals(fork(file1_name, file2_name, forked_file_name), ["Forked new file in '%s', remember to follow and commit it" % forked_file_name])
+        self.assertEquals(open(forked_file_name, 'r').read(), "Line One\nLine Two\nLine Three\n\nLine Five\nLine Six\nLine Seven\n\nLine Nine\nLine Ten\nLine Twelve\n")
 
     def test_fork_from_unfollowed_files(self):
         init()
@@ -768,7 +778,7 @@ class TestForkCommand(CommandBase, PostInitCommandMixIn):
             "Warning, '%s' not being followed" % file2_name,
             "Forked new file in '%s', remember to follow and commit it" % forked_file_name
         ])
-        self.assertEquals(open(forked_file_name, 'r').read(), "Line One\n\nLine Three\n\nLine Five\n")
+        self.assertEquals(open(forked_file_name, 'r').read(), "Line One\n\n\n\nLine Five\n")
 
     def test_cant_fork_onto_followed_file(self):
         init()

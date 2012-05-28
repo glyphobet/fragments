@@ -265,6 +265,7 @@ def fork(*args):
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, fork.__name__), description=fork.__doc__)
     parser.add_argument('SOURCE_FILENAME', help="old file names", nargs="+")
     parser.add_argument('TARGET_FILENAME', help="new file name")
+    parser.add_argument('-U', '--unified', type=int, dest="NUM", default=3, action="store", help="number of lines of context to use")
     args = parser.parse_args(args)
 
     config = FragmentsConfig()
@@ -300,7 +301,22 @@ def fork(*args):
     for old_name in old_filenames[1:]:
         current_revision = previous_revision + 1
         weave.add_revision(current_revision, open(old_name, 'r').readlines(), [])
-        new_lines = [l if isinstance(l, basestring) else '\n' for l in weave.merge(previous_revision, current_revision)]
+        new_lines = []
+        diff_output = weave.merge(previous_revision, current_revision)
+        i = 0
+        while i < len(diff_output):
+            line_or_conflict = diff_output[i]
+            if isinstance(line_or_conflict, tuple):
+                old, new = line_or_conflict
+                following_conflict_index = 0 # index of furthest following conflict within args.NUM lines
+                for j, loc in enumerate(diff_output[i+1:i+1+args.NUM]):
+                    if isinstance(loc, tuple):
+                        following_conflict_index = j
+                new_lines.extend(['\n'] * (following_conflict_index+1)) # add a blank line for each line and conflict we are skipping
+                i += following_conflict_index
+            else:
+                new_lines.append(line_or_conflict)
+            i += 1
         previous_revision = current_revision + 1
         weave.add_revision(previous_revision, new_lines, [])
 
