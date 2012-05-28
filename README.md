@@ -81,7 +81,7 @@ Commands
 
     Revert changes to the fragments repository, limited to _FILENAME_(s) if specified.
 
-* `fork SOURCE_FILENAME [SOURCE_FILENAME ...] TARGET_FILENAME`
+* `fork [-U NUM] SOURCE_FILENAME [SOURCE_FILENAME ...] TARGET_FILENAME`
 
     Create a new file in _TARGET\_FILENAME_ based on one or more _SOURCE\_FILENAME_(s).
     Large common sections are preserved;
