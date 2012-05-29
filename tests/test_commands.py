@@ -631,7 +631,7 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         os.unlink(file_path)
         config = FragmentsConfig()
         key = file_path[len(config.root)+1:]
-        self.assertEquals(commit(file_path), ["Could not commit '%s' because it has been removed, instead revert or remove it" % os.path.relpath(file_path)])
+        self.assertEquals(commit(file_path), ["Could not commit '%s' because it has been removed, instead revert or forget it" % os.path.relpath(file_path)])
 
     def test_commit_unchanged_file(self):
         init()

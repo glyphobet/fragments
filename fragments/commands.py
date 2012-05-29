@@ -229,7 +229,7 @@ def commit(*args):
             os.utime(repo_path, os.stat(curr_path)[7:9])
             yield "'%s' committed" % os.path.relpath(curr_path)
         elif s in 'D':
-            yield "Could not commit '%s' because it has been removed, instead revert or remove it" % os.path.relpath(curr_path)
+            yield "Could not commit '%s' because it has been removed, instead revert or forget it" % os.path.relpath(curr_path)
 
 
 def revert(*args):
