@@ -9,7 +9,7 @@ from .config import FragmentsConfig, configuration_directory_name, find_configur
 from .diff import _full_diff
 from .apply import apply
 from .precisecodevillemerge import Weave
-
+from . import color
 
 class ExecutionError(FragmentsError): pass
 
@@ -337,9 +337,9 @@ def _main(): # pragma: no cover
                 try:
                     l = next(command_generator)
                     if isinstance(l, Prompt):
-                        response = raw_input(l + ' ')
+                        response = raw_input(color.colorize(l, color=color.YELLOW)  + ' ')
                         l = command_generator.send(response.strip())
-                    print(l)
+                    print(color.colorize(l))
                 except StopIteration:
                     break
         except ExecutionError as exc:
