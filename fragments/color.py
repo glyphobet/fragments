@@ -19,5 +19,9 @@ def colorize(line, color=None, colorblind=False):
         'A' : BLUE if colorblind else GREEN,
         'E' : GREY   ,
     }
-
-    return '\033[%sm%s\033[0m' % (color or color_by_prefix.get(line[0:1], ''),line)
+    if color is None:
+        color = color_by_prefix.get(line[0:1])
+    if color:
+        return '\033[%sm%s\033[0m' % (color, line)
+    else:
+        return line
