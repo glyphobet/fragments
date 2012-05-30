@@ -330,7 +330,7 @@ def fork(*args):
 def _main(): # pragma: no cover
     from . import commands
     print("%s version %s.%s.%s" % ((__package__,) + __version__))
-    if (sys.argv[1] in __all__): # command is legit
+    if (len(sys.argv) > 1 and sys.argv[1] in __all__): # command is present and legit
         try:
             command_generator = getattr(commands, sys.argv[1])(*sys.argv[2:])
             while True:
