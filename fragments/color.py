@@ -1,3 +1,5 @@
+import os
+
 GREY    = 90
 RED     = 91
 GREEN   = 92
@@ -21,7 +23,7 @@ def colorize(line, color=None, colorblind=False):
     }
     if color is None:
         color = color_by_prefix.get(line[0:1])
-    if color:
+    if os.isatty(1) and color:
         return '\033[%sm%s\033[0m' % (color, line)
     else:
         return line
