@@ -111,7 +111,7 @@ Adding preprocessors for different file formats would potentially make Fragments
 
 ### Miscellaneous improvements
 
-* Colorized `diff` and `stat` output
+* Add `diff foo foo` lines to diff output
 * A better interactive mode including the ability to skip and return to hunks (like git does with `j/J/k/K`)
 * Command-line completion modes for bash and/or zsh
 * Short command resolution, so you can type `fragments st` for `fragments stat`, &c.
