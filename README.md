@@ -112,7 +112,6 @@ Adding preprocessors for different file formats would potentially make Fragments
 ### Miscellaneous improvements
 
 * Applying a file but picking no chunks still tries to apply it
-* Add `diff foo foo` lines to diff output
 * A better interactive mode including the ability to skip and return to hunks (like git does with `j/J/k/K`)
 * Command-line completion modes for bash and/or zsh
 * Short command resolution, so you can type `fragments st` for `fragments stat`, &c.
