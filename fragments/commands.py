@@ -344,6 +344,8 @@ def _main(): # pragma: no cover
                     break
         except ExecutionError as exc:
             sys.exit(exc.message)
+        except KeyboardInterrupt:
+            pass
     else:
         for l in help():
             print(l)
