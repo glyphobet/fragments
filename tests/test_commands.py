@@ -1093,8 +1093,8 @@ table {
             '         <link href="site.css" />',
             '         <script href="script.js" />',
             '         <script href="other.js" />',
+            "Changes in '%s' applied cleanly to '%s'" % (os.path.relpath(file1_path), os.path.relpath(file2_path)),
             "Changes in '%s' cannot apply to '%s', skipping" % (os.path.relpath(file1_path), os.path.relpath(css_path)),
-            "Changes in '%s' applied cleanly to '%s'" % (os.path.relpath(file1_path), os.path.relpath(file2_path))
         ])
         self.assertEqual(open(css_name, 'r').read(), self.css_file1_contents)
 
