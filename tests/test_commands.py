@@ -960,7 +960,7 @@ table {
         self.assertEqual(next(apply_generator), '         <link href="site.css" />'   )
         self.assertEqual(next(apply_generator), '         <script href="script.js" />')
         self.assertEqual(next(apply_generator), '         <script href="other.js" />' )
-        self.assertEqual(next(apply_generator), 'Apply this change? y/n')
+        self.assertEqual(next(apply_generator), 'Apply this change? y/n ')
         self.assertEqual(apply_generator.send('y'), "Changes in '%s' applied cleanly to '%s'" % (os.path.relpath(file1_path), os.path.relpath(file2_path))
 )
 
@@ -992,7 +992,7 @@ table {
         self.assertEqual(next(apply_generator), '         <link href="site.css" />'   )
         self.assertEqual(next(apply_generator), '         <script href="script.js" />')
         self.assertEqual(next(apply_generator), '         <script href="other.js" />' )
-        self.assertEqual(next(apply_generator), 'Apply this change? y/n')
+        self.assertEqual(next(apply_generator), 'Apply this change? y/n ')
         self.assertEqual(apply_generator.send('n'), "Changes in '%s' applied cleanly to '%s'" % (os.path.relpath(file1_path), os.path.relpath(file2_path))
 )
 

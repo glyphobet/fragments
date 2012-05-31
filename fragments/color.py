@@ -12,26 +12,48 @@ BRIGHT_WHITE = 57
 NORMAL = 0
 BOLD = 1
 
-def colorize(line, color=None, colorblind=False):
-    color_by_prefix = {
-        '+' : (BLUE if colorblind else GREEN),
-        '-' : RED,
-        '@' : MAGENTA,
-        '?' : MAGENTA,
-        'M' : YELLOW ,
-        'D' : RED    ,
-        'A' : BLUE if colorblind else GREEN,
-        'E' : GREY   ,
-    }
+
+class ColoredString(str):
+    color = WHITE
     weight = NORMAL
-    if color is None:
-        color = color_by_prefix.get(line[0:1], WHITE)
-    if line.startswith('diff '):
-        color = BRIGHT_WHITE
-        weight = BOLD
-    if line.startswith('+++') or line.startswith('---'):
-        weight = BOLD
-    if color and sys.stdout.isatty():
-        return '\033[%sm\033[%sm%s\033[0m' % (weight, color, line)
-    else:
-        return line
+    def __str__(self):
+        if sys.stdout.isatty():
+            return '\033[%sm\033[%sm%s\033[0m' % (self.weight, self.color, super(ColoredString, self).__str__())
+        else:
+            return super(ColoredString, self).__str__()
+
+
+class Added(ColoredString):
+    color = GREEN
+
+class Deleted(ColoredString):
+    color = RED
+
+class Modified(ColoredString):
+    color = YELLOW
+
+class LineNumber(ColoredString):
+    color = MAGENTA
+
+class Unknown(ColoredString):
+    color = MAGENTA
+
+class Error(ColoredString):
+    color = GREY
+
+class DeletedHeader(Deleted):
+    weight = BOLD
+
+class AddedHeader(Added):
+    weight = BOLD
+
+class Header(ColoredString):
+    color = BRIGHT_WHITE
+    weight = BOLD
+
+class Prompt(ColoredString):
+    color = YELLOW
+    weight = BOLD
+
+    def __new__(cls, s):
+        return super(Prompt, cls).__new__(cls, s+' ')

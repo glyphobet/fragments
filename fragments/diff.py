@@ -1,3 +1,5 @@
+from . import color
+
 def _visible_in_diff(merge_result, context_lines=3):
     """Collects the set of lines that should be visible in a diff with a certain number of context lines"""
     i = old_line = new_line = 0
@@ -57,7 +59,7 @@ def _diff_group_position(group):
     if new_length:
         new_start += 1
 
-    return '@@ -%s,%s +%s,%s @@' % (old_start, old_length, new_start, new_length)
+    return color.LineNumber('@@ -%s,%s +%s,%s @@' % (old_start, old_length, new_start, new_length))
 
 
 def _diff_group(group):
@@ -68,9 +70,9 @@ def _diff_group(group):
         if isinstance(line_or_conflict, tuple):
             old, new = line_or_conflict
             for o in old:
-                yield '-' + o.strip('\n')
+                yield color.Deleted('-' + o.strip('\n'))
             for n in new:
-                yield '+' + n.strip('\n')
+                yield color.Added('+' + n.strip('\n'))
         else:
             yield ' ' + line_or_conflict.strip('\n')
 
@@ -81,9 +83,9 @@ def _full_diff(merge_result, key, context_lines=3):
     for group in _split_diff(merge_result, context_lines=context_lines):
         if not header_printed:
             header_printed = True
-            yield 'diff a/%s b/%s' % (key, key)
-            yield '--- %s' % key
-            yield '+++ %s' % key
+            yield color.Header('diff a/%s b/%s' % (key, key))
+            yield color.DeletedHeader('--- %s' % key)
+            yield color.AddedHeader('+++ %s' % key)
 
         for l in _diff_group(group):
             yield l

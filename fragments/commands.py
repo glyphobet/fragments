@@ -4,7 +4,7 @@ import uuid
 import argparse
 #import difflib
 
-from . import __version__, FragmentsError, Prompt, _iterate_over_files
+from . import __version__, FragmentsError, _iterate_over_files
 from .config import FragmentsConfig, configuration_directory_name, find_configuration, ConfigurationFileCorrupt, ConfigurationFileNotFound, ConfigurationDirectoryNotFound
 from .diff import _full_diff
 from .apply import apply
@@ -79,6 +79,15 @@ def _file_stat(config, curr_path):
         return 'E' # error. this should never happen - both files on disk are missing, but file is being followed
 
 
+_stat_to_color = {
+    '?':color.Unknown,
+    'M':color.Modified,
+    'D':color.Deleted,
+    'A':color.Added,
+    'E':color.Error,
+}
+
+
 def stat(*args):
     """Get the current status of the fragments repository, limited to FILENAME(s) if specified."""
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, stat.__name__), description=stat.__doc__)
@@ -89,7 +98,8 @@ def stat(*args):
     yield "%s configuration version %s.%s.%s" % ((__package__,) + config['version'])
     yield "stored in %s" % config.directory
     for curr_path in _iterate_over_files(args.FILENAME, config):
-        yield '%s\t%s' % (_file_stat(config, curr_path), os.path.relpath(curr_path))
+        s = _file_stat(config, curr_path)
+        yield _stat_to_color.get(s, str)('%s\t%s' % (s, os.path.relpath(curr_path)))
 
 
 def follow(*args):
@@ -336,10 +346,10 @@ def _main(): # pragma: no cover
             while True:
                 try:
                     l = next(command_generator)
-                    if isinstance(l, Prompt):
-                        response = raw_input(color.colorize(l, color=color.YELLOW)  + ' ')
+                    if isinstance(l, color.Prompt):
+                        response = raw_input(l)
                         l = command_generator.send(response.strip())
-                    print(color.colorize(l))
+                    print(l)
                 except StopIteration:
                     break
         except ExecutionError as exc:

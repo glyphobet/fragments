@@ -4,7 +4,8 @@ import argparse
 from .precisecodevillemerge import Weave
 from .config import FragmentsConfig
 from .diff import _diff_group, _split_diff
-from . import Prompt, _iterate_over_files
+from .color import Prompt
+from . import _iterate_over_files
 
 
 def apply(*args):
