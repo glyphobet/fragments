@@ -6,6 +6,11 @@ class FragmentsError(Exception): pass
 
 def _iterate_over_files(args, config):
     if args:
-        return (os.path.realpath(a) for a in set(args))
+        seen = set()
+        for a in args:
+            if a not in seen:
+                yield os.path.realpath(a)
+                seen.add(a)
     else:
-        return sorted(os.path.join(config.root, f) for f in config['files'])
+        for f in sorted(config['files']):
+            yield os.path.join(config.root, f)
