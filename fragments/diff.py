@@ -81,6 +81,7 @@ def _full_diff(merge_result, key, context_lines=3):
     for group in _split_diff(merge_result, context_lines=context_lines):
         if not header_printed:
             header_printed = True
+            yield 'diff a/%s b/%s' % (key, key)
             yield '--- %s' % key
             yield '+++ %s' % key
 

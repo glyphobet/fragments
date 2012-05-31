@@ -428,6 +428,7 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
         commit(file1_name)
         file(file1_name, 'w').write(self.original_file.replace('Line Three', 'Line 2.6666\nLine Three and One Third'))
         self.assertEquals(list(diff(file1_name)), [
+            'diff a/test_content/file1.ext b/test_content/file1.ext',
             '--- test_content/file1.ext',
             '+++ test_content/file1.ext',
             '@@ -1,5 +1,6 @@',
@@ -449,6 +450,7 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
         commit(file1_name)
         file(file1_name, 'w').write(self.original_file.replace('Line One', 'Line 0.999999').replace('Line Five', 'Line 4.999999'))
         self.assertEquals(list(diff(file1_name)), [
+            'diff a/test_content/file1.ext b/test_content/file1.ext',
             '--- test_content/file1.ext',
             '+++ test_content/file1.ext',
             '@@ -1,5 +1,5 @@',
@@ -472,6 +474,7 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
         commit(file1_name)
         file(file1_name, 'w').write(original_file.replace('Line One', 'Line 0.999999').replace('Line Nine', 'Line 8.999999'))
         self.assertEquals(list(diff(file1_name)), [
+            'diff a/test_content/file1.ext b/test_content/file1.ext',
             '--- test_content/file1.ext',
             '+++ test_content/file1.ext',
             '@@ -1,4 +1,4 @@',
@@ -525,6 +528,7 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
 
         follow(file1_path)
         self.assertEquals(list(diff(file1_name)), [
+            'diff a/test_content/file1.ext b/test_content/file1.ext',
             '--- test_content/file1.ext',
             '+++ test_content/file1.ext',
             '@@ -0,0 +1,5 @@',
@@ -545,6 +549,7 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
         
         os.unlink(file1_path)
         self.assertEquals(list(diff(file1_name)), [
+            'diff a/test_content/file1.ext b/test_content/file1.ext',
             '--- test_content/file1.ext',
             '+++ test_content/file1.ext',
             '@@ -1,5 +0,0 @@',
