@@ -51,7 +51,7 @@ Commands
 
     Initialize a new fragments repository, in a directory named `_fragments/`.
 
-* `stat [FILENAME [FILENAME ...]]`
+* `stat [[ -l | --limit] STATUS ] [FILENAME [FILENAME ...]]`
 
     Get the current status of the fragments repository, limited to _FILENAME_(s) if specified.
 

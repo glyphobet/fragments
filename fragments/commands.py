@@ -89,17 +89,23 @@ _stat_to_color = {
 
 
 def stat(*args):
-    """Get the current status of the fragments repository, limited to FILENAME(s) if specified."""
+    """
+    Get the current status of the fragments repository, limited to FILENAME(s) if specified.
+    Limit output to files with status STATUS, if present.
+    """
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, stat.__name__), description=stat.__doc__)
     parser.add_argument('FILENAME', help="files to show status for", nargs="*")
+    parser.add_argument('-l', '--limit', type=str, dest="STATUS", default=None, action="store", help="limit to files in STATUS")
     args = parser.parse_args(args)
 
     config = FragmentsConfig()
-    yield "%s configuration version %s.%s.%s" % ((__package__,) + config['version'])
-    yield "stored in %s" % config.directory
+    if not args.STATUS:
+        yield "%s configuration version %s.%s.%s" % ((__package__,) + config['version'])
+        yield "stored in %s" % config.directory
     for curr_path in _iterate_over_files(args.FILENAME, config):
         s = _file_stat(config, curr_path)
-        yield _stat_to_color.get(s, str)('%s\t%s' % (s, os.path.relpath(curr_path)))
+        if not args.STATUS or s in args.STATUS.upper():
+            yield _stat_to_color.get(s, str)('%s\t%s' % (s, os.path.relpath(curr_path)))
 
 
 def follow(*args):
