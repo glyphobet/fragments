@@ -462,7 +462,6 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
             '-Line Five',
             '+Line 4.999999'])
 
-
     def test_two_distant_section_diff(self):
         original_file = "Line One\nLine Two\nLine Three\nLine Four\nLine Five\nLine Six\nLine Seven\nLine Eight\nLine Nine\n"
         init()
@@ -489,7 +488,6 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
             ' Line Eight',
             '-Line Nine',
             '+Line 8.999999'])
-
 
     def test_unmodified_file_diff(self):
         init()
@@ -898,7 +896,6 @@ table {
         target_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         self.assertEqual(open(file2_name, 'r').read(), target_file2_contents)
 
-
     def test_apply_to_one_file(self):
         init()
         file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
@@ -934,7 +931,6 @@ table {
 
         self.assertEqual(open(file3_name, 'r').read(), self.html_file2_contents)
 
-
     def test_apply_interactive_yes(self):
         init()
         file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
@@ -961,8 +957,7 @@ table {
         self.assertEqual(next(apply_generator), '         <script href="script.js" />')
         self.assertEqual(next(apply_generator), '         <script href="other.js" />' )
         self.assertEqual(next(apply_generator), 'Apply this change? y/n/j/k ')
-        self.assertEqual(apply_generator.send('y'), "Changes in '%s' applied cleanly to '%s'" % (os.path.relpath(file1_path), os.path.relpath(file2_path))
-)
+        self.assertEqual(apply_generator.send('y'), "Changes in '%s' applied cleanly to '%s'" % (os.path.relpath(file1_path), os.path.relpath(file2_path)))
 
         target_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
         self.assertEqual(open(file2_name, 'r').read(), target_file2_contents)
@@ -1066,7 +1061,6 @@ table {
         self.assertEqual(next(apply_generator), 'Apply this change? y/n/j/k ')
         self.assertEqual(apply_generator.send('y'), "Changes in 'file1.ext' applied cleanly to 'file2.ext'")
         self.assertEqual(open(file2_name, 'r').read(), self.html_file2_contents.replace('</body>\n', '</body>\n<!-- COMMENT -->\n'))
-
 
     def test_cant_apply_nonexistent_file(self):
         init()
