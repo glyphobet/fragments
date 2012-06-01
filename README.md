@@ -54,6 +54,7 @@ Commands
 * `stat [[ -l | --limit] STATUS ] [FILENAME [FILENAME ...]]`
 
     Get the current status of the fragments repository, limited to _FILENAME_(s) if specified.
+    Limit output to files with status _STATUS_, if present.
 
 * `follow FILENAME [FILENAME ...]`
 
