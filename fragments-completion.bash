@@ -11,19 +11,52 @@ _UseFragments ()   # By convention, the function name
     cmd=${COMP_WORDS[1]}
   fi
 
-  if [ "$cmd" == "apply" ] ; then
+  if [ "$cmd" == "follow" ] ; then
+      case "$curr" in
+        *)
+            COMPREPLY=( $( compgen -f -- $curr ) );;
+      esac;
+  elif [ "$cmd" == "forget" -o "$cmd" == "rename" -o "$cmd" == "stat" ] ; then
+      case "$curr" in
+        *)
+            COMPREPLY=( $( compgen -f -- $curr ) );;
+            # COMPREPLY=( $( compgen -W `$1 stat -l DAM\ ` -- $curr ) );;
+      esac;
+  elif [ "$cmd" == "revert" ] ; then
+      case "$curr" in
+        *)
+            COMPREPLY=( $( compgen -f -- $curr ) );;
+            # COMPREPLY=( $( compgen -W `$1 stat -l DM` -- $curr ) );;
+      esac;
+  elif [ "$cmd" == "commit" ] ; then
+      case "$curr" in
+        *)
+            COMPREPLY=( $( compgen -f -- $curr ) );;
+            # COMPREPLY=( $( compgen -W `$1 stat -l AM` -- $curr ) );;
+      esac;
+  elif [ "$cmd" == "apply" ] ; then
       case "$curr" in
         -*)
             COMPREPLY=( $( compgen -W '-i -a -U --unified' -- $curr ) );;
         *)
-            COMPREPLY=( $( compgen -W '$curr*' -- $curr ) );;
+            COMPREPLY=( $( compgen -f -- $curr ) );;
+            # COMPREPLY=( $( compgen -W `$1 stat -l M` -- $curr ) );;
       esac;
-  elif [ "$cmd" == "diff" -o "$cmd" == "fork" ] ; then
+  elif [ "$cmd" == "diff" ] ; then
       case "$curr" in
         -*)
             COMPREPLY=( $( compgen -W '-U --unified' -- $curr ) );;
         *)
-            COMPREPLY=( $( compgen -W '$curr*' -- $curr ) );;
+            COMPREPLY=( $( compgen -f -- $curr ) );;
+            # COMPREPLY=( $( compgen -W `$1 stat -l M` -- $curr ) );;
+      esac;
+  elif [ "$cmd" == "fork" ] ; then
+      case "$curr" in
+        -*)
+            COMPREPLY=( $( compgen -W '-U --unified' -- $curr ) );;
+        *)
+            COMPREPLY=( $( compgen -f -- $curr ) );;
+            # COMPREPLY=( $( compgen -W `$1 stat -l AM\ ` -- $curr ) );;
       esac;
   elif [ "$prev" == "fragments" -o "$cmd" == "help" ] ; then
       case "$curr" in
@@ -50,4 +83,4 @@ _UseFragments ()   # By convention, the function name
   return 0
 }
 
-complete -F _UseFragments fragments
+complete -F _UseFragments -o filenames fragments
