@@ -39,7 +39,7 @@ _UseFragments ()   # By convention, the function name
             COMPREPLY=( $( compgen -W 'rename revert' -- $curr ) );;
         s*)
             COMPREPLY=( $( compgen -W 'stat' -- $curr ) );;
-        '')
+        *)
             COMPREPLY=( $( compgen -W 'help init stat follow forget rename diff commit revert fork apply' -- $curr ) );;
       esac
   fi
