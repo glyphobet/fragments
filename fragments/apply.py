@@ -46,49 +46,58 @@ def apply(*args):
     new_revision = 2
     weave.add_revision(new_revision, open(changed_path, 'r').readlines(), [])
 
-    changes_to_apply = []
     diff = weave.merge(old_revision, new_revision)
-    display_groups = _split_diff(diff, context_lines=args.NUM)
+
+    preserve_changes = {}
+    discard_changes = {}
+    display_groups = list(_split_diff(diff, context_lines=args.NUM))
+    while display_groups:
+        display_group = display_groups[0]
+        for dl in _diff_group(display_group):
+            yield dl
+        if args.interactive:
+            while True:
+                response = (yield Prompt("Apply this change? y/n"))
+                if response.lower().startswith('y'):
+                    for old_line, new_line, line_or_conflict in display_group:
+                        if isinstance(line_or_conflict, tuple):
+                            preserve_changes[(old_line, new_line)] = line_or_conflict
+                    display_groups.pop(0)
+                    break
+                elif response.lower().startswith('n'):
+                    for old_line, new_line, line_or_conflict in display_group:
+                        if isinstance(line_or_conflict, tuple):
+                            discard_changes[(old_line, new_line)] = line_or_conflict
+                    display_groups.pop(0)
+                    break
+        else:
+            for old_line, new_line, line_or_conflict in display_group:
+                if isinstance(line_or_conflict, tuple):
+                    preserve_changes[(old_line, new_line)] = line_or_conflict
+            display_groups.pop(0)
+
+    if not preserve_changes:
+        yield "No changes in '%s' to apply." % os.path.relpath(changed_path)
+        return
+
+    changes_to_apply = []
 
     i = 0
-    old_line = 0 # not sure I need to be keeping track of these
+    old_line = 0
     new_line = 0
     while i < len(diff):
         line_or_conflict = diff[i]
         if isinstance(line_or_conflict, tuple):
-            display_group = next(display_groups)
-            for dl in _diff_group(display_group): # show the group
-                yield dl
-            if args.interactive:
-                while True:
-                    response = (yield Prompt("Apply this change? y/n"))
-                    if response.lower().startswith('y'):
-                        apply_change = True
-                        break
-                    elif response.lower().startswith('n'):
-                        apply_change = False
-                        break
-            else:
-                apply_change = True
-
-            while isinstance(display_group[0][-1], basestring):
-                display_group.pop(0) # preceeding context lines have already been added to the changes to apply
-
-            for display_line_or_conflict in display_group:
-                if isinstance(display_line_or_conflict[-1], tuple):
-                    old, new = display_line_or_conflict[-1]
-                    old_line += len(old)
-                    new_line += len(new)
-                    i += 1
-                    if apply_change:
-                        changes_to_apply.extend(new)
-                    else:
-                        changes_to_apply.extend(old)
-                else:
-                    old_line += 1
-                    new_line += 1
-                    i += 1
-                    changes_to_apply.append(display_line_or_conflict[-1])
+            old, new = line_or_conflict
+            if (old_line, new_line) in preserve_changes:
+                changes_to_apply.extend(new)
+            elif (old_line, new_line) in discard_changes:
+                changes_to_apply.extend(old)
+            else: # pragma: no cover
+                raise Exception("Catastrophic error in selecting diff chunks. Please report a bug.")
+            old_line += len(old)
+            new_line += len(new)
+            i += 1
         else:
             old_line += 1
             new_line += 1
