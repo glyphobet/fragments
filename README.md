@@ -112,9 +112,9 @@ Adding preprocessors for different file formats would potentially make Fragments
 
 ### Miscellaneous improvements
 
-* Applying a file but picking no chunks still tries to apply it
-* A better interactive mode including the ability to skip and return to hunks (like git does with `j/J/k/K`)
-* Command-line completion modes for bash and/or zsh
+* Better interactive mode with the ability to skip and return to chunks (like git does with `j/J/k/K`)
+* Better command-line completion mode for bash
+* Command-line completion mode for zsh
 * Short command resolution, so you can type `fragments st` for `fragments stat`, &c.
 * Command aliasing and default configuration
 * Pluggable merge algorithms, if they prove useful
