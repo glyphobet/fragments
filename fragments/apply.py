@@ -51,30 +51,26 @@ def apply(*args):
     preserve_changes = {}
     discard_changes = {}
     display_groups = list(_split_diff(diff, context_lines=args.NUM))
+    index = 0
     while display_groups:
-        display_group = display_groups[0]
+        display_group = display_groups[index]
         for dl in _diff_group(display_group):
             yield dl
-        if args.interactive:
-            while True:
+        while True:
+            if args.interactive:
                 response = (yield Prompt("Apply this change? y/n"))
-                if response.lower().startswith('y'):
-                    for old_line, new_line, line_or_conflict in display_group:
-                        if isinstance(line_or_conflict, tuple):
-                            preserve_changes[(old_line, new_line)] = line_or_conflict
-                    display_groups.pop(0)
-                    break
-                elif response.lower().startswith('n'):
-                    for old_line, new_line, line_or_conflict in display_group:
-                        if isinstance(line_or_conflict, tuple):
-                            discard_changes[(old_line, new_line)] = line_or_conflict
-                    display_groups.pop(0)
-                    break
-        else:
-            for old_line, new_line, line_or_conflict in display_group:
-                if isinstance(line_or_conflict, tuple):
-                    preserve_changes[(old_line, new_line)] = line_or_conflict
-            display_groups.pop(0)
+            if not args.interactive or response.lower().startswith('y'):
+                for old_line, new_line, line_or_conflict in display_group:
+                    if isinstance(line_or_conflict, tuple):
+                        preserve_changes[(old_line, new_line)] = line_or_conflict
+                display_groups.pop(index)
+                break
+            elif response.lower().startswith('n'):
+                for old_line, new_line, line_or_conflict in display_group:
+                    if isinstance(line_or_conflict, tuple):
+                        discard_changes[(old_line, new_line)] = line_or_conflict
+                display_groups.pop(index)
+                break
 
     if not preserve_changes:
         yield "No changes in '%s' to apply." % os.path.relpath(changed_path)
