@@ -15,11 +15,15 @@ _UseFragments ()   # By convention, the function name
       case "$curr" in
         -*)
             COMPREPLY=( $( compgen -W '-i -a -U --unified' -- $curr ) );;
+        *)
+            COMPREPLY=( $( compgen -W '$curr*' -- $curr ) );;
       esac;
   elif [ "$cmd" == "diff" -o "$cmd" == "fork" ] ; then
       case "$curr" in
         -*)
             COMPREPLY=( $( compgen -W '-U --unified' -- $curr ) );;
+        *)
+            COMPREPLY=( $( compgen -W '$curr*' -- $curr ) );;
       esac;
   elif [ "$prev" == "fragments" -o "$cmd" == "help" ] ; then
       case "$curr" in
