@@ -7,7 +7,7 @@ _UseFragments ()   # By convention, the function name
   COMPREPLY=()   # Array variable storing the possible completions.
   curr=${COMP_WORDS[COMP_CWORD]}
   prev=${COMP_WORDS[COMP_CWORD-1]}
-  if [ $COMP_CWORD > 2 ] ; then
+  if [ $COMP_CWORD -gt "1" ] ; then
     cmd=${COMP_WORDS[1]}
   fi
 
