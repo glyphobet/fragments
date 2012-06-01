@@ -58,18 +58,24 @@ def apply(*args):
             yield dl
         while True:
             if args.interactive:
-                response = (yield Prompt("Apply this change? y/n"))
-            if not args.interactive or response.lower().startswith('y'):
+                response = (yield Prompt("Apply this change? y/n/j/k")).lower()
+            if not args.interactive or response.startswith('y'):
                 for old_line, new_line, line_or_conflict in display_group:
                     if isinstance(line_or_conflict, tuple):
                         preserve_changes[(old_line, new_line)] = line_or_conflict
                 display_groups.pop(index)
                 break
-            elif response.lower().startswith('n'):
+            elif response.startswith('n'):
                 for old_line, new_line, line_or_conflict in display_group:
                     if isinstance(line_or_conflict, tuple):
                         discard_changes[(old_line, new_line)] = line_or_conflict
                 display_groups.pop(index)
+                break
+            elif response == 'j':
+                index = (index + 1) % len(display_groups)
+                break
+            elif response == 'k':
+                index = (index - 1) % len(display_groups)
                 break
 
     if not preserve_changes:
