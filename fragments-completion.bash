@@ -16,7 +16,7 @@ _UseFragments ()   # By convention, the function name
         -*)
             COMPREPLY=( $( compgen -W '-i -a -U --unified' -- $curr ) );;
       esac;
-  elif [ "$cmd" == "diff" -o "$prev" == "fork" ] ; then
+  elif [ "$cmd" == "diff" -o "$cmd" == "fork" ] ; then
       case "$curr" in
         -*)
             COMPREPLY=( $( compgen -W '-U --unified' -- $curr ) );;
