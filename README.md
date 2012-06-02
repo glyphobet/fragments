@@ -122,7 +122,6 @@ Adding preprocessors for different file formats would potentially make Fragments
 
 ### Miscellaneous improvements
 
-* Better interactive mode with the ability to skip and return to chunks (like git does with `j/J/k/K`)
 * Better command-line completion mode for bash
 * Command-line completion mode for zsh
 * Short command resolution, so you can type `fragments st` for `fragments stat`, &c.
