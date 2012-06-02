@@ -1062,6 +1062,140 @@ table {
         self.assertEqual(apply_generator.send('y'), "Changes in 'file1.ext' applied cleanly to 'file2.ext'")
         self.assertEqual(open(file2_name, 'r').read(), self.html_file2_contents.replace('</body>\n', '</body>\n<!-- COMMENT -->\n'))
 
+    def test_apply_all(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
+        follow(file1_name)
+        commit(file1_name)
+
+        file2_name, file2_path = self._create_file(contents=self.html_file2_contents)
+        follow(file2_name)
+        commit(file2_name)
+
+        new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />').replace('</body>\n', '</body>\n<!-- COMMENT -->\n')
+        open(file1_name, 'w').write(new_file1_contents)
+
+        apply_generator = commands.apply(file1_name, '-i')
+
+        self.assertEqual(next(apply_generator), '@@ -4,7 +4,7 @@'                     )
+        self.assertEqual(next(apply_generator), '         <title>'                    )
+        self.assertEqual(next(apply_generator), '             Page One'               )
+        self.assertEqual(next(apply_generator), '         </title>'                   )
+        self.assertEqual(next(apply_generator), '-        <link href="default.css" />')
+        self.assertEqual(next(apply_generator), '+        <link href="layout.css" />' )
+        self.assertEqual(next(apply_generator), '         <link href="site.css" />'   )
+        self.assertEqual(next(apply_generator), '         <script href="script.js" />')
+        self.assertEqual(next(apply_generator), '         <script href="other.js" />' )
+        self.assertEqual(next(apply_generator), 'Apply this change? [ynadjk] ')
+        self.assertEqual(apply_generator.send('a'), "Changes in 'file1.ext' applied cleanly to 'file2.ext'")
+        self.assertEqual(open(file2_name, 'r').read(), self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />').replace('</body>\n', '</body>\n<!-- COMMENT -->\n'))
+
+    def test_apply_none(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
+        follow(file1_name)
+        commit(file1_name)
+
+        file2_name, file2_path = self._create_file(contents=self.html_file2_contents)
+        follow(file2_name)
+        commit(file2_name)
+
+        new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />').replace('</body>\n', '</body>\n<!-- COMMENT -->\n')
+        open(file1_name, 'w').write(new_file1_contents)
+
+        apply_generator = commands.apply(file1_name, '-i')
+
+        self.assertEqual(next(apply_generator), '@@ -4,7 +4,7 @@'                     )
+        self.assertEqual(next(apply_generator), '         <title>'                    )
+        self.assertEqual(next(apply_generator), '             Page One'               )
+        self.assertEqual(next(apply_generator), '         </title>'                   )
+        self.assertEqual(next(apply_generator), '-        <link href="default.css" />')
+        self.assertEqual(next(apply_generator), '+        <link href="layout.css" />' )
+        self.assertEqual(next(apply_generator), '         <link href="site.css" />'   )
+        self.assertEqual(next(apply_generator), '         <script href="script.js" />')
+        self.assertEqual(next(apply_generator), '         <script href="other.js" />' )
+        self.assertEqual(next(apply_generator), 'Apply this change? [ynadjk] ')
+        self.assertEqual(apply_generator.send('d'), "No changes in '%s' to apply." % os.path.relpath(file1_path))
+        self.assertEqual(open(file2_name, 'r').read(), self.html_file2_contents)
+
+    def test_skip_forwards(self):
+        contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\nLine Six\nLine Seven\nLine Eight\nLine Nine\nLine Ten\nLine Eleven\nLine Twelve\nLine Thirteen\nLine Fourteen\nLine Fifteen\nLine Sixteen\nLine Seventeen\nLine Eighteen\nLine Nineteen\nLine Twenty"
+        init()
+        file1_name, file1_path = self._create_file(contents=contents)
+        follow(file1_name)
+        commit(file1_name)
+
+        new_contents = contents.replace('Line One', 'Line 1').replace('Line Ten', 'Line 10').replace('Line Twenty', 'Line 20')
+
+        with open(file1_name, 'w') as file1:
+            file1.write(new_contents)
+
+        apply_generator = commands.apply(file1_name, '-i')
+        self.assertEqual(next(apply_generator), '@@ -1,4 +1,4 @@')
+        self.assertEqual(next(apply_generator), '-Line One'  )
+        self.assertEqual(next(apply_generator), '+Line 1'    )
+        self.assertEqual(next(apply_generator), ' Line Two'  )
+        self.assertEqual(next(apply_generator), ' Line Three')
+        self.assertEqual(next(apply_generator), ' Line Four' )
+        self.assertEqual(next(apply_generator), 'Apply this change? [ynadjk] ')
+        self.assertEqual(apply_generator.send('j'), '@@ -7,7 +7,7 @@')
+        self.assertEqual(next(apply_generator), ' Line Seven'   )
+        self.assertEqual(next(apply_generator), ' Line Eight'   )
+        self.assertEqual(next(apply_generator), ' Line Nine'    )
+        self.assertEqual(next(apply_generator), '-Line Ten'     )
+        self.assertEqual(next(apply_generator), '+Line 10'      )
+        self.assertEqual(next(apply_generator), ' Line Eleven'  )
+        self.assertEqual(next(apply_generator), ' Line Twelve'  )
+        self.assertEqual(next(apply_generator), ' Line Thirteen')
+        self.assertEqual(next(apply_generator), 'Apply this change? [ynadjk] ')
+        self.assertEqual(apply_generator.send('j'), '@@ -17,4 +17,4 @@')
+        self.assertEqual(next(apply_generator), ' Line Seventeen')
+        self.assertEqual(next(apply_generator), ' Line Eighteen' )
+        self.assertEqual(next(apply_generator), ' Line Nineteen' )
+        self.assertEqual(next(apply_generator), '-Line Twenty'   )
+        self.assertEqual(next(apply_generator), '+Line 20'       )
+        self.assertEqual(next(apply_generator), 'Apply this change? [ynadjk] ')
+        self.assertEqual(apply_generator.send('j'), '@@ -1,4 +1,4 @@')
+
+    def test_skip_backwards(self):
+        contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\nLine Six\nLine Seven\nLine Eight\nLine Nine\nLine Ten\nLine Eleven\nLine Twelve\nLine Thirteen\nLine Fourteen\nLine Fifteen\nLine Sixteen\nLine Seventeen\nLine Eighteen\nLine Nineteen\nLine Twenty"
+        init()
+        file1_name, file1_path = self._create_file(contents=contents)
+        follow(file1_name)
+        commit(file1_name)
+
+        new_contents = contents.replace('Line One', 'Line 1').replace('Line Ten', 'Line 10').replace('Line Twenty', 'Line 20')
+
+        with open(file1_name, 'w') as file1:
+            file1.write(new_contents)
+
+        apply_generator = commands.apply(file1_name, '-i')
+        self.assertEqual(next(apply_generator), '@@ -1,4 +1,4 @@')
+        self.assertEqual(next(apply_generator), '-Line One'  )
+        self.assertEqual(next(apply_generator), '+Line 1'    )
+        self.assertEqual(next(apply_generator), ' Line Two'  )
+        self.assertEqual(next(apply_generator), ' Line Three')
+        self.assertEqual(next(apply_generator), ' Line Four' )
+        self.assertEqual(next(apply_generator), 'Apply this change? [ynadjk] ')
+        self.assertEqual(apply_generator.send('k'), '@@ -17,4 +17,4 @@')
+        self.assertEqual(next(apply_generator), ' Line Seventeen')
+        self.assertEqual(next(apply_generator), ' Line Eighteen' )
+        self.assertEqual(next(apply_generator), ' Line Nineteen' )
+        self.assertEqual(next(apply_generator), '-Line Twenty'   )
+        self.assertEqual(next(apply_generator), '+Line 20'       )
+        self.assertEqual(next(apply_generator), 'Apply this change? [ynadjk] ')
+        self.assertEqual(apply_generator.send('k'), '@@ -7,7 +7,7 @@')
+        self.assertEqual(next(apply_generator), ' Line Seven'   )
+        self.assertEqual(next(apply_generator), ' Line Eight'   )
+        self.assertEqual(next(apply_generator), ' Line Nine'    )
+        self.assertEqual(next(apply_generator), '-Line Ten'     )
+        self.assertEqual(next(apply_generator), '+Line 10'      )
+        self.assertEqual(next(apply_generator), ' Line Eleven'  )
+        self.assertEqual(next(apply_generator), ' Line Twelve'  )
+        self.assertEqual(next(apply_generator), ' Line Thirteen')
+        self.assertEqual(next(apply_generator), 'Apply this change? [ynadjk] ')
+        self.assertEqual(apply_generator.send('k'), '@@ -1,4 +1,4 @@')
+
     def test_cant_apply_nonexistent_file(self):
         init()
         self.assertEqual(apply("nonexistent.file", '-a'), ["Could not apply changes in 'nonexistent.file', it is not being followed"])
