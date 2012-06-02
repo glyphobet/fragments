@@ -16,23 +16,23 @@ _UseFragments ()   # By convention, the function name
         *)
             COMPREPLY=( $( compgen -f -- $curr ) );;
       esac;
-  elif [ "$cmd" == "forget" -o "$cmd" == "rename" -o "$cmd" == "stat" ] ; then
+  elif [ "$cmd" == "forget" -o "$cmd" == "rename" -o "$cmd" == "status" ] ; then
       case "$curr" in
         *)
             COMPREPLY=( $( compgen -f -- $curr ) );;
-            # COMPREPLY=( $( compgen -W `$1 stat -l DAM\ ` -- $curr ) );;
+            # COMPREPLY=( $( compgen -W `$1 status -l DAM\ ` -- $curr ) );;
       esac;
   elif [ "$cmd" == "revert" ] ; then
       case "$curr" in
         *)
             COMPREPLY=( $( compgen -f -- $curr ) );;
-            # COMPREPLY=( $( compgen -W `$1 stat -l DM` -- $curr ) );;
+            # COMPREPLY=( $( compgen -W `$1 status -l DM` -- $curr ) );;
       esac;
   elif [ "$cmd" == "commit" ] ; then
       case "$curr" in
         *)
             COMPREPLY=( $( compgen -f -- $curr ) );;
-            # COMPREPLY=( $( compgen -W `$1 stat -l AM` -- $curr ) );;
+            # COMPREPLY=( $( compgen -W `$1 status -l AM` -- $curr ) );;
       esac;
   elif [ "$cmd" == "apply" ] ; then
       case "$curr" in
@@ -40,7 +40,7 @@ _UseFragments ()   # By convention, the function name
             COMPREPLY=( $( compgen -W '-i -a -U --unified' -- $curr ) );;
         *)
             COMPREPLY=( $( compgen -f -- $curr ) );;
-            # COMPREPLY=( $( compgen -W `$1 stat -l M` -- $curr ) );;
+            # COMPREPLY=( $( compgen -W `$1 status -l M` -- $curr ) );;
       esac;
   elif [ "$cmd" == "diff" ] ; then
       case "$curr" in
@@ -48,7 +48,7 @@ _UseFragments ()   # By convention, the function name
             COMPREPLY=( $( compgen -W '-U --unified' -- $curr ) );;
         *)
             COMPREPLY=( $( compgen -f -- $curr ) );;
-            # COMPREPLY=( $( compgen -W `$1 stat -l M` -- $curr ) );;
+            # COMPREPLY=( $( compgen -W `$1 status -l M` -- $curr ) );;
       esac;
   elif [ "$cmd" == "fork" ] ; then
       case "$curr" in
@@ -56,7 +56,7 @@ _UseFragments ()   # By convention, the function name
             COMPREPLY=( $( compgen -W '-U --unified' -- $curr ) );;
         *)
             COMPREPLY=( $( compgen -f -- $curr ) );;
-            # COMPREPLY=( $( compgen -W `$1 stat -l AM\ ` -- $curr ) );;
+            # COMPREPLY=( $( compgen -W `$1 status -l AM\ ` -- $curr ) );;
       esac;
   elif [ "$prev" == "fragments" -o "$cmd" == "help" ] ; then
       case "$curr" in
@@ -75,9 +75,9 @@ _UseFragments ()   # By convention, the function name
         r*)
             COMPREPLY=( $( compgen -W 'rename revert' -- $curr ) );;
         s*)
-            COMPREPLY=( $( compgen -W 'stat' -- $curr ) );;
+            COMPREPLY=( $( compgen -W 'status' -- $curr ) );;
         *)
-            COMPREPLY=( $( compgen -W 'help init stat follow forget rename diff commit revert fork apply' -- $curr ) );;
+            COMPREPLY=( $( compgen -W 'help init status follow forget rename diff commit revert fork apply' -- $curr ) );;
       esac
   fi
   return 0

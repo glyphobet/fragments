@@ -54,7 +54,7 @@ def init(*args):
     yield "Fragments configuration created in '%s'" % config.path
 
 
-def _file_stat(config, curr_path):
+def _file_status(config, curr_path):
     key = curr_path[len(config.root)+1:]
     if key not in config['files']:
         return '?' # unfollowed
@@ -79,7 +79,7 @@ def _file_stat(config, curr_path):
         return 'E' # error. this should never happen - both files on disk are missing, but file is being followed
 
 
-_stat_to_color = {
+_status_to_color = {
     '?':color.Unknown,
     'M':color.Modified,
     'D':color.Deleted,
@@ -88,12 +88,12 @@ _stat_to_color = {
 }
 
 
-def stat(*args):
+def status(*args):
     """
     Get the current status of the fragments repository, limited to FILENAME(s) if specified.
     Limit output to files with status STATUS, if present.
     """
-    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, stat.__name__), description=stat.__doc__)
+    parser = argparse.ArgumentParser(prog="%s %s" % (__package__, status.__name__), description=status.__doc__)
     parser.add_argument('FILENAME', help="files to show status for", nargs="*")
     parser.add_argument('-l', '--limit', type=str, dest="STATUS", default=None, action="store", help="limit to files in STATUS")
     args = parser.parse_args(args)
@@ -103,9 +103,9 @@ def stat(*args):
         yield "%s configuration version %s.%s.%s" % ((__package__,) + config['version'])
         yield "stored in %s" % config.directory
     for curr_path in _iterate_over_files(args.FILENAME, config):
-        s = _file_stat(config, curr_path)
+        s = _file_status(config, curr_path)
         if not args.STATUS or s in args.STATUS.upper():
-            yield _stat_to_color.get(s, str)('%s\t%s' % (s, os.path.relpath(curr_path)))
+            yield _status_to_color.get(s, str)('%s\t%s' % (s, os.path.relpath(curr_path)))
 
 
 def follow(*args):
@@ -206,7 +206,7 @@ def diff(*args):
             yield "Could not diff '%s', it is not being followed" % os.path.relpath(curr_path)
             continue
 
-        s = _file_stat(config, curr_path)
+        s = _file_status(config, curr_path)
         if s in 'MAD':
             repo_lines = []
             curr_lines = []
@@ -237,7 +237,7 @@ def commit(*args):
             yield "Could not commit '%s' because it is not being followed" % os.path.relpath(curr_path)
             continue
 
-        s = _file_stat(config, curr_path)
+        s = _file_status(config, curr_path)
         if s in 'MA':
             repo_path = os.path.join(config.directory, config['files'][key])
             with file(repo_path, 'w') as repo_file:
@@ -262,7 +262,7 @@ def revert(*args):
             yield "Could not revert '%s' because it is not being followed" % os.path.relpath(curr_path)
             continue
 
-        s = _file_stat(config, curr_path)
+        s = _file_status(config, curr_path)
         if s in 'MD':
             repo_path = os.path.join(config.directory,  config['files'][key])
             with file(curr_path, 'w') as curr_file:
@@ -378,4 +378,4 @@ def _main(): # pragma: no cover
         except KeyboardInterrupt:
             pass
 
-__all__ = ['help', 'init', 'stat', 'follow', 'forget', 'rename', 'diff', 'commit', 'revert', 'fork', 'apply']
+__all__ = ['help', 'init', 'status', 'follow', 'forget', 'rename', 'diff', 'commit', 'revert', 'fork', 'apply']

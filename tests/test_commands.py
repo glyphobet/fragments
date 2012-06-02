@@ -15,7 +15,7 @@ from fragments.config import configuration_file_name, configuration_directory_na
 
 def help  (*a): return list(commands.help  (*a))
 def init  (*a): return list(commands.init  (*a))
-def stat  (*a): return list(commands.stat  (*a))
+def status(*a): return list(commands.status(*a))
 def follow(*a): return list(commands.follow(*a))
 def forget(*a): return list(commands.forget(*a))
 def rename(*a): return list(commands.rename(*a))
@@ -113,7 +113,7 @@ class TestInitCommand(CommandBase):
     def test_fragments_directory_inside_content_directory(self):
         init()
         shutil.move(os.path.join(self.path, configuration_directory_name), self.content_path)
-        stat()
+        status()
 
     def test_find_fragments_directory_one_level_up(self):
         init()
@@ -156,52 +156,52 @@ class PostInitCommandMixIn(object):
         self.command()
 
 
-class TestStatCommand(CommandBase, PostInitCommandMixIn):
+class TeststatusCommand(CommandBase, PostInitCommandMixIn):
 
-    command = staticmethod(stat)
+    command = staticmethod(status)
 
-    def test_stat(self):
+    def test_status(self):
         init()
         config = FragmentsConfig()
-        self.assertEquals(stat(), [
+        self.assertEquals(status(), [
             'fragments configuration version %s.%s.%s' % __version__,
             'stored in %s' % config.directory,
         ])
 
-    def test_unknown_file_stat(self):
+    def test_unknown_file_status(self):
         init()
         file_name, file_path = self._create_file()
         config = FragmentsConfig()
-        self.assertEquals(stat(file_name), [
+        self.assertEquals(status(file_name), [
             'fragments configuration version %s.%s.%s' % __version__,
             'stored in %s' % config.directory,
             '?\t%s' % file_name
         ])
 
-    def test_new_file_stat(self):
+    def test_new_file_status(self):
         init()
         file_name, file_path = self._create_file()
         follow(file_name)
         config = FragmentsConfig()
-        self.assertEquals(stat(file_name), [
+        self.assertEquals(status(file_name), [
             'fragments configuration version %s.%s.%s' % __version__,
             'stored in %s' % config.directory,
             'A\t%s' % file_name
         ])
 
-    def test_unmodified_file_stat(self):
+    def test_unmodified_file_status(self):
         init()
         file_name, file_path = self._create_file()
         follow(file_name)
         commit(file_name)
         config = FragmentsConfig()
-        self.assertEquals(stat(file_name), [
+        self.assertEquals(status(file_name), [
             'fragments configuration version %s.%s.%s' % __version__,
             'stored in %s' % config.directory,
             ' \t%s' % file_name
         ])
 
-    def test_modified_file_stat(self):
+    def test_modified_file_status(self):
         init()
         file_name, file_path = self._create_file()
         yestersecond = time.time() - 2
@@ -212,13 +212,13 @@ class TestStatCommand(CommandBase, PostInitCommandMixIn):
         f = open(file_path, 'a')
         f.write("CHICKENS\n")
         f.close()
-        self.assertEquals(stat(file_name), [
+        self.assertEquals(status(file_name), [
             'fragments configuration version %s.%s.%s' % __version__,
             'stored in %s' % config.directory,
             'M\t%s' % file_name
         ])
 
-    def test_removed_file_stat(self):
+    def test_removed_file_status(self):
         init()
         file_name, file_path = self._create_file()
         follow(file_name)
@@ -226,13 +226,13 @@ class TestStatCommand(CommandBase, PostInitCommandMixIn):
 
         config = FragmentsConfig()
         os.unlink(file_path)
-        self.assertEquals(stat(file_name), [
+        self.assertEquals(status(file_name), [
             'fragments configuration version %s.%s.%s' % __version__,
             'stored in %s' % config.directory,
             'D\t%s' % file_name
         ])
 
-    def test_error_file_stat(self):
+    def test_error_file_status(self):
         init()
         file_name, file_path = self._create_file()
         follow(file_name)
@@ -241,7 +241,7 @@ class TestStatCommand(CommandBase, PostInitCommandMixIn):
         key = os.path.relpath(file_path, config.root)
         os.unlink(file_path)
         os.unlink(os.path.join(config.directory, config['files'][key]))
-        self.assertEquals(stat(file_name), [
+        self.assertEquals(status(file_name), [
             'fragments configuration version %s.%s.%s' % __version__,
             'stored in %s' % config.directory,
             'E\t%s' % file_name
