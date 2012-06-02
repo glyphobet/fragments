@@ -70,7 +70,10 @@ def apply(*args):
                 yield dl
         while True:
             if args.interactive and apply_all is None:
-                response = (yield Prompt("Apply this change? [ynadjk?]")).lower()
+                response = (yield Prompt("Apply this change? [ynadjk?]"))
+                if not response:
+                    continue
+                response = response.lower()
             if not args.interactive or response.startswith('y') or apply_all == True:
                 for old_line, new_line, line_or_conflict in display_group:
                     if isinstance(line_or_conflict, tuple):
