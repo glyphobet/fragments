@@ -22,7 +22,8 @@ setup(
             'fragments = fragments.commands:_main',
         ],
     },
-    license='BSD',
+    data_files=[('share/fragments', ['README.md', 'bash_completion', 'LICENSE.txt'])],
+    license='BSD License',
     classifiers=(
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
