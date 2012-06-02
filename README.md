@@ -1,7 +1,7 @@
 Fragments
 =========
 
-Fragments uses concepts from version control to replace many uses of templating languages. It provides diff-based templating, instead of a templating language; It is "fragmentation control" instead of revision control.
+Fragments uses concepts from version control to replace many uses of templating languages. It is diff-based templating, instead of a templating language; It is "fragmentation control" instead of revision control.
 
 Fragments enables a programmer to violate the [DRY (Don't Repeat Yourself)](http://en.wikipedia.org/wiki/Don't_repeat_yourself) principle; it is a [Multiple Source of Truth](http://en.wikipedia.org/wiki/Single_Source_of_Truth) engine.
 
