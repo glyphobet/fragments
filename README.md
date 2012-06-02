@@ -101,6 +101,15 @@ Commands
 
     `-U NUM`, `--unified NUM` number of lines of context to show
 
+    In interactive mode, you can use the following commands:
+
+    * y - include this change
+    * n - do not include this change
+    * a - include this change and all remaining changes
+    * d - done, do not include this change nor any remaining changes
+    * j - leave this change undecided, see next undecided change
+    * k - leave this change undecided, see previous undecided change
+
 Future improvements
 -------------------
 

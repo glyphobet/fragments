@@ -14,6 +14,15 @@ def apply(*args):
     Limit application to TARGET_FILENAME(s) if specified.
     Files that conflict in their entirety will be skipped.
     Smaller conflicts will be written to the file as conflict sections.
+
+    In interactive mode, you can use the following commands:
+
+        y - include this change
+        n - do not include this change
+        a - include this change and all remaining changes
+        d - done, do not include this change nor any remaining changes
+        j - leave this change undecided, see next undecided change
+        k - leave this change undecided, see previous undecided change
     """
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, apply.__name__), description=apply.__doc__)
     parser.add_argument('SOURCE_FILENAME', help="file containing changes to be applied")
@@ -61,7 +70,7 @@ def apply(*args):
                 yield dl
         while True:
             if args.interactive and apply_all is None:
-                response = (yield Prompt("Apply this change? [ynadjk]")).lower()
+                response = (yield Prompt("Apply this change? [ynadjk?]")).lower()
             if not args.interactive or response.startswith('y') or apply_all == True:
                 for old_line, new_line, line_or_conflict in display_group:
                     if isinstance(line_or_conflict, tuple):
@@ -88,6 +97,9 @@ def apply(*args):
                 index = 0
                 apply_all = False
                 break
+            elif response == '?':
+                for l in apply.__doc__.split('\n')[-7:-1]:
+                    yield l.strip()
 
     if not preserve_changes:
         yield "No changes in '%s' to apply." % os.path.relpath(changed_path)
