@@ -48,6 +48,7 @@ def apply(*args):
 
     diff = weave.merge(old_revision, new_revision)
 
+    # Select the chunks to be applied, possibly interactively
     preserve_changes = {}
     discard_changes = {}
     display_groups = list(_split_diff(diff, context_lines=args.NUM))
@@ -82,6 +83,7 @@ def apply(*args):
         yield "No changes in '%s' to apply." % os.path.relpath(changed_path)
         return
 
+    # Build the changed file to be applied
     changes_to_apply = []
 
     i = 0
@@ -106,6 +108,7 @@ def apply(*args):
             i += 1
             changes_to_apply.append(line_or_conflict)
 
+    # Apply the changes across other files
     changed_revision = 3
     weave.add_revision(changed_revision, changes_to_apply, [1])
 
