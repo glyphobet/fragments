@@ -23,6 +23,7 @@ def apply(*args):
         d - done, do not include this change nor any remaining changes
         j - leave this change undecided, see next undecided change
         k - leave this change undecided, see previous undecided change
+        ? - interactive apply mode help
     """
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, apply.__name__), description=apply.__doc__)
     parser.add_argument('SOURCE_FILENAME', help="file containing changes to be applied")
@@ -101,7 +102,7 @@ def apply(*args):
                 apply_all = False
                 break
             elif response == '?':
-                for l in apply.__doc__.split('\n')[-7:-1]:
+                for l in apply.__doc__.split('\n')[-8:-1]:
                     yield l.strip()
 
     if not preserve_changes:

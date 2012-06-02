@@ -109,6 +109,7 @@ Commands
     * d - done, do not include this change nor any remaining changes
     * j - leave this change undecided, see next undecided change
     * k - leave this change undecided, see previous undecided change
+    * ? - interactive apply mode help
 
 Future improvements
 -------------------
