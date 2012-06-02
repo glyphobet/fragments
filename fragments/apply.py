@@ -53,20 +53,22 @@ def apply(*args):
     discard_changes = {}
     display_groups = list(_split_diff(diff, context_lines=args.NUM))
     index = 0
+    apply_all = None
     while display_groups:
         display_group = display_groups[index]
-        for dl in _diff_group(display_group):
-            yield dl
+        if apply_all is None:
+            for dl in _diff_group(display_group):
+                yield dl
         while True:
-            if args.interactive:
-                response = (yield Prompt("Apply this change? y/n/j/k")).lower()
-            if not args.interactive or response.startswith('y'):
+            if args.interactive and apply_all is None:
+                response = (yield Prompt("Apply this change? [ynadjk]")).lower()
+            if not args.interactive or response.startswith('y') or apply_all == True:
                 for old_line, new_line, line_or_conflict in display_group:
                     if isinstance(line_or_conflict, tuple):
                         preserve_changes[(old_line, new_line)] = line_or_conflict
                 display_groups.pop(index)
                 break
-            elif response.startswith('n'):
+            elif response.startswith('n') or apply_all == False:
                 for old_line, new_line, line_or_conflict in display_group:
                     if isinstance(line_or_conflict, tuple):
                         discard_changes[(old_line, new_line)] = line_or_conflict
@@ -77,6 +79,14 @@ def apply(*args):
                 break
             elif response == 'k':
                 index = (index - 1) % len(display_groups)
+                break
+            elif response == 'a':
+                index = 0
+                apply_all = True
+                break
+            elif response == 'd':
+                index = 0
+                apply_all = False
                 break
 
     if not preserve_changes:
