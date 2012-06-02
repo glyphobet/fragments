@@ -116,9 +116,9 @@ Future improvements
 
 ### Preprocessors
 
-Since Fragments is diff-based, it will not do well with minified or otherwise compressed content. Do not expect it to handle changes to your 1,000 character, single line, über-compressed CSS file. The more newlines in your files, the more robust Fragments' merging will be.
+Since Fragments is diff-based, it will not do well with minified or otherwise compressed content. Do not expect it to handle changes to your 10,000 character, single line, über-compressed CSS file, or to the inline JavaScript function in an `onclick` attribute in your HTML. The more newlines there are in your files, the more robust Fragments' merging will be.
 
-Adding preprocessors for different file formats would potentially make Fragments' merging even more robust. Running a preprocessor before `commit` and `apply` would make the merging more robust by ensuring that XML tags, (some) HTML tags, and CSS declarations get their own lines, and by placing a canonical number of newlines around CSS rules, functions and any other structures in the document.
+Adding preprocessors to enforce consistent newline placement and indentation across all followed files, would potentially make Fragments' merging even more robust. The preprocessors would run before `commit`, `fork`, and `apply`, and there would be different preprocessors for different file formats.
 
 ### Miscellaneous improvements
 
