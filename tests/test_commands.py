@@ -1196,6 +1196,60 @@ table {
         self.assertEqual(next(apply_generator), 'Apply this change? [ynadjk?] ')
         self.assertEqual(apply_generator.send('k'), '@@ -1,4 +1,4 @@')
 
+    def test_apply_interactive_no_response(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
+        follow(file1_name)
+        commit(file1_name)
+
+        new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />')
+        open(file1_name, 'w').write(new_file1_contents)
+
+        apply_generator = commands.apply(file1_name, '-i')
+
+        self.assertEqual(next(apply_generator), '@@ -4,7 +4,7 @@'                     )
+        self.assertEqual(next(apply_generator), '         <title>'                    )
+        self.assertEqual(next(apply_generator), '             Page One'               )
+        self.assertEqual(next(apply_generator), '         </title>'                   )
+        self.assertEqual(next(apply_generator), '-        <link href="default.css" />')
+        self.assertEqual(next(apply_generator), '+        <link href="layout.css" />' )
+        self.assertEqual(next(apply_generator), '         <link href="site.css" />'   )
+        self.assertEqual(next(apply_generator), '         <script href="script.js" />')
+        self.assertEqual(next(apply_generator), '         <script href="other.js" />' )
+        self.assertEqual(next(apply_generator), 'Apply this change? [ynadjk?] ')
+        self.assertEqual(next(apply_generator), 'Apply this change? [ynadjk?] ')
+        self.assertEqual(next(apply_generator), 'Apply this change? [ynadjk?] ')
+
+    def test_apply_interactive_help(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.html_file1_contents)
+        follow(file1_name)
+        commit(file1_name)
+
+        new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />')
+        open(file1_name, 'w').write(new_file1_contents)
+
+        apply_generator = commands.apply(file1_name, '-i')
+
+        self.assertEqual(next(apply_generator), '@@ -4,7 +4,7 @@'                     )
+        self.assertEqual(next(apply_generator), '         <title>'                    )
+        self.assertEqual(next(apply_generator), '             Page One'               )
+        self.assertEqual(next(apply_generator), '         </title>'                   )
+        self.assertEqual(next(apply_generator), '-        <link href="default.css" />')
+        self.assertEqual(next(apply_generator), '+        <link href="layout.css" />' )
+        self.assertEqual(next(apply_generator), '         <link href="site.css" />'   )
+        self.assertEqual(next(apply_generator), '         <script href="script.js" />')
+        self.assertEqual(next(apply_generator), '         <script href="other.js" />' )
+        self.assertEqual(next(apply_generator), 'Apply this change? [ynadjk?] ')
+        self.assertEqual(apply_generator.send('?'), 'y - include this change'                                   )
+        self.assertEqual(next(apply_generator), 'n - do not include this change'                                )
+        self.assertEqual(next(apply_generator), 'a - include this change and all remaining changes'             )
+        self.assertEqual(next(apply_generator), 'd - done, do not include this change nor any remaining changes')
+        self.assertEqual(next(apply_generator), 'j - leave this change undecided, see next undecided change'    )
+        self.assertEqual(next(apply_generator), 'k - leave this change undecided, see previous undecided change')
+        self.assertEqual(next(apply_generator), '? - interactive apply mode help'                               )
+        self.assertEqual(next(apply_generator), 'Apply this change? [ynadjk?] ')
+
     def test_cant_apply_nonexistent_file(self):
         init()
         self.assertEqual(apply("nonexistent.file", '-a'), ["Could not apply changes in 'nonexistent.file', it is not being followed"])
