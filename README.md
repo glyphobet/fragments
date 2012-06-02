@@ -124,6 +124,5 @@ Adding preprocessors to enforce consistent newline placement and indentation acr
 
 * Better command-line completion mode for bash
 * Command-line completion mode for zsh
-* Short command resolution, so you can type `fragments st` for `fragments stat`, &c.
 * Command aliasing and default configuration
 * Pluggable merge algorithms, if they prove useful

@@ -346,9 +346,24 @@ def fork(*args):
 def _main(): # pragma: no cover
     from . import commands
     print("%s version %s.%s.%s" % ((__package__,) + __version__))
-    if (len(sys.argv) > 1 and sys.argv[1] in __all__): # command is present and legit
+    cmd = None
+    if len(sys.argv) > 1:
+        if sys.argv[1] in __all__:
+            cmd = sys.argv[1]
+        else:
+            cmds = [c for c in __all__ if c.startswith(sys.argv[1])]
+            if len(cmds) == 1:
+                cmd = cmds.pop()
+            else:
+                if len(cmds) > 1:
+                    print("Command '%s' is ambiguous, did you mean:" % sys.argv[1])
+                    print(' '.join(cmds))
+                else:
+                    print("No such command '%s'. Available commands are:" % sys.argv[1])
+                    print(' '.join(__all__))
+    if (cmd): # command is present and legit
         try:
-            command_generator = getattr(commands, sys.argv[1])(*sys.argv[2:])
+            command_generator = getattr(commands, cmd)(*sys.argv[2:])
             while True:
                 try:
                     l = next(command_generator)
@@ -362,9 +377,5 @@ def _main(): # pragma: no cover
             sys.exit(exc.message)
         except KeyboardInterrupt:
             pass
-    else:
-        for l in help():
-            print(l)
-
 
 __all__ = ['help', 'init', 'stat', 'follow', 'forget', 'rename', 'diff', 'commit', 'revert', 'fork', 'apply']
