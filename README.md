@@ -48,7 +48,7 @@ Fragments is in PyPi. You can install it with `pip install fragments`.
 Usage
 -----
 
-Fragments installs a `fragments` command line script. Like version control, the first argument to Fragments is the command. And like version control, you must first `init` a repository, `follow` some files, then `commit` them. I deliberately chose different command names in some cases, to remind you that Fragments is not version control.
+Fragments installs a `fragments` command line script. Like version control, the first argument to Fragments is the command. And like version control, you must first `$ fragments init` a repository, then `$ fragments follow` some files, then `$ fragments commit` them. I deliberately chose different command names in some cases, to remind you that Fragments is not version control.
 
 Commands
 --------
