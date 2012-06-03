@@ -140,4 +140,4 @@ Adding preprocessors to enforce consistent newline placement and indentation acr
 Credits
 -------
 
-Fragments is &copy; 2012 by Matt Chisholm, and is released under the BSD License. It is available GitHub at https://github.com/glyphobet/fragments. Many thanks to Ross Cohen for his thoughts on the idea, and for preparing Precise Codeville Merge for use in Fragments.
+Fragments is Copyright 2012 by Matt Chisholm, and is released under the BSD License. It is available [on GitHub](https://github.com/glyphobet/fragments). Many thanks to Ross Cohen for his thoughts on the idea, and for preparing Precise Codeville Merge for use in Fragments.
