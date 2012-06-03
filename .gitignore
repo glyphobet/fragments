@@ -1,0 +1,8 @@
+*.pyc
+*~
+.DS_Store
+.coverage
+_fragments
+build
+dist
+fragments.egg-info
