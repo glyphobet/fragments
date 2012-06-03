@@ -43,7 +43,7 @@ _UseFragments ()   # By convention, the function name
         -*)
             COMPREPLY=( $( compgen -W '-U --unified' -- $curr ) );;
         *)
-            COMPREPLY=( $( compgen -W '`$1 status -l M | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );;
+            COMPREPLY=( $( compgen -W '`$1 status -l AMD | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );;
       esac;
   elif [ "$cmd" == "fork" ] ; then
       case "$curr" in
