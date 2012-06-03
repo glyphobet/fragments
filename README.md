@@ -43,7 +43,7 @@ Fragments is invisible to people who don't know it's being used. If you (or some
 Installation
 ------------
 
-Fragments is in PyPi. You can install it with `pip install fragments`.
+Fragments is [on PyPI](http://pypi.python.org/pypi/fragments). You can install it with `pip install fragments`.
 
 Usage
 -----
@@ -140,4 +140,4 @@ Adding preprocessors to enforce consistent newline placement and indentation acr
 Credits
 -------
 
-Fragments is Copyright 2012 by Matt Chisholm, and is released under the BSD License. It is available [on GitHub](https://github.com/glyphobet/fragments). Many thanks to Ross Cohen for his thoughts on the idea, and for preparing Precise Codeville Merge for use in Fragments.
+Fragments is Copyright 2012 by Matt Chisholm, and is released under the BSD License. It is available [on GitHub](https://github.com/glyphobet/fragments) and [on PyPI](http://pypi.python.org/pypi/fragments). Many thanks to Ross Cohen for his thoughts on the idea, and for preparing Precise Codeville Merge for use in Fragments.
