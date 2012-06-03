@@ -126,3 +126,8 @@ Adding preprocessors to enforce consistent newline placement and indentation acr
 * Command-line completion mode for zsh
 * Command aliasing and default configuration
 * Pluggable diff & merge algorithms, if they prove useful
+
+Credits
+-------
+
+Fragments is &copy; 2012 by Matt Chisholm, and is released under the BSD License. It is available GitHub at https://github.com/glyphobet/fragments. Many thanks to Ross Cohen for his thoughts on the idea, and for preparing Precise Codeville Merge for use in Fragments.
