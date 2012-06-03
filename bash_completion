@@ -19,12 +19,12 @@ _UseFragments ()   # By convention, the function name
   elif [ "$cmd" == "forget" -o "$cmd" == "rename" -o "$cmd" == "status" ] ; then
       case "$curr" in
         *)
-            COMPREPLY=( $( compgen -W '`$1 status -l DAM\  | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );;
+            COMPREPLY=( $( compgen -W '`$1 status -l AMD\  | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );;
       esac;
   elif [ "$cmd" == "revert" ] ; then
       case "$curr" in
         *)
-            COMPREPLY=( $( compgen -W '`$1 status -l DM | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );;
+            COMPREPLY=( $( compgen -W '`$1 status -l MD | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );;
       esac;
   elif [ "$cmd" == "commit" ] ; then
       case "$curr" in
