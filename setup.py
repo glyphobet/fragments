@@ -11,7 +11,7 @@ import fragments
 setup(
     name='fragments',
     version='.'.join(map(str, fragments.__version__)),
-    description='Differencing Fragmentation Manager',
+    description='tool for diff-based templating / fragmentation control',
     long_description=open('README.md').read(),
     author='Matt Chisholm',
     author_email='matt-fragments@theory.org',
