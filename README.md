@@ -40,6 +40,16 @@ Invisibility
 
 Fragments is invisible to people who don't know it's being used. If you (or someone else) make more than one change to a file, Fragments' `apply` command allows you to perform chunk-based interactive application of changes, similar to `git commit --patch` or `hg record`. So, you can give a single HTML file to your web designer or junior programmer, let him or her modify it as desired, and later, selectively apply some of those changes across all other HTML files, while leaving other changes only in the modified file.
 
+Installation
+------------
+
+Fragments is in PyPi. You can install it with `pip install fragments`.
+
+Usage
+-----
+
+Fragments installs a `fragments` command line script. Like version control, the first argument to Fragments is the command. And like version control, you must first `init` a repository, `follow` some files, then `commit` them. I deliberately chose different command names in some cases, to remind you that Fragments is not version control.
+
 Commands
 --------
 
