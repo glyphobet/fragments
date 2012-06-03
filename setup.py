@@ -15,7 +15,7 @@ setup(
     long_description=open('README.md').read(),
     author='Matt Chisholm',
     author_email='matt-fragments@theory.org',
-    # url='https://github.com/glyphobet/fragments',
+    url='https://github.com/glyphobet/fragments',
     packages= ['fragments',],
     entry_points = {
         'console_scripts': [
