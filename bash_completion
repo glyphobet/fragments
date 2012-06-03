@@ -19,44 +19,38 @@ _UseFragments ()   # By convention, the function name
   elif [ "$cmd" == "forget" -o "$cmd" == "rename" -o "$cmd" == "status" ] ; then
       case "$curr" in
         *)
-            COMPREPLY=( $( compgen -f -- $curr ) );;
-            # COMPREPLY=( $( compgen -W `$1 status -l DAM\ ` -- $curr ) );;
+            COMPREPLY=( $( compgen -W '`$1 status -l DAM\  | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );;
       esac;
   elif [ "$cmd" == "revert" ] ; then
       case "$curr" in
         *)
-            COMPREPLY=( $( compgen -f -- $curr ) );;
-            # COMPREPLY=( $( compgen -W `$1 status -l DM` -- $curr ) );;
+            COMPREPLY=( $( compgen -W '`$1 status -l DM | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );;
       esac;
   elif [ "$cmd" == "commit" ] ; then
       case "$curr" in
         *)
-            COMPREPLY=( $( compgen -f -- $curr ) );;
-            # COMPREPLY=( $( compgen -W `$1 status -l AM` -- $curr ) );;
+            COMPREPLY=( $( compgen -W '`$1 status -l AM | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );;
       esac;
   elif [ "$cmd" == "apply" ] ; then
       case "$curr" in
         -*)
             COMPREPLY=( $( compgen -W '-i -a -U --unified' -- $curr ) );;
         *)
-            COMPREPLY=( $( compgen -f -- $curr ) );;
-            # COMPREPLY=( $( compgen -W `$1 status -l M` -- $curr ) );;
+            COMPREPLY=( $( compgen -W '`$1 status -l M | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );;
       esac;
   elif [ "$cmd" == "diff" ] ; then
       case "$curr" in
         -*)
             COMPREPLY=( $( compgen -W '-U --unified' -- $curr ) );;
         *)
-            COMPREPLY=( $( compgen -f -- $curr ) );;
-            # COMPREPLY=( $( compgen -W `$1 status -l M` -- $curr ) );;
+            COMPREPLY=( $( compgen -W '`$1 status -l M | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );;
       esac;
   elif [ "$cmd" == "fork" ] ; then
       case "$curr" in
         -*)
             COMPREPLY=( $( compgen -W '-U --unified' -- $curr ) );;
         *)
-            COMPREPLY=( $( compgen -f -- $curr ) );;
-            # COMPREPLY=( $( compgen -W `$1 status -l AM\ ` -- $curr ) );;
+            COMPREPLY=( $( compgen -W '`$1 status -l AM\  | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );;
       esac;
   elif [ "$prev" == "fragments" -o "$cmd" == "help" ] ; then
       case "$curr" in
