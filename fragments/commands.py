@@ -244,8 +244,10 @@ def commit(*args):
                 repo_file.write(open(curr_path, 'r').read())
             os.utime(repo_path, os.stat(curr_path)[7:9])
             yield "'%s' committed" % os.path.relpath(curr_path)
-        elif s in 'D':
+        elif s == 'D':
             yield "Could not commit '%s' because it has been removed, instead revert or forget it" % os.path.relpath(curr_path)
+        elif s == ' ':
+            yield "Could not commit '%s' because it has not been changed" % os.path.relpath(curr_path)
 
 
 def revert(*args):
@@ -269,8 +271,10 @@ def revert(*args):
                 curr_file.write(open(repo_path, 'r').read())
             os.utime(curr_path, os.stat(repo_path)[7:9])
             yield "'%s' reverted" % key
-        elif s in 'A':
+        elif s == 'A':
             yield "Could not revert '%s' because it has never been committed" % os.path.relpath(curr_path)
+        elif s == ' ':
+            yield "Could not revert '%s' because it has not been changed" % os.path.relpath(curr_path)
 
 
 def fork(*args):

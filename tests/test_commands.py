@@ -645,7 +645,7 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
 
         follow(file_name)
         commit(file_name)
-        self.assertEquals(commit(file_name), [])
+        self.assertEquals(commit(file_name), ["Could not commit '%s' because it has not been changed" % os.path.relpath(file_path)])
 
 
 class TestRevertCommand(CommandBase, PostInitCommandMixIn):
@@ -735,7 +735,7 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
 
         follow(file_name)
         commit(file_name)
-        self.assertEquals(revert(file_name), [])
+        self.assertEquals(revert(file_name), ["Could not revert '%s' because it has not been changed" % os.path.relpath(file_path)])
 
 
 class TestForkCommand(CommandBase, PostInitCommandMixIn):
