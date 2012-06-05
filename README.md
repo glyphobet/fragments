@@ -33,7 +33,9 @@ What is it good for?
 
 Fragments was designed with the task of simplifying large collections of HTML or HTML templates. It could replace simpler CMS-managed websites with pure static HTML. It could also handle several different translations of an HTML website, ensuring that the same HTML structure was wrapped around each translation of the content.
 
-But Fragments is also not HTML specific. If it's got newlines, Fragments can manage it. That means XML, CSS, JSON, YAML, or source code from any programming language where newlines are common (sorry, Perl). Fragments is even smart enough to know not to merge totally different files together.
+But Fragments is also not HTML specific. If it's got newlines, Fragments can manage it. That means XML, CSS, JSON, YAML, or source code from any programming language where newlines are common (sorry, Perl). cFragments is even smart enough to know not to merge totally different files together. You could use it to manage a large set of configuration files for different servers and deployment configurations, for example. Or you could use it to manage bug fixes to that mess of duplicated source files on that legacy project you wish you didn't have to maintain.
+
+In short, Fragments can be used anyplace where you have thought to yourself "this group of files really is violating DRY".
 
 Integration with version control
 --------------------------------
