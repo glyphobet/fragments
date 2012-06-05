@@ -135,10 +135,9 @@ def apply(*args):
             changes_to_apply.append(line_or_conflict)
 
     # Apply the changes across other files
-    changed_revision = 3
+    current_revision = changed_revision = 3
     weave.add_revision(changed_revision, changes_to_apply, [1])
 
-    current_revision = changed_revision
     for other_path in _iterate_over_files(args.TARGET_FILENAME, config):
         other_key = os.path.relpath(other_path, config.root)
         if other_path == changed_path:
