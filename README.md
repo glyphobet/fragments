@@ -26,7 +26,14 @@ How does it work?
 
 The merge algorithm is a version of [Precise Codeville Merge](http://revctrl.org/PreciseCodevilleMerge) modified to support cherry-picking. Precise Codeville Merge was chosen because it supports [accidental clean merges](http://revctrl.org/AccidentalCleanMerge) and [convergence](http://revctrl.org/Convergence). That is, if two files are independently modified in the same way, they merge together cleanly. This makes adding new files easy; use Fragment's `fork` command to create a new file based on other files (or just `cp` one of your files), change it as desired, and commit it. Subsequent changes to any un-modified, common sections, in that file or in its siblings, will be applicable across the rest of the repository.
 
-Fragments is also not HTML specific. If it's got newlines, Fragments can manage it. That means XML, CSS, JSON, YAML, or source code from any programming language where newlines are common (sorry, Perl). Fragments is even smart enough to know not to merge totally different files together. It could even replace simpler CMS-managed websites with pure static HTML.
+Like version control, you run Fragments on the command line each time you make a change to your HTML, not before each page render.
+
+What is it good for?
+--------------------
+
+Fragments was designed with the task of simplifying large collections of HTML or HTML templates. It could replace simpler CMS-managed websites with pure static HTML. It could also handle several different translations of an HTML website, ensuring that the same HTML structure was wrapped around each translation of the content.
+
+But Fragments is also not HTML specific. If it's got newlines, Fragments can manage it. That means XML, CSS, JSON, YAML, or source code from any programming language where newlines are common (sorry, Perl). Fragments is even smart enough to know not to merge totally different files together.
 
 Integration with version control
 --------------------------------
