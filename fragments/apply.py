@@ -149,7 +149,7 @@ def apply(*args):
         if len(merge_result) == 1 and isinstance(merge_result[0], tuple):
             # total conflict, skip
             yield "Changes in '%s' cannot apply to '%s', skipping" % (os.path.relpath(changed_path), os.path.relpath(other_path))
-        elif tuple in (type(mr) for mr in merge_result):
+        elif tuple in set(type(mr) for mr in merge_result):
             # some conflicts exist
             with file(other_path, 'w') as other_file:
                 for line_or_conflict in merge_result:
