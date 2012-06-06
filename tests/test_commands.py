@@ -814,6 +814,143 @@ class TestForkCommand(CommandBase, PostInitCommandMixIn):
         ])
         self.assertFalse(os.path.exists('file3.ext'))
 
+    def test_three_way_fork(self):
+        fileA_contents = """<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            Page AAA
+        </title>
+        <link href="default.css" />
+        <link href="site.css" />
+        <link href="not_in_file_b.css" />
+        <link href="also_not_in_file_b.css" />
+        <script href="script.js" />
+        <script href="other.js" />
+        <script type="text/javascript">
+            var whole = function (buncha) {
+                $tuff;
+            };
+        </script>
+        <script>
+            <!-- Not in file C -->
+        </script>
+    </head>
+    <body>
+        <h1>AAA</h1>
+        <p>
+            blah de blah blah
+            lorem ipsum blah
+        </p>
+        <div id="footer">
+            <a href="foo">bar</a>
+        </div>
+    </body>
+</html>
+"""
+        fileB_contents = """<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            Page BBB
+        </title>
+        <link href="default.css" />
+        <link href="site.css" />
+        <script href="script.js" />
+        <script href="other.js" />
+        <script type="text/javascript">
+            var whole = function (buncha) {
+                $tuff;
+            };
+        </script>
+        <script>
+            <!-- Not in file C -->
+        </script>
+    </head>
+    <body>
+        <h1>BBB</h1>
+        <p>
+            blah de blah blah
+            lorem ipsum blah
+        </p>
+        <div id="footer">
+            <a href="foo">bar</a>
+            <a href="Not in File A">AAA</a>
+        </div>
+    </body>
+</html>
+"""
+        fileC_contents = """<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            Page CCC
+        </title>
+        <link href="default.css" />
+        <link href="site.css" />
+        <link href="not_in_file_b.css" />
+        <link href="also_not_in_file_b.css" />
+        <script href="script.js" />
+        <script href="other.js" />
+        <script type="text/javascript">
+            var whole = function (buncha) {
+                $tuff;
+            };
+        </script>
+    </head>
+    <body>
+        <h1>CCC</h1>
+        <p>
+            blah de blah blah
+            lorem ipsum blah
+        </p>
+        <div id="footer">
+            <a href="foo">bar</a>
+            <a href="Not in File A">AAA</a>
+        </div>
+    </body>
+</html>
+"""
+        target_contents = """<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+
+        </title>
+        <link href="default.css" />
+        <link href="site.css" />
+
+        <script href="script.js" />
+        <script href="other.js" />
+        <script type="text/javascript">
+            var whole = function (buncha) {
+                $tuff;
+            };
+        </script>
+
+    </head>
+    <body>
+
+        <p>
+            blah de blah blah
+            lorem ipsum blah
+        </p>
+        <div id="footer">
+            <a href="foo">bar</a>
+
+        </div>
+    </body>
+</html>
+"""
+        init()
+        fileA_name, fileA_path = self._create_file(contents=fileA_contents)
+        fileB_name, fileB_path = self._create_file(contents=fileB_contents)
+        fileC_name, fileC_path = self._create_file(contents=fileC_contents)
+        follow(fileA_name, fileB_name, fileC_name)
+        commit(fileA_name, fileB_name, fileC_name)
+        fork(fileA_name, fileB_name, fileC_name, 'target.html', '-U', '2')
+        self.assertEqual(open('target.html', 'r').read(), target_contents)
+
 
 class TestApplyCommand(CommandBase, PostInitCommandMixIn):
     maxDiff = None
