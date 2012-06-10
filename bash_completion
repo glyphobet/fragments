@@ -14,7 +14,7 @@ _UseFragments ()   # By convention, the function name
   if [ "$cmd" == "follow" ] ; then
       case "$curr" in
         *)
-            COMPREPLY=( $( compgen -f -- $curr ) );;
+            COMPREPLY=( $( compgen -W '`find . -not -regex ".*/\..*" -not -regex ".*/_fragments.*" -type f | xargs fragments stat -l ? | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );;
       esac;
   elif [ "$cmd" == "forget" -o "$cmd" == "rename" -o "$cmd" == "status" ] ; then
       case "$curr" in
