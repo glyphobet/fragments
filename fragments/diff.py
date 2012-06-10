@@ -10,19 +10,13 @@ def _visible_in_diff(merge_result, context_lines=3):
             old_line += len(line_or_conflict[0])
             new_line += len(line_or_conflict[1])
         else:
-            should_yield = False
-            for ibefore in range(max(0, i-context_lines), i): # look behind
-                if isinstance(merge_result[ibefore], tuple):
-                    should_yield = True
+            for j in (range(max(0, i-context_lines), i) +                      # look behind for nearby conflicts
+                      range(i+1, min(len(merge_result), i+1+context_lines))):  # look ahead for nearby conflicts
+                if isinstance(merge_result[j], tuple):
+                    yield old_line, new_line, line_or_conflict
                     break
-            for iafter in range(i+1, min(len(merge_result), i+1+context_lines)): # look ahead
-                if isinstance(merge_result[iafter], tuple):
-                    should_yield = True
-                    break
-            if should_yield:
-                yield old_line, new_line, line_or_conflict
             else:
-                yield None
+                yield None # sentinel to mark boundaries between diff section groups
             old_line += 1
             new_line += 1
         i += 1
