@@ -10,8 +10,8 @@ def _visible_in_diff(merge_result, context_lines=3):
             old_line += len(line_or_conflict[0])
             new_line += len(line_or_conflict[1])
         else:
-            for j in (range(max(0, i-context_lines), i) +                      # look behind for nearby conflicts
-                      range(i+1, min(len(merge_result), i+1+context_lines))):  # look ahead for nearby conflicts
+            for j in (list(range(max(0, i-context_lines), i                                        )) +  # look behind for nearby conflicts
+                      list(range(i+1                    , min(len(merge_result), i+1+context_lines)))):  # look ahead for nearby conflicts
                 if isinstance(merge_result[j], tuple):
                     yield old_line, new_line, line_or_conflict
                     break
