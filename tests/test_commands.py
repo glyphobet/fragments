@@ -4,9 +4,12 @@ import time
 import types
 import shutil
 import argparse
-import StringIO
 import tempfile
 import unittest
+try:
+    from io import StringIO
+except ImportError:
+    from StringIO import StringIO
 
 from fragments import commands, __version__
 from fragments.commands import ExecutionError
@@ -73,7 +76,7 @@ class TestHelpCommand(CommandBase):
     def setUp(self):
         super(TestHelpCommand, self).setUp()
         self.argparse_sys_stdout = argparse._sys.stdout
-        argparse._sys.stdout = StringIO.StringIO()
+        argparse._sys.stdout = StringIO()
 
     def tearDown(self):
         argparse._sys.stdout = self.argparse_sys_stdout

@@ -1,5 +1,8 @@
 import sys
-from StringIO import StringIO
+try:
+    from io import StringIO
+except ImportError:
+    from StringIO import StringIO
 import unittest
 from fragments import color
 
