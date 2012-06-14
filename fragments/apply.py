@@ -152,9 +152,7 @@ def apply(*args):
             # some conflicts exist
             with open(other_path, 'w') as other_file:
                 for line_or_conflict in merge_result:
-                    if isinstance(line_or_conflict, basestring):
-                        other_file.write(line_or_conflict)
-                    else:
+                    if isinstance(line_or_conflict, tuple):
                         other_file.write('>'*7 + '\n')
                         for line in line_or_conflict[0]:
                             other_file.write(line)
@@ -162,6 +160,8 @@ def apply(*args):
                         for line in line_or_conflict[1]:
                             other_file.write(line)
                         other_file.write('>'*7 + '\n')
+                    else:
+                        other_file.write(line_or_conflict)
             yield "Conflict merging '%s' into '%s'" % (os.path.relpath(changed_path), os.path.relpath(other_path))
         else:
             # Merge is clean:
