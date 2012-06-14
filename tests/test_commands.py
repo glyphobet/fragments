@@ -97,9 +97,9 @@ class TestInitCommand(CommandBase):
         self.assertTrue(os.path.exists(os.path.join(self.path, configuration_directory_name, configuration_file_name)))
 
     def test_init_raises_error_on_unwritable_parent(self):
-        os.chmod(self.path, 0500)
+        os.chmod(self.path, int('0500', 8))
         self.assertRaises(ExecutionError, init)
-        os.chmod(self.path, 0700)
+        os.chmod(self.path, int('0700', 8))
 
     def test_init_json(self):
         init()
