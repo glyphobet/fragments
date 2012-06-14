@@ -51,7 +51,7 @@ class CommandBase(unittest.TestCase):
             file_name = 'file%d.ext' % self.file_counter
             self.file_counter += 1
         file_path = os.path.join(self.content_path, file_name)
-        new_file = file(file_path, 'w')
+        new_file = open(file_path, 'w')
         new_file.write(contents)
         return file_name, file_path
 
@@ -62,9 +62,9 @@ class TestConfig(CommandBase):
     def test_version_number_updated_on_dump(self):
         init()
         config = FragmentsConfig()
-        raw_config = json.loads(file(config.path, 'r').read())
+        raw_config = json.loads(open(config.path, 'r').read())
         raw_config['version'] = __version__[0:2] +(__version__[2] - 1,)
-        file(config.path, 'w').write(json.dumps(raw_config, sort_keys=True, indent=4))
+        open(config.path, 'w').write(json.dumps(raw_config, sort_keys=True, indent=4))
         config = FragmentsConfig()
         config.dump()
         config = FragmentsConfig()
@@ -134,7 +134,7 @@ class TestInitCommand(CommandBase):
     
     def test_recovery_from_corrupt_fragments_config_json(self):
         init()
-        corrupted_config = file(os.path.join(os.path.join(self.path, configuration_directory_name, configuration_file_name)), 'a')
+        corrupted_config = open(os.path.join(os.path.join(self.path, configuration_directory_name, configuration_file_name)), 'a')
         corrupted_config.write("GIBBERISH#$$$;,){no}this=>is NOT.json")
         corrupted_config.close()
         init()
@@ -429,7 +429,7 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
 
         follow(file1_name)
         commit(file1_name)
-        file(file1_name, 'w').write(self.original_file.replace('Line Three', 'Line 2.6666\nLine Three and One Third'))
+        open(file1_name, 'w').write(self.original_file.replace('Line Three', 'Line 2.6666\nLine Three and One Third'))
         self.assertEquals(list(diff(file1_name)), [
             'diff a/test_content/file1.ext b/test_content/file1.ext',
             '--- test_content/file1.ext',
@@ -451,7 +451,7 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
 
         follow(file1_name)
         commit(file1_name)
-        file(file1_name, 'w').write(self.original_file.replace('Line One', 'Line 0.999999').replace('Line Five', 'Line 4.999999'))
+        open(file1_name, 'w').write(self.original_file.replace('Line One', 'Line 0.999999').replace('Line Five', 'Line 4.999999'))
         self.assertEquals(list(diff(file1_name)), [
             'diff a/test_content/file1.ext b/test_content/file1.ext',
             '--- test_content/file1.ext',
@@ -474,7 +474,7 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
 
         follow(file1_name)
         commit(file1_name)
-        file(file1_name, 'w').write(original_file.replace('Line One', 'Line 0.999999').replace('Line Nine', 'Line 8.999999'))
+        open(file1_name, 'w').write(original_file.replace('Line One', 'Line 0.999999').replace('Line Nine', 'Line 8.999999'))
         self.assertEquals(list(diff(file1_name)), [
             'diff a/test_content/file1.ext b/test_content/file1.ext',
             '--- test_content/file1.ext',
@@ -586,8 +586,8 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         self.assertIn(key, config['files'])
         self.assertTrue(os.access(os.path.join(config.directory, config['files'][key]), os.R_OK|os.W_OK))
         self.assertEquals(
-            file(os.path.join(config.directory, config['files'][key]), 'r').read(),
-            file(file_path, 'r').read(),
+            open(os.path.join(config.directory, config['files'][key]), 'r').read(),
+            open(file_path, 'r').read(),
         )
 
     def test_commit_modify_commit_file(self):
@@ -602,7 +602,7 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         follow(file_name)
         commit(file_name)
 
-        f = file(file_path, 'a')
+        f = open(file_path, 'a')
         f.write("GIBBERISH!\n")
         f.close()
 
@@ -612,14 +612,14 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         self.assertIn(key, config['files'])
         self.assertTrue(os.access(os.path.join(config.directory, config['files'][key]), os.R_OK|os.W_OK))
         self.assertNotEquals(
-            file(os.path.join(config.directory, config['files'][key]), 'r').read(),
-            file(file_path, 'r').read(),
+            open(os.path.join(config.directory, config['files'][key]), 'r').read(),
+            open(file_path, 'r').read(),
         )
 
         commit(file_name)
         self.assertEquals(
-            file(os.path.join(config.directory, config['files'][key]), 'r').read(),
-            file(file_path, 'r').read(),
+            open(os.path.join(config.directory, config['files'][key]), 'r').read(),
+            open(file_path, 'r').read(),
         )
 
     def test_commit_unfollowed_file(self):
@@ -644,7 +644,7 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         file_name, file_path = self._create_file()
         yestersecond = time.time() - 2
         os.utime(file_path, (yestersecond, yestersecond))
-        original_content = file(file_path, 'r').read()
+        original_content = open(file_path, 'r').read()
 
         follow(file_name)
         commit(file_name)
@@ -658,7 +658,7 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
     def test_commit_modify_revert_file(self):
         init()
         file_name, file_path = self._create_file()
-        original_content = file(file_path, 'r').read()
+        original_content = open(file_path, 'r').read()
 
         # pretend file was actually created two seconds ago
         # so that commit will detect changes
@@ -668,7 +668,7 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
         follow(file_name)
         commit(file_name)
 
-        f = file(file_path, 'a')
+        f = open(file_path, 'a')
         f.write("GIBBERISH!\n")
         f.close()
 
@@ -679,25 +679,25 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
         self.assertIn(key, config['files'])
         self.assertTrue(os.access(os.path.join(config.directory, config['files'][key]), os.R_OK|os.W_OK))
         self.assertNotEquals(
-            file(os.path.join(config.directory, config['files'][key]), 'r').read(),
-            file(file_path, 'r').read(),
+            open(os.path.join(config.directory, config['files'][key]), 'r').read(),
+            open(file_path, 'r').read(),
         )
 
         revert(file_name)
         self.assertEquals(
-            file(os.path.join(config.directory, config['files'][key]), 'r').read(),
-            file(file_path, 'r').read(),
+            open(os.path.join(config.directory, config['files'][key]), 'r').read(),
+            open(file_path, 'r').read(),
         )
 
         self.assertEquals(
             original_content,
-            file(file_path, 'r').read(),
+            open(file_path, 'r').read(),
         )
 
     def test_follow_modify_revert_file(self):
         init()
         file_name, file_path = self._create_file()
-        original_content = file(file_path, 'r').read()
+        original_content = open(file_path, 'r').read()
 
         # pretend file was actually created two seconds ago
         # so that commit will detect changes
@@ -719,7 +719,7 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
     def test_revert_removed_file(self):
         init()
         file_name, file_path = self._create_file()
-        original_content = file(file_path, 'r').read()
+        original_content = open(file_path, 'r').read()
 
         follow(file_name)
         commit(file_name)
@@ -728,13 +728,13 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
 
         self.assertEquals(
             original_content,
-            file(file_path, 'r').read(),
+            open(file_path, 'r').read(),
         )
 
     def test_revert_unchanged_file(self):
         init()
         file_name, file_path = self._create_file()
-        original_content = file(file_path, 'r').read()
+        original_content = open(file_path, 'r').read()
 
         follow(file_name)
         commit(file_name)

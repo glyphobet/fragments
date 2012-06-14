@@ -150,7 +150,7 @@ def apply(*args):
             yield "Changes in '%s' cannot apply to '%s', skipping" % (os.path.relpath(changed_path), os.path.relpath(other_path))
         elif tuple in set(type(mr) for mr in merge_result):
             # some conflicts exist
-            with file(other_path, 'w') as other_file:
+            with open(other_path, 'w') as other_file:
                 for line_or_conflict in merge_result:
                     if isinstance(line_or_conflict, basestring):
                         other_file.write(line_or_conflict)
@@ -165,6 +165,6 @@ def apply(*args):
             yield "Conflict merging '%s' into '%s'" % (os.path.relpath(changed_path), os.path.relpath(other_path))
         else:
             # Merge is clean:
-            with file(other_path, 'w') as other_file:
+            with open(other_path, 'w') as other_file:
                 other_file.writelines(merge_result)
             yield "Changes in '%s' applied cleanly to '%s'" % (os.path.relpath(changed_path), os.path.relpath(other_path))

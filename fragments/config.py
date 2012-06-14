@@ -66,4 +66,4 @@ class FragmentsConfig(dict):
 
     def dump(self):
         self['version'] = __version__
-        file(self.path, 'w').write(json.dumps(self, sort_keys=True, indent=4, cls=UUIDEncoder))
+        open(self.path, 'w').write(json.dumps(self, sort_keys=True, indent=4, cls=UUIDEncoder))
