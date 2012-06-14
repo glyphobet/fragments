@@ -7,9 +7,9 @@ import argparse
 import tempfile
 import unittest
 try:
-    from io import StringIO
-except ImportError:
     from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 from fragments import commands, __version__
 from fragments.commands import ExecutionError
