@@ -144,9 +144,6 @@ class TestInitCommand(CommandBase):
 
 class PostInitCommandMixIn(object):
 
-    def setUp(self):
-        super(CommandBase, self).setUp()
-
     def test_command_attribute_set_properly(self):
         self.assertTrue(isinstance(self.command, types.FunctionType), 
             "%s.command attribute must be a staticmethod." % type(self).__name__)
