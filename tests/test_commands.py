@@ -15,9 +15,6 @@ try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
-from functools import wraps
-
-from nose import SkipTest
 
 from fragments import commands, __version__
 from fragments.commands import ExecutionError
@@ -35,17 +32,6 @@ def commit(*a): return list(commands.commit(*a))
 def revert(*a): return list(commands.revert(*a))
 def diff  (*a): return list(commands.diff  (*a))
 def apply (*a): return list(commands.apply (*a))
-
-
-def minimum_version(version):
-    def outer(function):
-        @wraps(function)
-        def inner(*a, **kw):
-            if sys.version_info >= version:
-                return function(*a, **kw)
-            raise SkipTest
-        return inner
-    return outer
 
 
 class CommandBase(unittest.TestCase):
@@ -187,7 +173,6 @@ class TestUnicode(CommandBase):
         config = FragmentsConfig()
         self.assertNotIn(key, config['files'])
 
-    @minimum_version((3,))
     def test_unicode_contents(self):
         contents = "grüß Gott!\n"
         init()
