@@ -155,7 +155,7 @@ class TestInitCommand(CommandBase):
 class TestUnicode(CommandBase):
 
     def test_unicode_filename(self):
-        contents = "grüß Gott!\n"
+        contents = "Hello\n"
         init()
         file_name, file_path = self._create_file(file_name='grüß_gott.bang', contents=contents)
         yestersecond = time.time() - 2
@@ -174,12 +174,13 @@ class TestUnicode(CommandBase):
     def test_unicode_contents(self):
         contents = "grüß Gott!\n"
         init()
-        file_name, file_path = self._create_file(file_name='grüß_gott.bang', contents=contents)
+        file_name, file_path = self._create_file(file_name='grüß_gott.bang', contents='')
+        open(file_name, 'a').write(contents.encode('utf8'))
         yestersecond = time.time() - 2
         os.utime(file_path, (yestersecond, yestersecond))
         follow(file_name)
         commit(file_name)
-        open(file_name, 'a').write("↑↑↓↓←→←→αβав\n")
+        open(file_name, 'a').write("↑↑↓↓←→←→αβав\n".encode('utf8'))
         self.assertEquals(diff(file_name), [
             'diff a/test_content/grüß_gott.bang b/test_content/grüß_gott.bang',
             '--- test_content/grüß_gott.bang',
