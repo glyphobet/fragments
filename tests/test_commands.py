@@ -567,6 +567,53 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
         os.unlink(file1_path)
         self.assertEquals(list(diff(file1_name)), [])
 
+    def test_trailing_newline_added_diff(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.original_file[:-1])
+        yestersecond = time.time() - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
+        follow(file1_path)
+        commit(file1_path)
+
+        open(file1_name, 'w').write(self.original_file)
+
+        self.assertEquals(list(diff(file1_name)), [
+            'diff a/test_content/file1.ext b/test_content/file1.ext',
+            '--- test_content/file1.ext',
+            '+++ test_content/file1.ext',
+            '@@ -2,4 +2,4 @@',
+            ' Line Two',
+            ' Line Three',
+            ' Line Four',
+            '-Line Five',
+            '\ No newline at end of file',
+            '+Line Five',
+        ])
+
+    def test_trailing_newline_removed_diff(self):
+        init()
+        file1_name, file1_path = self._create_file(contents=self.original_file)
+        yestersecond = time.time() - 2
+        os.utime(file1_path, (yestersecond, yestersecond))
+        follow(file1_path)
+        commit(file1_path)
+
+        open(file1_name, 'w').write(self.original_file[:-1])
+        # import pdb; pdb.set_trace()
+
+        self.assertEquals(list(diff(file1_name)), [
+            'diff a/test_content/file1.ext b/test_content/file1.ext',
+            '--- test_content/file1.ext',
+            '+++ test_content/file1.ext',
+            '@@ -2,4 +2,4 @@',
+            ' Line Two',
+            ' Line Three',
+            ' Line Four',
+            '-Line Five',
+            '+Line Five',
+            '\ No newline at end of file',
+        ])
+
 
 class TestCommitCommand(CommandBase, PostInitCommandMixIn):
 

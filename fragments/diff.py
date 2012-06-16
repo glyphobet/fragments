@@ -65,8 +65,16 @@ def _diff_group(group):
             old, new = line_or_conflict
             for o in old:
                 yield color.Deleted('-' + o.strip('\n'))
+
+            if new and old and new[-1].endswith('\n') and not old[-1].endswith('\n'): # new last line has a newline but old last line doesn't
+                yield "\ No newline at end of file"
+
             for n in new:
                 yield color.Added('+' + n.strip('\n'))
+
+            if old and new and old[-1].endswith('\n') and not new[-1].endswith('\n'): # old last line has a newline but new last line doesn't
+                yield "\ No newline at end of file"
+
         else:
             yield ' ' + line_or_conflict.strip('\n')
 
