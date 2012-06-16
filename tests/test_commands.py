@@ -96,6 +96,13 @@ class TestInitCommand(CommandBase):
         self.assertTrue(os.path.exists(os.path.join(self.path, configuration_directory_name)))
         self.assertTrue(os.path.exists(os.path.join(self.path, configuration_directory_name, configuration_file_name)))
 
+    def test_init_creates_fragments_directory_and_config_json_in_different_location(self):
+        different_location = 'sandbox'
+        os.mkdir(different_location)
+        init(different_location)
+        self.assertTrue(os.path.exists(os.path.join(different_location, configuration_directory_name)))
+        self.assertTrue(os.path.exists(os.path.join(different_location, configuration_directory_name, configuration_file_name)))
+
     def test_init_raises_error_on_unwritable_parent(self):
         os.chmod(self.path, int('0500', 8))
         self.assertRaises(ExecutionError, init)

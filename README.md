@@ -66,9 +66,9 @@ Commands
 
     Display global help, or help for _COMMAND_ if specified.
 
-* `init`
+* `init [FRAGMENTS_ROOT]`
 
-    Initialize a new fragments repository, in a directory named `_fragments/`.
+    Initialize a new fragments repository. Repository is in a directory named `_fragments/`, created in either the current working directory, or _FRAGMENTS\_ROOT_ if specified.
 
 * `status [[ -l | --limit] STATUS ] [FILENAME [FILENAME ...]]`
 

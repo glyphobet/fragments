@@ -27,8 +27,9 @@ def help(*args):
 
 
 def init(*args):
-    """Initialize a new fragments repository, in a directory named _fragments/."""
+    """Initialize a new fragments repository. Repository is in a directory named _fragments/, created in either the current working directory, or FRAGMENTS_ROOT if specified."""
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, init.__name__), description=init.__doc__)
+    parser.add_argument('FRAGMENTS_ROOT', help="root directory in which to create the _fragments/ directory", nargs="?")
     args = parser.parse_args(args)
 
     try:
@@ -41,7 +42,10 @@ def init(*args):
         config = FragmentsConfig(autoload=False)
         config.dump()
     except ConfigurationDirectoryNotFound as exc:
-        configuration_parent = os.path.split(os.getcwd())[0]
+        if args.FRAGMENTS_ROOT:
+            configuration_parent = os.path.realpath(args.FRAGMENTS_ROOT)
+        else:
+            configuration_parent = os.path.split(os.getcwd())[0]
         if os.access(configuration_parent, os.R_OK|os.W_OK):
             configuration_path = os.path.join(configuration_parent, configuration_directory_name)
             os.mkdir(configuration_path)
