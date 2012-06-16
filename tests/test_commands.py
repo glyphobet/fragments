@@ -609,7 +609,6 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
         commit(file1_path)
 
         open(file1_name, 'w').write(self.original_file[:-1])
-        # import pdb; pdb.set_trace()
 
         self.assertEquals(list(diff(file1_name)), [
             'diff a/test_content/file1.ext b/test_content/file1.ext',
