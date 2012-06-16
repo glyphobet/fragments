@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import os
+import codecs
 
 __version__ = (1,1,0)
 
@@ -17,3 +18,6 @@ def _iterate_over_files(args, config):
     else:
         for f in sorted(config['files']):
             yield os.path.join(config.root, f)
+
+def _smart_open(path, mode='r'):
+    return codecs.open(path, mode=mode, encoding='utf8')

@@ -7,7 +7,7 @@ import hashlib
 import argparse
 #import difflib
 
-from . import __version__, FragmentsError, _iterate_over_files
+from . import __version__, FragmentsError, _iterate_over_files, _smart_open
 from .config import FragmentsConfig, configuration_directory_name, find_configuration, ConfigurationFileCorrupt, ConfigurationFileNotFound, ConfigurationDirectoryNotFound
 from .diff import _full_diff
 from .apply import apply
@@ -217,9 +217,9 @@ def diff(*args):
             repo_lines = []
             curr_lines = []
             if s in 'MA':
-                curr_lines = open(curr_path, 'r').readlines()
+                curr_lines = _smart_open(curr_path, 'r').readlines()
             if s in 'MD':
-                repo_lines = open(os.path.join(config.directory, config['files'][key]), 'r').readlines()
+                repo_lines = _smart_open(os.path.join(config.directory, config['files'][key]), 'r').readlines()
             weave = Weave()
             weave.add_revision(1, repo_lines, [])
             weave.add_revision(2, curr_lines, [])
@@ -246,8 +246,8 @@ def commit(*args):
         s = _file_status(config, curr_path)
         if s in 'MA':
             repo_path = os.path.join(config.directory, config['files'][key])
-            with open(repo_path, 'w') as repo_file:
-                repo_file.write(open(curr_path, 'r').read())
+            with _smart_open(repo_path, 'w') as repo_file:
+                repo_file.write(_smart_open(curr_path, 'r').read())
             os.utime(repo_path, os.stat(curr_path)[7:9])
             yield "'%s' committed" % os.path.relpath(curr_path)
         elif s == 'D':
@@ -273,8 +273,8 @@ def revert(*args):
         s = _file_status(config, curr_path)
         if s in 'MD':
             repo_path = os.path.join(config.directory,  config['files'][key])
-            with open(curr_path, 'w') as curr_file:
-                curr_file.write(open(repo_path, 'r').read())
+            with _smart_open(curr_path, 'w') as curr_file:
+                curr_file.write(_smart_open(repo_path, 'r').read())
             os.utime(curr_path, os.stat(repo_path)[7:9])
             yield "'%s' reverted" % key
         elif s == 'A':
@@ -322,12 +322,12 @@ def fork(*args):
 
     weave = Weave()
 
-    new_lines = open(old_filenames[0], 'r').readlines()
+    new_lines = _smart_open(old_filenames[0], 'r').readlines()
     previous_revision = 1
     weave.add_revision(previous_revision, new_lines, [])
     for old_name in old_filenames[1:]:
         current_revision = previous_revision + 1
-        weave.add_revision(current_revision, open(old_name, 'r').readlines(), [])
+        weave.add_revision(current_revision, _smart_open(old_name, 'r').readlines(), [])
         new_lines = []
         diff_output = weave.merge(previous_revision, current_revision)
         i = 0
@@ -347,7 +347,7 @@ def fork(*args):
         previous_revision = current_revision + 1
         weave.add_revision(previous_revision, new_lines, [])
 
-    with open(new_path, 'w') as new_file:
+    with _smart_open(new_path, 'w') as new_file:
         new_file.writelines(new_lines)
     yield "Forked new file in '%s', remember to follow and commit it" % os.path.relpath(args.TARGET_FILENAME)
     config.dump()
