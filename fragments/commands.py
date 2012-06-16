@@ -354,6 +354,9 @@ def fork(*args):
 
 
 def _main(): # pragma: no cover
+    if 'raw_input' not in __builtins__:
+        global raw_input
+        raw_input = input
     from . import commands
     print("%s version %s.%s.%s" % ((__package__,) + __version__))
     cmd = None
