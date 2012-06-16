@@ -1,3 +1,6 @@
+# -*- coding: utf-8
+from __future__ import unicode_literals
+
 import os
 import sys
 import hashlib
@@ -127,7 +130,7 @@ def follow(*args):
                 yield "'%s' is already being followed" % os.path.relpath(filename)
                 continue
             if os.access(fullpath, os.W_OK|os.R_OK):
-                file_sha = hashlib.sha256('%s:%s' % (__package__, key)).hexdigest()
+                file_sha = hashlib.sha256(('%s:%s' % (__package__, key)).encode('utf8')).hexdigest()
                 config['files'][key] = file_sha
                 yield "'%s' is now being followed (SHA-256: '%s')" % (os.path.relpath(filename), file_sha)
             else:

@@ -1,6 +1,8 @@
 # This code is based on code from
 #   http://revctrl.org/PreciseCodevilleMerge?action=AttachFile
 # That code was in turn based on BSD-licensed code from the Codeville distributed version control system
+# -*- coding: utf-8
+from __future__ import unicode_literals
 try:
     xrange
 except NameError: # Python3 compatibility

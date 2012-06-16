@@ -1,3 +1,6 @@
+# -*- coding: utf-8
+from __future__ import unicode_literals
+
 from . import color
 
 def _visible_in_diff(merge_result, context_lines=3):
