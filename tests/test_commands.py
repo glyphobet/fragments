@@ -5,6 +5,7 @@ import os
 import json
 import time
 import types
+import codecs
 import shutil
 import argparse
 import tempfile
@@ -175,12 +176,12 @@ class TestUnicode(CommandBase):
         contents = "grüß Gott!\n"
         init()
         file_name, file_path = self._create_file(file_name='grüß_gott.bang', contents='')
-        open(file_name, 'a').write(contents.encode('utf8'))
+        codecs.open(file_name, 'a', 'utf8').write(contents)
         yestersecond = time.time() - 2
         os.utime(file_path, (yestersecond, yestersecond))
         follow(file_name)
         commit(file_name)
-        open(file_name, 'a').write("↑↑↓↓←→←→αβав\n".encode('utf8'))
+        codecs.open(file_name, 'a', 'utf8').write("↑↑↓↓←→←→αβав\n")
         self.assertEquals(diff(file_name), [
             'diff a/test_content/grüß_gott.bang b/test_content/grüß_gott.bang',
             '--- test_content/grüß_gott.bang',
