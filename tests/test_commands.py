@@ -266,7 +266,7 @@ class TestFollowCommand(CommandBase, PostInitCommandMixIn):
         config = FragmentsConfig()
         key = file_path[len(os.path.split(config.directory)[0])+1:]
         self.assertIn(key, config['files'])
-        self.assertEquals(follow_output, ["'%s' is now being followed, UUID %s" % (file_name,config['files'][key])])
+        self.assertEquals(follow_output, ["'%s' is now being followed (SHA-256: '%s')" % (file_name,config['files'][key])])
 
     def test_file_twice_on_the_command_line(self):
         init()

@@ -127,9 +127,9 @@ def follow(*args):
                 yield "'%s' is already being followed" % os.path.relpath(filename)
                 continue
             if os.access(fullpath, os.W_OK|os.R_OK):
-                file_uuid = hashlib.sha256('%s:%s' % (__package__, key)).hexdigest()
-                config['files'][key] = file_uuid
-                yield "'%s' is now being followed, UUID %s" % (os.path.relpath(filename), file_uuid)
+                file_sha = hashlib.sha256('%s:%s' % (__package__, key)).hexdigest()
+                config['files'][key] = file_sha
+                yield "'%s' is now being followed (SHA-256: '%s')" % (os.path.relpath(filename), file_sha)
             else:
                 yield "Could not access '%s' to follow it" % os.path.relpath(filename)
         else:
@@ -149,10 +149,10 @@ def forget(*args):
         if fullpath.startswith(config.root):
             key = os.path.relpath(fullpath, config.root)
             if key in config['files']:
-                file_uuid = config['files'][key]
-                uuid_path = os.path.join(config.directory, file_uuid)
-                if os.access(os.path.join(config.directory, file_uuid), os.W_OK|os.R_OK):
-                    os.unlink(uuid_path)
+                file_sha = config['files'][key]
+                sha_path = os.path.join(config.directory, file_sha)
+                if os.access(os.path.join(config.directory, file_sha), os.W_OK|os.R_OK):
+                    os.unlink(sha_path)
                     yield "'%s' is no longer being followed" % os.path.relpath(filename)
                 else:
                     yield "'%s' was never committed and will not be followed" % os.path.relpath(filename)
