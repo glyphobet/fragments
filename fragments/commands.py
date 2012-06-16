@@ -380,7 +380,7 @@ def _main(): # pragma: no cover
                     if isinstance(l, color.Prompt):
                         response = raw_input(l)
                         l = command_generator.send(response.strip())
-                    print(l)
+                    print(str(l))
                 except StopIteration:
                     break
         except FragmentsError as exc:
