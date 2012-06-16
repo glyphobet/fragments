@@ -353,10 +353,12 @@ def fork(*args):
     config.dump()
 
 
+try:
+    raw_input
+except NameError: # pragma: no cover # Python 3 support
+    raw_input = input
+
 def _main(): # pragma: no cover
-    if 'raw_input' not in __builtins__:
-        global raw_input
-        raw_input = input
     from . import commands
     print("%s version %s.%s.%s" % ((__package__,) + __version__))
     cmd = None
