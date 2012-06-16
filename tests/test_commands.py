@@ -152,6 +152,46 @@ class TestInitCommand(CommandBase):
         self.assertTrue(os.path.exists(os.path.join(self.path, configuration_directory_name, configuration_file_name + '.corrupt')))
 
 
+class TestUnicode(CommandBase):
+
+    def test_unicode_filename(self):
+        contents = "grüß Gott!\n"
+        init()
+        file_name, file_path = self._create_file(file_name='grüß_gott.bang', contents=contents)
+        yestersecond = time.time() - 2
+        os.utime(file_path, (yestersecond, yestersecond))
+        follow(file_name)
+        commit(file_name)
+        config = FragmentsConfig()
+        key = os.path.relpath(file_path, config.root)
+        self.assertIn(key, config['files'])
+        open(file_name, 'a').write(contents)
+        revert(file_name)
+        forget(file_name)
+        config = FragmentsConfig()
+        self.assertNotIn(key, config['files'])
+
+    def test_unicode_contents(self):
+        contents = "grüß Gott!\n"
+        init()
+        file_name, file_path = self._create_file(file_name='grüß_gott.bang', contents=contents)
+        yestersecond = time.time() - 2
+        os.utime(file_path, (yestersecond, yestersecond))
+        follow(file_name)
+        commit(file_name)
+        open(file_name, 'a').write("↑↑↓↓←→←→αβав\n")
+        self.assertEquals(diff(file_name), [
+            'diff a/test_content/grüß_gott.bang b/test_content/grüß_gott.bang',
+            '--- test_content/grüß_gott.bang',
+            '+++ test_content/grüß_gott.bang',
+            '@@ -1,1 +1,2 @@',
+            ' grüß Gott!',
+            '+↑↑↓↓←→←→αβав',
+        ])
+        revert(file_name)
+        self.assertEquals(diff(file_name), [])
+
+
 class PostInitCommandMixIn(object):
 
     def test_command_attribute_set_properly(self):
