@@ -1,6 +1,6 @@
 import os
 import sys
-import uuid
+import hashlib
 import argparse
 #import difflib
 
@@ -119,7 +119,6 @@ def follow(*args):
     args = parser.parse_args(args)
 
     config = FragmentsConfig()
-    random_uuid = uuid.uuid4()
     for filename in set(args.FILENAME):
         fullpath = os.path.realpath(filename)
         if fullpath.startswith(config.root):
@@ -128,7 +127,7 @@ def follow(*args):
                 yield "'%s' is already being followed" % os.path.relpath(filename)
                 continue
             if os.access(fullpath, os.W_OK|os.R_OK):
-                file_uuid = uuid.uuid5(random_uuid, key)
+                file_uuid = hashlib.sha256('%s:%s' % (__package__, key)).hexdigest()
                 config['files'][key] = file_uuid
                 yield "'%s' is now being followed, UUID %s" % (os.path.relpath(filename), file_uuid)
             else:

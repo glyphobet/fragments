@@ -1,7 +1,6 @@
 import os
 import sys
 import json
-import uuid
 
 from . import FragmentsError, __version__
 
@@ -14,13 +13,6 @@ class ConfigurationError(FragmentsError): pass
 class ConfigurationDirectoryNotFound(ConfigurationError): pass
 class ConfigurationFileNotFound(ConfigurationError): pass
 class ConfigurationFileCorrupt(ConfigurationError): pass
-
-
-class UUIDEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, uuid.UUID):
-            return str(obj)
-        return json.JSONEncoder.default(self, obj)
 
 
 def find_configuration(current=None):
@@ -66,4 +58,4 @@ class FragmentsConfig(dict):
 
     def dump(self):
         self['version'] = __version__
-        open(self.path, 'w').write(json.dumps(self, sort_keys=True, indent=4, cls=UUIDEncoder))
+        open(self.path, 'w').write(json.dumps(self, sort_keys=True, indent=4))
