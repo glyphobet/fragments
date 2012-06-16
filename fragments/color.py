@@ -16,7 +16,7 @@ NORMAL = 0
 BOLD = 1
 
 
-class ColoredString(str):
+class ColoredString(type('')):
     color = WHITE
     weight = NORMAL
     def __str__(self):
