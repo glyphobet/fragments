@@ -377,8 +377,8 @@ def _main(): # pragma: no cover
                     print(l)
                 except StopIteration:
                     break
-        except ExecutionError as exc:
-            sys.exit(exc.message)
+        except FragmentsError as exc:
+            sys.exit(exc.args[0])
         except KeyboardInterrupt:
             pass
 
