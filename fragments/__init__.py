@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import os
 import codecs
 
-__version__ = (1,1,0)
+__version__ = (1,1,1)
 
 class FragmentsError(Exception): pass
 
