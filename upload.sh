@@ -1,6 +1,7 @@
 #!/bin/bash
 python2.7 setup.py bdist_egg register upload
 python2.7 setup.py sdist     register upload
+rm -fr build/ dist/
 
 markdown_py README.md > index.html
 rm pypi-docs.zip
