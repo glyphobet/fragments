@@ -209,7 +209,7 @@ class PostInitCommandMixIn(object):
         self.command()
 
 
-class TeststatusCommand(CommandBase, PostInitCommandMixIn):
+class TestStatusCommand(CommandBase, PostInitCommandMixIn):
 
     command = staticmethod(status)
 
