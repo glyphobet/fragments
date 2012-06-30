@@ -7,6 +7,11 @@ import hashlib
 import argparse
 #import difflib
 
+try:
+    from itertools import izip as zip
+except ImportError:
+    pass
+
 from . import __version__, FragmentsError, _iterate_over_files, _smart_open
 from .config import FragmentsConfig, configuration_directory_name, find_configuration, ConfigurationFileCorrupt, ConfigurationFileNotFound, ConfigurationDirectoryNotFound
 from .diff import _full_diff
@@ -72,12 +77,15 @@ def _file_status(config, curr_path):
     curr_exists = os.access(curr_path, os.R_OK|os.W_OK)
 
     if repo_exists and curr_exists:
-        repo_mtime = os.stat(repo_path)[8]
-        curr_mtime = os.stat(curr_path)[8]
-        if curr_mtime > repo_mtime:
-            return 'M' # modified
+        if os.stat(repo_path)[6] != os.stat(curr_path)[6]:
+            return 'M' # current and repo versions have different sizes: file has been modified
         else:
-            return ' ' # unmodified
+            for repo_line, curr_line in zip(open(repo_path, 'r').readlines(), open(curr_path, 'r').readlines()):
+                if len(repo_line) != len(curr_line):
+                    return 'M' # corresponding lines have different length: file has been modified
+                if repo_line != curr_line:
+                    return 'M' # corresponding lines are different: file has been modified
+            return ' ' # current and repo versions are the same size, corresponding lines are all the same length and all match: file is unmodified
     elif repo_exists:
         return 'D' # deleted
     elif curr_exists:

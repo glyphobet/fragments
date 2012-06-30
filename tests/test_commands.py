@@ -242,11 +242,13 @@ class TeststatusCommand(CommandBase, PostInitCommandMixIn):
             'A\t%s' % file_name
         ])
 
-    def test_unmodified_file_status(self):
+    def test_unmodified_file_current_is_older_status(self):
         init()
         file_name, file_path = self._create_file()
         follow(file_name)
         commit(file_name)
+        yestersecond = time.time() - 2
+        os.utime(file_path, (yestersecond, yestersecond)) # mtime should be irrelevant
         config = FragmentsConfig()
         self.assertEquals(status(file_name), [
             'fragments configuration version %s.%s.%s' % __version__,
@@ -254,16 +256,60 @@ class TeststatusCommand(CommandBase, PostInitCommandMixIn):
             ' \t%s' % file_name
         ])
 
-    def test_modified_file_status(self):
+    def test_unmodified_file_current_is_newer_status(self):
         init()
         file_name, file_path = self._create_file()
-        yestersecond = time.time() - 2
-        os.utime(file_path, (yestersecond, yestersecond))
+        now = time.time()
+        yestersecond = now - 2
+        os.utime(file_path, (yestersecond, yestersecond)) # mtime should be irrelevant
+        follow(file_name)
+        commit(file_name)
+        os.utime(file_path, (now, now)) # mtime should be irrelevant
+        config = FragmentsConfig()
+        self.assertEquals(status(file_name), [
+            'fragments configuration version %s.%s.%s' % __version__,
+            'stored in %s' % config.directory,
+            ' \t%s' % file_name
+        ])
+
+    def test_modified_file_different_size_status(self):
+        init()
+        file_name, file_path = self._create_file()
         follow(file_name)
         commit(file_name)
         config = FragmentsConfig()
         f = open(file_path, 'a')
         f.write("CHICKENS\n")
+        f.close()
+        self.assertEquals(status(file_name), [
+            'fragments configuration version %s.%s.%s' % __version__,
+            'stored in %s' % config.directory,
+            'M\t%s' % file_name
+        ])
+
+    def test_modified_file_same_size_different_line_status(self):
+        init()
+        file_name, file_path = self._create_file(contents="one\ntwo\n")
+        follow(file_name)
+        commit(file_name)
+        config = FragmentsConfig()
+        f = open(file_path, 'w')
+        f.write("two\none\n")
+        f.close()
+        self.assertEquals(status(file_name), [
+            'fragments configuration version %s.%s.%s' % __version__,
+            'stored in %s' % config.directory,
+            'M\t%s' % file_name
+        ])
+
+    def test_modified_file_same_size_different_line_length_status(self):
+        init()
+        file_name, file_path = self._create_file(contents="one\ntwo\n")
+        follow(file_name)
+        commit(file_name)
+        config = FragmentsConfig()
+        f = open(file_path, 'w')
+        f.write("on\netwo\n")
         f.close()
         self.assertEquals(status(file_name), [
             'fragments configuration version %s.%s.%s' % __version__,
