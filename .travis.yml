@@ -1,7 +1,7 @@
 language: python
 python:
   - "2.7"
-  - "pypy"
+#  - "pypy" # broken; see build #2
   - "3.2"
 #  - "3.3" # should work as soon as travis-ci adds it
 # command to run tests
