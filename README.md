@@ -1,6 +1,8 @@
 Fragments
 =========
 
+[![Build Status](https://secure.travis-ci.org/glyphobet/fragments.png)](http://travis-ci.org/glyphobet/fragments)
+
 Fragments uses concepts from version control to replace many uses of templating languages.
 Instead of a templating language, it provides diff-based templating;
 instead of revision control, it provides "fragmentation control".
