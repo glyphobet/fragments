@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8
+import sys
 
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
+
+install_requires = []
+if sys.version_info < (2, 7):
+    install_requires.append('argparse')
 
 import fragments
 
@@ -17,6 +22,7 @@ setup(
     author_email='matt-fragments@theory.org',
     url='https://github.com/glyphobet/fragments',
     packages= ['fragments',],
+    install_requires=install_requires,
     entry_points = {
         'console_scripts': [
             'fragments = fragments.commands:_main',
@@ -30,7 +36,9 @@ setup(
         'Natural Language :: English',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
     ),
 )
