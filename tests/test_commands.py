@@ -61,23 +61,23 @@ class CommandBase(unittest.TestCase):
         return file_name, file_path
 
     # The following three methods are for Python 2.6 support
-    def assertIn(self, item, iterable):
+    def assertIn(self, item, iterable, msg=None):
         if hasattr(super(CommandBase, self), 'assertIn'):
-            return super(CommandBase, self).assertIn(item, iterable)
+            return super(CommandBase, self).assertIn(item, iterable, msg=msg)
         else:
-            return self.assertTrue(item in iterable)
+            return self.assertTrue(item in iterable, msg=msg)
 
-    def assertNotIn(self, item, iterable):
+    def assertNotIn(self, item, iterable, msg=None):
         if hasattr(super(CommandBase, self), 'assertNotIn'):
-            return super(CommandBase, self).assertIn(item, iterable)
+            return super(CommandBase, self).assertIn(item, iterable, msg=msg)
         else:
-            return self.assertFalse(item in iterable)
+            return self.assertFalse(item in iterable, msg=msg)
 
-    def assertIsInstance(self, obj, cls):
+    def assertIsInstance(self, obj, cls, msg=None):
         if hasattr(super(CommandBase, self), 'assertIsInstance'):
-            return super(CommandBase, self).assertIsInstance(obj, cls)
+            return super(CommandBase, self).assertIsInstance(obj, cls, msg=msg)
         else:
-            return self.assertTrue(isinstance(obj, cls))
+            return self.assertTrue(isinstance(obj, cls), msg=msg)
 
 
 class TestConfig(CommandBase):
