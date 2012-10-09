@@ -69,7 +69,7 @@ class CommandBase(unittest.TestCase):
 
     def assertNotIn(self, item, iterable, msg=None):
         if hasattr(super(CommandBase, self), 'assertNotIn'):
-            return super(CommandBase, self).assertIn(item, iterable, msg=msg)
+            return super(CommandBase, self).assertNotIn(item, iterable, msg=msg)
         else:
             return self.assertFalse(item in iterable, msg=msg)
 
