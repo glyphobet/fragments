@@ -49,7 +49,8 @@ class FragmentsConfig(dict):
 
     def load(self):
         if os.access(self.path, os.R_OK|os.W_OK):
-            file_contents = open(self.path, 'r').read()
+            with open(self.path, 'r') as config_file:
+                file_contents = config_file.read()
             try:
                 parsed_json = json.loads(file_contents)
             except Exception as exc:
@@ -61,4 +62,5 @@ class FragmentsConfig(dict):
 
     def dump(self):
         self['version'] = __version__
-        open(self.path, 'w').write(json.dumps(self, sort_keys=True, indent=4))
+        with open(self.path, 'w') as config:
+            config.write(json.dumps(self, sort_keys=True, indent=4))

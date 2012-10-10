@@ -55,9 +55,11 @@ def apply(*args):
         return
 
     old_revision = 1
-    weave.add_revision(old_revision, _smart_open(old_path, 'r').readlines(), [])
+    with _smart_open(old_path, 'r') as old_file:
+        weave.add_revision(old_revision, old_file.readlines(), [])
     new_revision = 2
-    weave.add_revision(new_revision, _smart_open(changed_path, 'r').readlines(), [])
+    with _smart_open(changed_path, 'r') as new_file:
+        weave.add_revision(new_revision, new_file.readlines(), [])
 
     diff = weave.merge(old_revision, new_revision)
 
@@ -146,7 +148,8 @@ def apply(*args):
         if other_path == changed_path:
             continue # don't try to apply changes to ourself
         current_revision += 1
-        weave.add_revision(current_revision, _smart_open(other_path, 'r').readlines(), [])
+        with _smart_open(other_path, 'r') as other_file:
+            weave.add_revision(current_revision, other_file.readlines(), [])
         merge_result = weave.cherry_pick(changed_revision, current_revision) # Can I apply changes in changed_revision onto this other file?
         if len(merge_result) == 1 and isinstance(merge_result[0], tuple):
             # total conflict, skip

@@ -80,12 +80,14 @@ def _file_status(config, curr_path):
         if os.stat(repo_path)[6] != os.stat(curr_path)[6]:
             return 'M' # current and repo versions have different sizes: file has been modified
         else:
-            for repo_line, curr_line in zip(open(repo_path, 'r').readlines(), open(curr_path, 'r').readlines()):
-                if len(repo_line) != len(curr_line):
-                    return 'M' # corresponding lines have different length: file has been modified
-                if repo_line != curr_line:
-                    return 'M' # corresponding lines are different: file has been modified
-            return ' ' # current and repo versions are the same size, corresponding lines are all the same length and all match: file is unmodified
+            with open(repo_path, 'r') as repo_file:
+                with open(curr_path, 'r') as curr_file:
+                    for repo_line, curr_line in zip(repo_file.readlines(), curr_file.readlines()):
+                        if len(repo_line) != len(curr_line):
+                            return 'M' # corresponding lines have different length: file has been modified
+                        if repo_line != curr_line:
+                            return 'M' # corresponding lines are different: file has been modified
+                    return ' ' # current and repo versions are the same size, corresponding lines are all the same length and all match: file is unmodified
     elif repo_exists:
         return 'D' # deleted
     elif curr_exists:
@@ -225,9 +227,12 @@ def diff(*args):
             repo_lines = []
             curr_lines = []
             if s in 'MA':
-                curr_lines = _smart_open(curr_path, 'r').readlines()
+                with _smart_open(curr_path, 'r') as curr_file:
+                    curr_lines = curr_file.readlines()
             if s in 'MD':
-                repo_lines = _smart_open(os.path.join(config.directory, config['files'][key]), 'r').readlines()
+                repo_path = os.path.join(config.directory, config['files'][key])
+                with _smart_open(repo_path, 'r') as repo_file:
+                    repo_lines = repo_file.readlines()
             weave = Weave()
             weave.add_revision(1, repo_lines, [])
             weave.add_revision(2, curr_lines, [])
@@ -255,7 +260,8 @@ def commit(*args):
         if s in 'MA':
             repo_path = os.path.join(config.directory, config['files'][key])
             with _smart_open(repo_path, 'w') as repo_file:
-                repo_file.write(_smart_open(curr_path, 'r').read())
+                with _smart_open(curr_path, 'r') as curr_file:
+                    repo_file.write(curr_file.read())
             os.utime(repo_path, os.stat(curr_path)[7:9])
             yield "'%s' committed" % os.path.relpath(curr_path)
         elif s == 'D':
@@ -282,7 +288,8 @@ def revert(*args):
         if s in 'MD':
             repo_path = os.path.join(config.directory,  config['files'][key])
             with _smart_open(curr_path, 'w') as curr_file:
-                curr_file.write(_smart_open(repo_path, 'r').read())
+                with _smart_open(repo_path, 'r') as repo_file:
+                    curr_file.write(repo_file.read())
             os.utime(curr_path, os.stat(repo_path)[7:9])
             yield "'%s' reverted" % key
         elif s == 'A':
@@ -330,12 +337,14 @@ def fork(*args):
 
     weave = Weave()
 
-    new_lines = _smart_open(old_filenames[0], 'r').readlines()
+    with _smart_open(old_filenames[0], 'r') as new_file:
+        new_lines = new_file.readlines()
     previous_revision = 1
     weave.add_revision(previous_revision, new_lines, [])
     for old_name in old_filenames[1:]:
         current_revision = previous_revision + 1
-        weave.add_revision(current_revision, _smart_open(old_name, 'r').readlines(), [])
+        with _smart_open(old_name, 'r') as old_file:
+            weave.add_revision(current_revision, old_file.readlines(), [])
         new_lines = []
         diff_output = weave.merge(previous_revision, current_revision)
         i = 0

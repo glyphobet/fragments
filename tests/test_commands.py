@@ -56,8 +56,8 @@ class CommandBase(unittest.TestCase):
             file_name = 'file%d.ext' % self.file_counter
             self.file_counter += 1
         file_path = os.path.join(self.content_path, file_name)
-        new_file = open(file_path, 'w')
-        new_file.write(contents)
+        with open(file_path, 'w') as new_file:
+            new_file.write(contents)
         return file_name, file_path
 
     # The following three methods are for Python 2.6 support
@@ -85,9 +85,11 @@ class TestConfig(CommandBase):
     def test_version_number_updated_on_dump(self):
         init()
         config = FragmentsConfig()
-        raw_config = json.loads(open(config.path, 'r').read())
+        with open(config.path, 'r') as raw_file:
+            raw_config = json.loads(raw_file.read())
         raw_config['version'] = __version__[0:2] +(__version__[2] - 1,)
-        open(config.path, 'w').write(json.dumps(raw_config, sort_keys=True, indent=4))
+        with open(config.path, 'w') as cf:
+            cf.write(json.dumps(raw_config, sort_keys=True, indent=4))
         config = FragmentsConfig()
         config.dump()
         config = FragmentsConfig()
@@ -164,9 +166,8 @@ class TestInitCommand(CommandBase):
     
     def test_recovery_from_corrupt_fragments_config_json(self):
         init()
-        corrupted_config = open(os.path.join(os.path.join(self.path, configuration_directory_name, configuration_file_name)), 'a')
-        corrupted_config.write("GIBBERISH#$$$;,){no}this=>is NOT.json")
-        corrupted_config.close()
+        with open(os.path.join(os.path.join(self.path, configuration_directory_name, configuration_file_name)), 'a') as corrupted_config:
+            corrupted_config.write("GIBBERISH#$$$;,){no}this=>is NOT.json")
         init()
         self.assertTrue(os.path.exists(os.path.join(self.path, configuration_directory_name, configuration_file_name)))
         self.assertTrue(os.path.exists(os.path.join(self.path, configuration_directory_name, configuration_file_name + '.corrupt')))
@@ -185,7 +186,8 @@ class TestUnicode(CommandBase):
         config = FragmentsConfig()
         key = os.path.relpath(file_path, config.root)
         self.assertIn(key, config['files'])
-        open(file_name, 'a').write(contents)
+        with open(file_name, 'a') as f:
+            f.write(contents)
         revert(file_name)
         forget(file_name)
         config = FragmentsConfig()
@@ -195,12 +197,14 @@ class TestUnicode(CommandBase):
         contents = "grüß Gott!\n"
         init()
         file_name, file_path = self._create_file(file_name='grüß_gott.bang', contents='')
-        codecs.open(file_name, 'a', 'utf8').write(contents)
+        with codecs.open(file_name, 'a', 'utf8') as f:
+            f.write(contents)
         yestersecond = time.time() - 2
         os.utime(file_path, (yestersecond, yestersecond))
         follow(file_name)
         commit(file_name)
-        codecs.open(file_name, 'a', 'utf8').write("↑↑↓↓←→←→αβав\n")
+        with codecs.open(file_name, 'a', 'utf8') as f:
+            f.write("↑↑↓↓←→←→αβав\n")
         self.assertEquals(diff(file_name), [
             'diff a/test_content/grüß_gott.bang b/test_content/grüß_gott.bang',
             '--- test_content/grüß_gott.bang',
@@ -296,9 +300,8 @@ class TestStatusCommand(CommandBase, PostInitCommandMixIn):
         follow(file_name)
         commit(file_name)
         config = FragmentsConfig()
-        f = open(file_path, 'a')
-        f.write("CHICKENS\n")
-        f.close()
+        with open(file_path, 'a') as f:
+            f.write("CHICKENS\n")
         self.assertEquals(status(file_name), [
             'fragments configuration version %s.%s.%s' % __version__,
             'stored in %s' % config.directory,
@@ -311,9 +314,8 @@ class TestStatusCommand(CommandBase, PostInitCommandMixIn):
         follow(file_name)
         commit(file_name)
         config = FragmentsConfig()
-        f = open(file_path, 'w')
-        f.write("two\none\n")
-        f.close()
+        with open(file_path, 'w') as f:
+            f.write("two\none\n")
         self.assertEquals(status(file_name), [
             'fragments configuration version %s.%s.%s' % __version__,
             'stored in %s' % config.directory,
@@ -326,9 +328,8 @@ class TestStatusCommand(CommandBase, PostInitCommandMixIn):
         follow(file_name)
         commit(file_name)
         config = FragmentsConfig()
-        f = open(file_path, 'w')
-        f.write("on\netwo\n")
-        f.close()
+        with open(file_path, 'w') as f:
+            f.write("on\netwo\n")
         self.assertEquals(status(file_name), [
             'fragments configuration version %s.%s.%s' % __version__,
             'stored in %s' % config.directory,
@@ -543,7 +544,8 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
 
         follow(file1_name)
         commit(file1_name)
-        open(file1_name, 'w').write(self.original_file.replace('Line Three', 'Line 2.6666\nLine Three and One Third'))
+        with open(file1_name, 'w') as file1:
+            file1.write(self.original_file.replace('Line Three', 'Line 2.6666\nLine Three and One Third'))
         self.assertEquals(list(diff(file1_name)), [
             'diff a/test_content/file1.ext b/test_content/file1.ext',
             '--- test_content/file1.ext',
@@ -565,7 +567,8 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
 
         follow(file1_name)
         commit(file1_name)
-        open(file1_name, 'w').write(self.original_file.replace('Line One', 'Line 0.999999').replace('Line Five', 'Line 4.999999'))
+        with open(file1_name, 'w') as file1:
+            file1.write(self.original_file.replace('Line One', 'Line 0.999999').replace('Line Five', 'Line 4.999999'))
         self.assertEquals(list(diff(file1_name)), [
             'diff a/test_content/file1.ext b/test_content/file1.ext',
             '--- test_content/file1.ext',
@@ -588,7 +591,8 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
 
         follow(file1_name)
         commit(file1_name)
-        open(file1_name, 'w').write(original_file.replace('Line One', 'Line 0.999999').replace('Line Nine', 'Line 8.999999'))
+        with open(file1_name, 'w') as file1:
+            file1.write(original_file.replace('Line One', 'Line 0.999999').replace('Line Nine', 'Line 8.999999'))
         self.assertEquals(list(diff(file1_name)), [
             'diff a/test_content/file1.ext b/test_content/file1.ext',
             '--- test_content/file1.ext',
@@ -692,7 +696,8 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
         follow(file1_path)
         commit(file1_path)
 
-        open(file1_name, 'w').write(self.original_file)
+        with open(file1_name, 'w') as file1:
+            file1.write(self.original_file)
 
         self.assertEquals(list(diff(file1_name)), [
             'diff a/test_content/file1.ext b/test_content/file1.ext',
@@ -715,7 +720,8 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
         follow(file1_path)
         commit(file1_path)
 
-        open(file1_name, 'w').write(self.original_file[:-1])
+        with open(file1_name, 'w') as file1:
+            file1.write(self.original_file[:-1])
 
         self.assertEquals(list(diff(file1_name)), [
             'diff a/test_content/file1.ext b/test_content/file1.ext',
@@ -745,10 +751,12 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         key = file_path[len(prefix)+1:]
         self.assertIn(key, config['files'])
         self.assertTrue(os.access(os.path.join(config.directory, config['files'][key]), os.R_OK|os.W_OK))
-        self.assertEquals(
-            open(os.path.join(config.directory, config['files'][key]), 'r').read(),
-            open(file_path, 'r').read(),
-        )
+        with open(os.path.join(config.directory, config['files'][key]), 'r') as repo_file:
+            with open(file_path, 'r') as curr_file:
+                self.assertEquals(
+                    repo_file.read(),
+                    curr_file.read(),
+                )
 
     def test_commit_modify_commit_file(self):
         init()
@@ -762,25 +770,28 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         follow(file_name)
         commit(file_name)
 
-        f = open(file_path, 'a')
-        f.write("GIBBERISH!\n")
-        f.close()
+        with open(file_path, 'a') as f:
+            f.write("GIBBERISH!\n")
 
         config = FragmentsConfig()
         key = file_path[len(config.root)+1:]
 
         self.assertIn(key, config['files'])
         self.assertTrue(os.access(os.path.join(config.directory, config['files'][key]), os.R_OK|os.W_OK))
-        self.assertNotEquals(
-            open(os.path.join(config.directory, config['files'][key]), 'r').read(),
-            open(file_path, 'r').read(),
-        )
+        with open(os.path.join(config.directory, config['files'][key]), 'r') as repo_file:
+            with open(file_path, 'r') as curr_file:
+                self.assertNotEquals(
+                    repo_file.read(),
+                    curr_file.read(),
+                )
 
         commit(file_name)
-        self.assertEquals(
-            open(os.path.join(config.directory, config['files'][key]), 'r').read(),
-            open(file_path, 'r').read(),
-        )
+        with open(os.path.join(config.directory, config['files'][key]), 'r') as repo_file:
+            with open(file_path, 'r') as curr_file:
+                self.assertEquals(
+                    repo_file.read(),
+                    curr_file.read(),
+                )
 
     def test_commit_unfollowed_file(self):
         init()
@@ -804,7 +815,8 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         file_name, file_path = self._create_file()
         yestersecond = time.time() - 2
         os.utime(file_path, (yestersecond, yestersecond))
-        original_content = open(file_path, 'r').read()
+        with open(file_path, 'r') as original_file:
+            original_content = original_file.read()
 
         follow(file_name)
         commit(file_name)
@@ -818,7 +830,8 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
     def test_commit_modify_revert_file(self):
         init()
         file_name, file_path = self._create_file()
-        original_content = open(file_path, 'r').read()
+        with open(file_path, 'r') as original_file:
+            original_content = original_file.read()
 
         # pretend file was actually created two seconds ago
         # so that commit will detect changes
@@ -828,9 +841,8 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
         follow(file_name)
         commit(file_name)
 
-        f = open(file_path, 'a')
-        f.write("GIBBERISH!\n")
-        f.close()
+        with open(file_path, 'a') as f:
+            f.write("GIBBERISH!\n")
 
         config = FragmentsConfig()
         prefix = os.path.split(config.directory)[0]
@@ -838,26 +850,32 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
 
         self.assertIn(key, config['files'])
         self.assertTrue(os.access(os.path.join(config.directory, config['files'][key]), os.R_OK|os.W_OK))
-        self.assertNotEquals(
-            open(os.path.join(config.directory, config['files'][key]), 'r').read(),
-            open(file_path, 'r').read(),
-        )
+        with open(os.path.join(config.directory, config['files'][key]), 'r') as repo_file:
+            with open(file_path, 'r') as curr_file:
+                self.assertNotEquals(
+                    repo_file.read(),
+                    curr_file.read(),
+                )
 
         revert(file_name)
-        self.assertEquals(
-            open(os.path.join(config.directory, config['files'][key]), 'r').read(),
-            open(file_path, 'r').read(),
-        )
+        with open(os.path.join(config.directory, config['files'][key]), 'r') as repo_file:
+            with open(file_path, 'r') as curr_file:
+                self.assertEquals(
+                    repo_file.read(),
+                    curr_file.read(),
+                )
 
-        self.assertEquals(
-            original_content,
-            open(file_path, 'r').read(),
-        )
+        with open(file_path, 'r') as curr_file:
+            self.assertEquals(
+                original_content,
+                curr_file.read(),
+            )
 
     def test_follow_modify_revert_file(self):
         init()
         file_name, file_path = self._create_file()
-        original_content = open(file_path, 'r').read()
+        with open(file_path, 'r') as original_file:
+            original_content = original_file.read()
 
         # pretend file was actually created two seconds ago
         # so that commit will detect changes
@@ -879,22 +897,25 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
     def test_revert_removed_file(self):
         init()
         file_name, file_path = self._create_file()
-        original_content = open(file_path, 'r').read()
+        with open(file_path, 'r') as original_file:
+            original_content = original_file.read()
 
         follow(file_name)
         commit(file_name)
         os.unlink(file_path)
         revert(file_name)
 
-        self.assertEquals(
-            original_content,
-            open(file_path, 'r').read(),
-        )
+        with open(file_path, 'r') as original_file:
+            self.assertEquals(
+                original_content,
+                original_file.read(),
+            )
 
     def test_revert_unchanged_file(self):
         init()
         file_name, file_path = self._create_file()
-        original_content = open(file_path, 'r').read()
+        with open(file_path, 'r') as original_file:
+            original_content = original_file.read()
 
         follow(file_name)
         commit(file_name)
@@ -912,7 +933,9 @@ class TestForkCommand(CommandBase, PostInitCommandMixIn):
         commit(file1_name)
         forked_file_name = 'forked.file'
         self.assertEquals(fork(file1_name, forked_file_name), ["Forked new file in '%s', remember to follow and commit it" % forked_file_name])
-        self.assertEquals(open(forked_file_name, 'r').read(), open(file1_name, 'r').read())
+        with open(forked_file_name, 'r') as forked_file:
+            with open(file1_name, 'r') as old_file:
+                self.assertEquals(forked_file.read(), old_file.read())
 
     def test_basic_fork(self):
         init()
@@ -922,7 +945,8 @@ class TestForkCommand(CommandBase, PostInitCommandMixIn):
         commit(file1_name, file2_name)
         forked_file_name = 'forked.file'
         self.assertEquals(fork(file1_name, file2_name, forked_file_name), ["Forked new file in '%s', remember to follow and commit it" % forked_file_name])
-        self.assertEquals(open(forked_file_name, 'r').read(), "Line One\n\n\n\nLine Five\n")
+        with open(forked_file_name, 'r') as forked_file:
+            self.assertEquals(forked_file.read(), "Line One\n\n\n\nLine Five\n")
 
     def test_bigger_fork(self):
         init()
@@ -932,7 +956,8 @@ class TestForkCommand(CommandBase, PostInitCommandMixIn):
         commit(file1_name, file2_name)
         forked_file_name = 'forked.file'
         self.assertEquals(fork(file1_name, file2_name, forked_file_name), ["Forked new file in '%s', remember to follow and commit it" % forked_file_name])
-        self.assertEquals(open(forked_file_name, 'r').read(), "Line One\nLine Two\nLine Three\n\nLine Five\nLine Six\nLine Seven\n\nLine Nine\nLine Ten\nLine Twelve\n")
+        with open(forked_file_name, 'r') as forked_file:
+            self.assertEquals(forked_file.read(), "Line One\nLine Two\nLine Three\n\nLine Five\nLine Six\nLine Seven\n\nLine Nine\nLine Ten\nLine Twelve\n")
 
     def test_fork_from_unfollowed_files(self):
         init()
@@ -944,7 +969,8 @@ class TestForkCommand(CommandBase, PostInitCommandMixIn):
             "Warning, '%s' not being followed" % file2_name,
             "Forked new file in '%s', remember to follow and commit it" % forked_file_name
         ])
-        self.assertEquals(open(forked_file_name, 'r').read(), "Line One\n\n\n\nLine Five\n")
+        with open(forked_file_name, 'r') as forked_file:
+            self.assertEquals(forked_file.read(), "Line One\n\n\n\nLine Five\n")
 
     def test_cant_fork_onto_followed_file(self):
         init()
@@ -955,7 +981,8 @@ class TestForkCommand(CommandBase, PostInitCommandMixIn):
         commit(file1_name, file2_name)
 
         self.assertEquals(fork(file1_name, file2_name, file3_name), ["Could not fork into '%s', it is already followed" % file3_name])
-        self.assertEquals(open(file3_path, 'r').read(), "Line 3\nLine 3\nLine 3\nLine 3\nLine 3\n")
+        with open(file3_path, 'r') as file3:
+            self.assertEquals(file3.read(), "Line 3\nLine 3\nLine 3\nLine 3\nLine 3\n")
 
     def test_cant_fork_onto_existing_file(self):
         init()
@@ -966,7 +993,8 @@ class TestForkCommand(CommandBase, PostInitCommandMixIn):
         commit(file1_name, file2_name)
 
         self.assertEquals(fork(file1_name, file2_name, file3_name), ["Could not fork into '%s', the file already exists" % file3_name])
-        self.assertEquals(open(file3_path, 'r').read(), "Line 3\nLine 3\nLine 3\nLine 3\nLine 3\n")
+        with open(file3_path, 'r') as file3:
+            self.assertEquals(file3.read(), "Line 3\nLine 3\nLine 3\nLine 3\nLine 3\n")
 
     def test_cant_fork_from_nothing(self):
         init()
@@ -1112,7 +1140,8 @@ class TestForkCommand(CommandBase, PostInitCommandMixIn):
         follow(fileA_name, fileB_name, fileC_name)
         commit(fileA_name, fileB_name, fileC_name)
         fork(fileA_name, fileB_name, fileC_name, 'target.html', '-U', '2')
-        self.assertEqual(open('target.html', 'r').read(), target_contents)
+        with open('target.html', 'r') as target:
+            self.assertEqual(target.read(), target_contents)
 
 
 class TestApplyCommand(CommandBase, PostInitCommandMixIn):
@@ -1178,7 +1207,8 @@ table {
         commit(file2_name)
 
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
-        open(file1_name, 'w').write(new_file1_contents)
+        with open(file1_name, 'w') as file1:
+            file1.write(new_file1_contents)
         self.assertEqual(apply(file1_name, '-a'), [
             '@@ -4,7 +4,8 @@',
             '         <title>',
@@ -1194,7 +1224,8 @@ table {
         ])
 
         target_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
-        self.assertEqual(open(file2_name, 'r').read(), target_file2_contents)
+        with open(file2_name, 'r') as file2:
+            self.assertEqual(file2.read(), target_file2_contents)
 
     def test_apply_to_one_file(self):
         init()
@@ -1211,7 +1242,8 @@ table {
         commit(file3_name)
 
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
-        open(file1_name, 'w').write(new_file1_contents)
+        with open(file1_name, 'w') as file1:
+            file1.write(new_file1_contents)
         self.assertEqual(apply('-a', file1_name, file2_name), [
             '@@ -4,7 +4,8 @@',
             '         <title>',
@@ -1227,9 +1259,10 @@ table {
         ])
 
         target_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
-        self.assertEqual(open(file2_name, 'r').read(), target_file2_contents)
-
-        self.assertEqual(open(file3_name, 'r').read(), self.html_file2_contents)
+        with open(file2_name, 'r') as file2:
+            self.assertEqual(file2.read(), target_file2_contents)
+        with open(file3_name, 'r') as file3:
+            self.assertEqual(file3.read(), self.html_file2_contents)
 
     def test_apply_interactive_yes(self):
         init()
@@ -1242,7 +1275,8 @@ table {
         commit(file2_name)
 
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
-        open(file1_name, 'w').write(new_file1_contents)
+        with open(file1_name, 'w') as file1:
+            file1.write(new_file1_contents)
 
         apply_generator = commands.apply(file1_name, '-i')
 
@@ -1260,7 +1294,8 @@ table {
         self.assertEqual(apply_generator.send('y'), "Changes in '%s' applied cleanly to '%s'" % (os.path.relpath(file1_path), os.path.relpath(file2_path)))
 
         target_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
-        self.assertEqual(open(file2_name, 'r').read(), target_file2_contents)
+        with open(file2_name, 'r') as file2:
+            self.assertEqual(file2.read(), target_file2_contents)
 
     def test_apply_interactive_no(self):
         init()
@@ -1273,7 +1308,8 @@ table {
         commit(file2_name)
 
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
-        open(file1_name, 'w').write(new_file1_contents)
+        with open(file1_name, 'w') as file1:
+            file1.write(new_file1_contents)
 
         apply_generator = commands.apply(file1_name, '-i')
 
@@ -1290,7 +1326,8 @@ table {
         self.assertEqual(next(apply_generator), 'Apply this change? [ynadjk?] ')
         self.assertEqual(apply_generator.send('n'), "No changes in '%s' to apply." % os.path.relpath(file1_name))
         self.assertRaises(StopIteration, next, apply_generator)
-        self.assertEqual(open(file2_name, 'r').read(), self.html_file2_contents)
+        with open(file2_name, 'r') as file2:
+            self.assertEqual(file2.read(), self.html_file2_contents)
 
     def test_selectively_apply_first(self):
         init()
@@ -1303,7 +1340,8 @@ table {
         commit(file2_name)
 
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />').replace('</body>\n', '</body>\n<!-- COMMENT -->\n')
-        open(file1_name, 'w').write(new_file1_contents)
+        with open(file1_name, 'w') as file1:
+            file1.write(new_file1_contents)
 
         apply_generator = commands.apply(file1_name, '-i')
 
@@ -1325,7 +1363,8 @@ table {
         self.assertEqual(next(apply_generator), ' </html>'                )
         self.assertEqual(next(apply_generator), 'Apply this change? [ynadjk?] ')
         self.assertEqual(apply_generator.send('n'), "Changes in 'file1.ext' applied cleanly to 'file2.ext'")
-        self.assertEqual(open(file2_name, 'r').read(), self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />'))
+        with open(file2_name, 'r') as file2:
+            self.assertEqual(file2.read(), self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />'))
 
     def test_selectively_apply_second(self):
         init()
@@ -1338,7 +1377,8 @@ table {
         commit(file2_name)
 
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />').replace('</body>\n', '</body>\n<!-- COMMENT -->\n')
-        open(file1_name, 'w').write(new_file1_contents)
+        with open(file1_name, 'w') as file1:
+            file1.write(new_file1_contents)
 
         apply_generator = commands.apply(file1_name, '-i')
 
@@ -1360,7 +1400,8 @@ table {
         self.assertEqual(next(apply_generator), ' </html>'                )
         self.assertEqual(next(apply_generator), 'Apply this change? [ynadjk?] ')
         self.assertEqual(apply_generator.send('y'), "Changes in 'file1.ext' applied cleanly to 'file2.ext'")
-        self.assertEqual(open(file2_name, 'r').read(), self.html_file2_contents.replace('</body>\n', '</body>\n<!-- COMMENT -->\n'))
+        with open(file2_name, 'r') as file2:
+            self.assertEqual(file2.read(), self.html_file2_contents.replace('</body>\n', '</body>\n<!-- COMMENT -->\n'))
 
     def test_apply_all(self):
         init()
@@ -1373,7 +1414,8 @@ table {
         commit(file2_name)
 
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />').replace('</body>\n', '</body>\n<!-- COMMENT -->\n')
-        open(file1_name, 'w').write(new_file1_contents)
+        with open(file1_name, 'w') as file1:
+            file1.write(new_file1_contents)
 
         apply_generator = commands.apply(file1_name, '-i')
 
@@ -1388,7 +1430,8 @@ table {
         self.assertEqual(next(apply_generator), '         <script href="other.js" />' )
         self.assertEqual(next(apply_generator), 'Apply this change? [ynadjk?] ')
         self.assertEqual(apply_generator.send('a'), "Changes in 'file1.ext' applied cleanly to 'file2.ext'")
-        self.assertEqual(open(file2_name, 'r').read(), self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />').replace('</body>\n', '</body>\n<!-- COMMENT -->\n'))
+        with open(file2_name, 'r') as file2:
+            self.assertEqual(file2.read(), self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />').replace('</body>\n', '</body>\n<!-- COMMENT -->\n'))
 
     def test_apply_none(self):
         init()
@@ -1401,7 +1444,8 @@ table {
         commit(file2_name)
 
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />').replace('</body>\n', '</body>\n<!-- COMMENT -->\n')
-        open(file1_name, 'w').write(new_file1_contents)
+        with open(file1_name, 'w') as file1:
+            file1.write(new_file1_contents)
 
         apply_generator = commands.apply(file1_name, '-i')
 
@@ -1416,7 +1460,8 @@ table {
         self.assertEqual(next(apply_generator), '         <script href="other.js" />' )
         self.assertEqual(next(apply_generator), 'Apply this change? [ynadjk?] ')
         self.assertEqual(apply_generator.send('d'), "No changes in '%s' to apply." % os.path.relpath(file1_path))
-        self.assertEqual(open(file2_name, 'r').read(), self.html_file2_contents)
+        with open(file2_name, 'r') as file2:
+            self.assertEqual(file2.read(), self.html_file2_contents)
 
     def test_skip_forwards(self):
         contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\nLine Six\nLine Seven\nLine Eight\nLine Nine\nLine Ten\nLine Eleven\nLine Twelve\nLine Thirteen\nLine Fourteen\nLine Fifteen\nLine Sixteen\nLine Seventeen\nLine Eighteen\nLine Nineteen\nLine Twenty"
@@ -1503,7 +1548,8 @@ table {
         commit(file1_name)
 
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />')
-        open(file1_name, 'w').write(new_file1_contents)
+        with open(file1_name, 'w') as file1:
+            file1.write(new_file1_contents)
 
         apply_generator = commands.apply(file1_name, '-i')
 
@@ -1527,7 +1573,8 @@ table {
         commit(file1_name)
 
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />')
-        open(file1_name, 'w').write(new_file1_contents)
+        with open(file1_name, 'w') as file1:
+            file1.write(new_file1_contents)
 
         apply_generator = commands.apply(file1_name, '-i')
 
@@ -1596,10 +1643,12 @@ table {
         commit(file2_name)
 
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
-        open(file1_name, 'w').write(new_file1_contents)
+        with open(file1_name, 'w') as file1:
+            file1.write(new_file1_contents)
 
         new_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
-        open(file2_name, 'w').write(new_file2_contents)
+        with open(file2_name, 'w') as file2:
+            file2.write(new_file2_contents)
 
         self.assertEqual(apply(file1_name, '-a'), [
             '@@ -4,7 +4,8 @@',
@@ -1615,7 +1664,8 @@ table {
             "Changes in '%s' applied cleanly to '%s'" % (os.path.relpath(file1_path), os.path.relpath(file2_path))
         ])
 
-        self.assertEqual(open(file2_name, 'r').read(), new_file2_contents)
+        with open(file2_name, 'r') as file2:
+            self.assertEqual(file2.read(), new_file2_contents)
 
     def test_apply_skips_unrelated_files(self):
         init()
@@ -1632,7 +1682,8 @@ table {
         commit(css_name)
 
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />\n        <link href="colors.css" />')
-        open(file1_name, 'w').write(new_file1_contents)
+        with open(file1_name, 'w') as file1:
+            file1.write(new_file1_contents)
 
         self.assertEqual(apply(file1_name, '-a'), [
             '@@ -4,7 +4,8 @@',
@@ -1648,7 +1699,8 @@ table {
             "Changes in '%s' applied cleanly to '%s'" % (os.path.relpath(file1_path), os.path.relpath(file2_path)),
             "Changes in '%s' cannot apply to '%s', skipping" % (os.path.relpath(file1_path), os.path.relpath(css_path)),
         ])
-        self.assertEqual(open(css_name, 'r').read(), self.css_file1_contents)
+        with open(css_name, 'r') as css_file:
+            self.assertEqual(css_file.read(), self.css_file1_contents)
 
     def test_apply_generates_conflict(self):
         init()
@@ -1661,9 +1713,11 @@ table {
         commit(file2_name)
 
         new_file1_contents = self.html_file1_contents.replace('<link href="default.css" />', '<link href="layout.css" />')
-        open(file1_name, 'w').write(new_file1_contents)
+        with open(file1_name, 'w') as file1:
+            file1.write(new_file1_contents)
         new_file2_contents = self.html_file2_contents.replace('<link href="default.css" />', '<link href="colors.css" />')
-        open(file2_name, 'w').write(new_file2_contents)
+        with open(file2_name, 'w') as file2:
+            file2.write(new_file2_contents)
 
         self.assertEqual(apply(file1_name, '-a'), [
             '@@ -4,7 +4,7 @@',
@@ -1677,7 +1731,8 @@ table {
             '         <script href="other.js" />',
             "Conflict merging '%s' into '%s'" % (os.path.relpath(file1_path), os.path.relpath(file2_path))
         ])
-        self.assertEqual(open(file2_name, 'r').read(), new_file2_contents.replace('        <link href="colors.css" />', '''>>>>>>>
+        with open(file2_name, 'r') as file2:
+            self.assertEqual(file2.read(), new_file2_contents.replace('        <link href="colors.css" />', '''>>>>>>>
         <link href="layout.css" />
 =======
         <link href="colors.css" />
