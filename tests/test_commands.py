@@ -196,7 +196,7 @@ class TestUnicode(CommandBase):
     def test_unicode_contents(self):
         contents = "grüß Gott!\n"
         init()
-        file_name, file_path = self._create_file(file_name='grüß_gott.bang', contents='')
+        file_name, file_path = self._create_file(file_name='gruesz_gott.bang', contents='')
         with codecs.open(file_name, 'a', 'utf8') as f:
             f.write(contents)
         yestersecond = time.time() - 2
@@ -206,9 +206,9 @@ class TestUnicode(CommandBase):
         with codecs.open(file_name, 'a', 'utf8') as f:
             f.write("↑↑↓↓←→←→αβав\n")
         self.assertEquals(diff(file_name), [
-            'diff a/grüß_gott.bang b/grüß_gott.bang',
-            '--- grüß_gott.bang',
-            '+++ grüß_gott.bang',
+            'diff a/gruesz_gott.bang b/gruesz_gott.bang',
+            '--- gruesz_gott.bang',
+            '+++ gruesz_gott.bang',
             '@@ -1,1 +1,2 @@',
             ' grüß Gott!',
             '+↑↑↓↓←→←→αβав',
