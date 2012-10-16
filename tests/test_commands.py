@@ -181,12 +181,12 @@ class TestUnicode(CommandBase):
         with open(file_name, 'a') as f:
             f.write(contents)
         self.assertEquals(diff(file_name), [
-            u'diff a/gr\xfc\xdf_gott.bang b/gr\xfc\xdf_gott.bang',
-            u'--- gr\xfc\xdf_gott.bang',
-            u'+++ gr\xfc\xdf_gott.bang',
-            u'@@ -1,1 +1,2 @@',
-            u' Hello',
-            u'+Hello',
+            'diff a/gr\xfc\xdf_gott.bang b/gr\xfc\xdf_gott.bang',
+            '--- gr\xfc\xdf_gott.bang',
+            '+++ gr\xfc\xdf_gott.bang',
+            '@@ -1,1 +1,2 @@',
+            ' Hello',
+            '+Hello',
         ])
         revert(file_name)
         forget(file_name)
