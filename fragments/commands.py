@@ -53,7 +53,7 @@ def init(*args):
         if args.FRAGMENTS_ROOT:
             configuration_parent = os.path.realpath(args.FRAGMENTS_ROOT)
         else:
-            configuration_parent = os.path.split(os.getcwd())[0]
+            configuration_parent = os.getcwd()
         if os.access(configuration_parent, os.R_OK|os.W_OK):
             configuration_path = os.path.join(configuration_parent, configuration_directory_name)
             os.mkdir(configuration_path)

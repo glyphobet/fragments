@@ -42,10 +42,7 @@ class CommandBase(unittest.TestCase):
         super(CommandBase, self).setUp()
         self.file_counter = 1
         self.path = os.path.realpath(tempfile.mkdtemp())
-        self.content_path = os.path.join(self.path, self.test_content_directory)
-        os.mkdir(self.content_path)
-        self.assertTrue(os.path.exists(os.path.join(self.path, self.test_content_directory)))
-        os.chdir(self.content_path)
+        os.chdir(self.path)
 
     def tearDown(self):
         shutil.rmtree(self.path)
@@ -55,7 +52,7 @@ class CommandBase(unittest.TestCase):
         if file_name is None:
             file_name = 'file%d.ext' % self.file_counter
             self.file_counter += 1
-        file_path = os.path.join(self.content_path, file_name)
+        file_path = os.path.join(self.path, file_name)
         with open(file_path, 'w') as new_file:
             new_file.write(contents)
         return file_name, file_path
@@ -145,18 +142,13 @@ class TestInitCommand(CommandBase):
         init()
         self.assertRaises(ExecutionError, init)
 
-    def test_fragments_directory_inside_content_directory(self):
-        init()
-        shutil.move(os.path.join(self.path, configuration_directory_name), self.content_path)
-        status()
-
     def test_find_fragments_directory_one_level_up(self):
         init()
-        inner_directory = os.path.join(self.content_path, 'inner')
+        inner_directory = os.path.join(self.path, 'inner')
         os.mkdir(inner_directory)
         os.chdir(inner_directory)
         self.assertRaises(ExecutionError, init)
-        self.assertFalse(os.path.exists(os.path.join(self.content_path, configuration_directory_name)))
+        self.assertFalse(os.path.exists(os.path.join(inner_directory, configuration_directory_name)))
 
     def test_recovery_from_missing_fragments_config_json(self):
         init()
@@ -206,9 +198,9 @@ class TestUnicode(CommandBase):
         with codecs.open(file_name, 'a', 'utf8') as f:
             f.write("↑↑↓↓←→←→αβав\n")
         self.assertEquals(diff(file_name), [
-            'diff a/test_content/grüß_gott.bang b/test_content/grüß_gott.bang',
-            '--- test_content/grüß_gott.bang',
-            '+++ test_content/grüß_gott.bang',
+            'diff a/grüß_gott.bang b/grüß_gott.bang',
+            '--- grüß_gott.bang',
+            '+++ grüß_gott.bang',
             '@@ -1,1 +1,2 @@',
             ' grüß Gott!',
             '+↑↑↓↓←→←→αβав',
@@ -547,9 +539,9 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
         with open(file1_name, 'w') as file1:
             file1.write(self.original_file.replace('Line Three', 'Line 2.6666\nLine Three and One Third'))
         self.assertEquals(list(diff(file1_name)), [
-            'diff a/test_content/file1.ext b/test_content/file1.ext',
-            '--- test_content/file1.ext',
-            '+++ test_content/file1.ext',
+            'diff a/file1.ext b/file1.ext',
+            '--- file1.ext',
+            '+++ file1.ext',
             '@@ -1,5 +1,6 @@',
             ' Line One',
             ' Line Two',
@@ -570,9 +562,9 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
         with open(file1_name, 'w') as file1:
             file1.write(self.original_file.replace('Line One', 'Line 0.999999').replace('Line Five', 'Line 4.999999'))
         self.assertEquals(list(diff(file1_name)), [
-            'diff a/test_content/file1.ext b/test_content/file1.ext',
-            '--- test_content/file1.ext',
-            '+++ test_content/file1.ext',
+            'diff a/file1.ext b/file1.ext',
+            '--- file1.ext',
+            '+++ file1.ext',
             '@@ -1,5 +1,5 @@',
             '-Line One',
             '+Line 0.999999',
@@ -594,9 +586,9 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
         with open(file1_name, 'w') as file1:
             file1.write(original_file.replace('Line One', 'Line 0.999999').replace('Line Nine', 'Line 8.999999'))
         self.assertEquals(list(diff(file1_name)), [
-            'diff a/test_content/file1.ext b/test_content/file1.ext',
-            '--- test_content/file1.ext',
-            '+++ test_content/file1.ext',
+            'diff a/file1.ext b/file1.ext',
+            '--- file1.ext',
+            '+++ file1.ext',
             '@@ -1,4 +1,4 @@',
             '-Line One',
             '+Line 0.999999',
@@ -647,9 +639,9 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
 
         follow(file1_path)
         self.assertEquals(list(diff(file1_name)), [
-            'diff a/test_content/file1.ext b/test_content/file1.ext',
-            '--- test_content/file1.ext',
-            '+++ test_content/file1.ext',
+            'diff a/file1.ext b/file1.ext',
+            '--- file1.ext',
+            '+++ file1.ext',
             '@@ -0,0 +1,5 @@',
             '+Line One',
             '+Line Two',
@@ -668,9 +660,9 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
         
         os.unlink(file1_path)
         self.assertEquals(list(diff(file1_name)), [
-            'diff a/test_content/file1.ext b/test_content/file1.ext',
-            '--- test_content/file1.ext',
-            '+++ test_content/file1.ext',
+            'diff a/file1.ext b/file1.ext',
+            '--- file1.ext',
+            '+++ file1.ext',
             '@@ -1,5 +0,0 @@',
             '-Line One',
             '-Line Two',
@@ -700,9 +692,9 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
             file1.write(self.original_file)
 
         self.assertEquals(list(diff(file1_name)), [
-            'diff a/test_content/file1.ext b/test_content/file1.ext',
-            '--- test_content/file1.ext',
-            '+++ test_content/file1.ext',
+            'diff a/file1.ext b/file1.ext',
+            '--- file1.ext',
+            '+++ file1.ext',
             '@@ -2,4 +2,4 @@',
             ' Line Two',
             ' Line Three',
@@ -724,9 +716,9 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
             file1.write(self.original_file[:-1])
 
         self.assertEquals(list(diff(file1_name)), [
-            'diff a/test_content/file1.ext b/test_content/file1.ext',
-            '--- test_content/file1.ext',
-            '+++ test_content/file1.ext',
+            'diff a/file1.ext b/file1.ext',
+            '--- file1.ext',
+            '+++ file1.ext',
             '@@ -2,4 +2,4 @@',
             ' Line Two',
             ' Line Three',
