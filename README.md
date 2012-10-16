@@ -69,7 +69,8 @@ Storing history is up to your version control system.
 But Fragments stores its repository configuration in such a way to allow your version control system to manage it painlessly and obviously.
 Configuration is stored in a `_fragments` directory.
 This directory name is not preceded by a `.`, and all the files in it are stored as plain text.
-The configuration resides one directory above your actual content, so it does not interfere with template loading code, and so it is not accidentally deployed to production along with your actual content.
+You want to make sure to run `fragments init` from your repository root, which is usually at least one directory level above your actual content.
+Otherwise your `_fragments` directory may get accidentally deployed to production or interfere with template loaders.
 
 The `rename` and `forget` commands in Fragments are written to not interfere with a version control's rename and remove commands, as these commands sometimes need to be used in tandem.
 
