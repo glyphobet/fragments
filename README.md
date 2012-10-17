@@ -96,6 +96,10 @@ Like version control, the first argument to Fragments is the command.
 And like version control, you must first `$ fragments init` a repository, then `$ fragments follow` some files, then `$ fragments commit` them.
 Deliberately different command names are used in some cases, to remind you that Fragments is not version control.
 
+If you are red-green color-blind (protanopic or deutanopic), set a environment variable `COLORBLIND` to `protan` or `deutan` and fragments will use blue instead of green for displaying added lines.
+
+    `export COLORBLIND=protan`
+
 Commands
 --------
 

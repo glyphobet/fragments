@@ -1,6 +1,7 @@
 # -*- coding: utf-8
 from __future__ import unicode_literals
 
+import os
 import sys
 try:
     from StringIO import StringIO
@@ -25,10 +26,30 @@ class TestColor(unittest.TestCase):
         sys.stdout = self._stdout
         super(TestColor, self).tearDown()
 
-
     def test_color(self):
         self.assertTrue(sys.stdout.isatty())
         self.assertEquals(str(color.ColoredString('foo')), '\x1b[0m\x1b[37mfoo\x1b[0m')
+
+    def test_not_colorblind(self):
+        old_colorblind = os.getenv('COLORBLIND')
+        try:
+            if old_colorblind is not None:
+                del os.environ['COLORBLIND']
+            self.assertEquals(str(color.Added('foo')), '\x1b[0m\x1b[32mfoo\x1b[0m')
+        finally:
+            if old_colorblind is not None:
+                os.environ['COLORBLIND'] = old_colorblind
+
+    def test_colorblind(self):
+        old_colorblind = os.getenv('COLORBLIND')
+        try:
+            os.environ['COLORBLIND'] = 'protan'
+            self.assertEquals(str(color.Added('foo')), '\x1b[0m\x1b[34mfoo\x1b[0m')
+        finally:
+            if old_colorblind is not None:
+                os.environ['COLORBLIND'] = old_colorblind
+            else:
+                del os.environ['COLORBLIND']
 
 
 class TestNotATTYColor(unittest.TestCase):

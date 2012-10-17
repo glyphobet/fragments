@@ -1,6 +1,7 @@
 # -*- coding: utf-8
 from __future__ import unicode_literals
 
+import os
 import sys
 
 GREY    = 30
@@ -27,7 +28,11 @@ class ColoredString(type('')):
 
 
 class Added(ColoredString):
-    color = GREEN
+    @property
+    def color(self):
+        if os.getenv('COLORBLIND', '').lower() in ['protan', 'deutan']:
+            return BLUE
+        return GREEN
 
 class Deleted(ColoredString):
     color = RED
