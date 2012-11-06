@@ -200,7 +200,9 @@ def rename(*args):
     elif not os.access(old_path, os.W_OK|os.R_OK) and not os.access(new_path, os.W_OK|os.R_OK):
         yield "Could not rename '%s' to '%s', neither file exists" % (old_name, new_name)
     else:
-        config['files'][new_key] = config['files'][old_key]
+        new_sha = hashlib.sha256(('%s:%s' % (__package__, new_key)).encode('utf8')).hexdigest()
+        os.rename(os.path.join(config.directory, config['files'][old_key]), os.path.join(config.directory, new_sha))
+        config['files'][new_key] = new_sha
         del config['files'][old_key]
         if os.access(old_path, os.W_OK|os.R_OK):
             os.rename(old_path, new_path)

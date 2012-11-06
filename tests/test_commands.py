@@ -529,6 +529,19 @@ class TestRenameCommand(CommandBase, PostInitCommandMixIn):
         self.assertNotIn(old_key, config['files'])
         self.assertIn(new_key, config['files'])
 
+    def test_rename_then_replace(self):
+        init()
+        file1_name, file1_path = self._create_file(file_name='index.html', contents="GEE BER ISH")
+        follow(file1_name)
+        commit(file1_name)
+        os.rename(file1_name, 'notactuallytheindex.html')
+        rename(file1_name, 'notactuallytheindex.html')
+        commit('notactuallytheindex.html')
+        file2_name, file2_path = self._create_file(file_name='index.html', contents="blathering idjit")
+        follow(file2_name)
+        commit(file2_name)
+        self.assertEquals(status()[2:], [' \tindex.html', ' \tnotactuallytheindex.html'])
+
 
 class TestDiffCommand(CommandBase, PostInitCommandMixIn):
 
