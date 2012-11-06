@@ -66,6 +66,11 @@ def init(*args):
     yield "Fragments configuration created in '%s'" % config.path
 
 
+def _file_key(file_path):
+    """Converts a file path into a key for storing the file's committed contents in the _fragments/ directory."""
+    return hashlib.sha256(('%s:%s' % (__package__, file_path)).encode('utf8')).hexdigest()
+
+
 def _file_status(config, curr_path):
     key = curr_path[len(config.root)+1:]
     if key not in config['files']:
@@ -140,7 +145,7 @@ def follow(*args):
                 yield "'%s' is already being followed" % os.path.relpath(filename)
                 continue
             if os.access(fullpath, os.W_OK|os.R_OK):
-                file_sha = hashlib.sha256(('%s:%s' % (__package__, key)).encode('utf8')).hexdigest()
+                file_sha = _file_key(key)
                 config['files'][key] = file_sha
                 yield "'%s' is now being followed (SHA-256: '%s')" % (os.path.relpath(filename), file_sha)
             else:
@@ -200,7 +205,7 @@ def rename(*args):
     elif not os.access(old_path, os.W_OK|os.R_OK) and not os.access(new_path, os.W_OK|os.R_OK):
         yield "Could not rename '%s' to '%s', neither file exists" % (old_name, new_name)
     else:
-        new_sha = hashlib.sha256(('%s:%s' % (__package__, new_key)).encode('utf8')).hexdigest()
+        new_sha = _file_key(new_key)
         os.rename(os.path.join(config.directory, config['files'][old_key]), os.path.join(config.directory, new_sha))
         config['files'][new_key] = new_sha
         del config['files'][old_key]
