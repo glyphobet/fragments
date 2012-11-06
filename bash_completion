@@ -36,7 +36,11 @@ _UseFragments ()   # By convention, the function name
         -*)
             COMPREPLY=( $( compgen -W '-i -a -U --unified' -- $curr ) );;
         *)
-            COMPREPLY=( $( compgen -W '`$1 status -l M | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );;
+            if [ $COMP_CWORD -gt "2" ] ; then
+                COMPREPLY=( $( compgen -W '`$1 status -l AMD\  | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );
+            else
+                COMPREPLY=( $( compgen -W '`$1 status -l M | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );
+            fi
       esac;
   elif [ "$cmd" == "diff" ] ; then
       case "$curr" in
