@@ -20,11 +20,12 @@ BOLD = 1
 class ColoredString(type('')):
     color = WHITE
     weight = NORMAL
-    def __str__(self):
+
+    def colorize(self):
         if sys.stdout.isatty():
-            return '\033[%sm\033[%sm%s\033[0m' % (self.weight, self.color, super(ColoredString, self).__str__())
+            return '\033[%sm\033[%sm%s\033[0m' % (self.weight, self.color, self)
         else:
-            return super(ColoredString, self).__str__()
+            return self
 
 
 class Added(ColoredString):

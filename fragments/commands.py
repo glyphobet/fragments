@@ -382,6 +382,13 @@ try:
 except NameError: # pragma: no cover # Python 3 support
     raw_input = input
 
+
+def _colorize(line): # pragma: no cover
+    if hasattr(line, 'colorize'):
+        return line.colorize()
+    return line
+
+
 def _main(): # pragma: no cover
     from . import commands
     print("%s version %s.%s.%s" % ((__package__,) + __version__))
@@ -407,9 +414,9 @@ def _main(): # pragma: no cover
                 try:
                     l = next(command_generator)
                     if isinstance(l, color.Prompt):
-                        response = raw_input(l)
+                        response = raw_input(_colorize(l))
                         l = command_generator.send(response.strip())
-                    print(str(l))
+                    print(_colorize(l))
                 except StopIteration:
                     break
         except FragmentsError as exc:
