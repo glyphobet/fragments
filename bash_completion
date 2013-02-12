@@ -16,7 +16,7 @@ _UseFragments ()   # By convention, the function name
         *)
             COMPREPLY=( $( compgen -W '`find . -not -regex ".*/\..*" -not -regex ".*/_fragments.*" -type f | xargs fragments stat -l ? | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );;
       esac;
-  elif [ "$cmd" == "forget" -o "$cmd" == "rename" -o "$cmd" == "status" ] ; then
+  elif [ "$cmd" == "forget" -o "$cmd" == "status" ] ; then
       case "$curr" in
         *)
             COMPREPLY=( $( compgen -W '`$1 status -l AMD\  | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );;
@@ -40,6 +40,15 @@ _UseFragments ()   # By convention, the function name
                 COMPREPLY=( $( compgen -W '`$1 status -l AMD\  | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );
             else
                 COMPREPLY=( $( compgen -W '`$1 status -l M | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );
+            fi
+      esac;
+  elif [ "$cmd" == "rename" ] ; then
+      case "$curr" in
+        *)
+            if [ $COMP_CWORD -gt "2" ] ; then
+                COMPREPLY=( $( compgen -f -- $curr | xargs fragments stat -l ? | grep -v "fragments version" | cut -f 2 - | grep -v '_fragments' ) );
+            else
+                COMPREPLY=( $( compgen -W '`$1 status -l AMD\  | grep -v "fragments version" | cut -f 2 -`' -- $curr ) );
             fi
       esac;
   elif [ "$cmd" == "diff" ] ; then
