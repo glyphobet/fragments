@@ -4,6 +4,6 @@ python:
   - "2.7"
   - "pypy"
   - "3.2"
-#  - "3.3" # should work as soon as travis-ci adds it
+  - "3.3"
 # command to run tests
 script: nosetests
