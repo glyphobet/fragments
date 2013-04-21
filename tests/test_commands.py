@@ -48,14 +48,25 @@ class CommandBase(unittest.TestCase):
         shutil.rmtree(self.path)
         super(CommandBase, self).tearDown()
 
-    def _create_file(self, file_name=None, contents='CONTENTS\nCONTENTS\n'):
+    def _create_dir(self, dir_name):
+        dir_path = os.path.join(self.path, dir_name)
+        if not os.path.exists(dir_path):
+            os.mkdir(dir_path)
+
+    def _create_file(self, file_name=None, dir_name=None, contents='CONTENTS\nCONTENTS\n'):
         if file_name is None:
             file_name = 'file%d.ext' % self.file_counter
             self.file_counter += 1
-        file_path = os.path.join(self.path, file_name)
+        if dir_name is not None:
+            self._create_dir(dir_name)
+            file_path = os.path.join(self.path, dir_name, file_name)
+            rel_path = os.path.join(dir_name, file_name)
+        else:
+            rel_path = file_name
+            file_path = os.path.join(self.path, file_name)
         with open(file_path, 'w') as new_file:
             new_file.write(contents)
-        return file_name, file_path
+        return rel_path, file_path
 
     # The following three methods are for Python 2.6 support
     def assertIn(self, item, iterable, msg=None):
@@ -220,7 +231,7 @@ class TestUnicode(CommandBase):
 class PostInitCommandMixIn(object):
 
     def test_command_attribute_set_properly(self):
-        self.assertTrue(isinstance(self.command, types.FunctionType), 
+        self.assertTrue(isinstance(self.command, types.FunctionType),
             "%s.command attribute must be a staticmethod." % type(self).__name__)
 
     def test_command_raises_error_before_init(self):
@@ -363,6 +374,32 @@ class TestStatusCommand(CommandBase, PostInitCommandMixIn):
             'fragments configuration version %s.%s.%s' % __version__,
             'stored in %s' % config.directory,
             'E\t%s' % file_name
+        ])
+
+    def test_subdir_status(self):
+        init()
+        foo_rel, foo_path = self._create_file(file_name='foo', dir_name='foodir')
+        bar_rel, bar_path = self._create_file(file_name='bar', dir_name='bardir')
+        follow(foo_rel, bar_rel)
+        commit()
+        config = FragmentsConfig()
+        self.assertEquals(status()[2:], [
+            ' \tbardir/bar',
+            ' \tfoodir/foo'
+        ])
+        self.assertEquals(status('foodir', 'bardir')[2:], [
+            ' \tbardir/bar',
+            ' \tfoodir/foo'
+        ])
+        self.assertEquals(status('foodir')[2:], [
+            ' \tfoodir/foo'
+        ])
+        self.assertEquals(status('bardir')[2:], [
+            ' \tbardir/bar',
+        ])
+        os.chdir('bardir')
+        self.assertEquals(status()[2:], [
+            ' \tbar',
         ])
 
 
