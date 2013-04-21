@@ -458,6 +458,30 @@ class TestFollowCommand(CommandBase, PostInitCommandMixIn):
         outside_file = os.path.join(outside_path, 'outside.repository')
         self.assertEquals(follow(outside_file), ["Could not follow '%s'; it is outside the repository" % os.path.relpath(outside_file)])
 
+    def test_follow_subdirs(self):
+        init()
+        foo_rel, foo_path = self._create_file(file_name='foo', dir_name='foodir')
+        bar_rel, bar_path = self._create_file(file_name='bar', dir_name='bardir')
+        self.assertEquals(follow('bardir', 'foodir'), [
+            "'bardir/bar' is now being followed (SHA-256: 'fd0c8be4a069c852c94beff161726bfacca28da53c7a4f9a3b54afc04f355313')",
+            "'foodir/foo' is now being followed (SHA-256: '794c9474e5e4e7f0c4427a9e4a1b2eeaf0602dfe9a1ec286d6ed8a3054526eca')",
+        ])
+        config = FragmentsConfig()
+        self.assertIn('bardir/bar', config['files'])
+        self.assertIn('foodir/foo', config['files'])
+
+    def test_follow_one_subdir(self):
+        init()
+        foo_rel, foo_path = self._create_file(file_name='foo', dir_name='foodir')
+        bar_rel, bar_path = self._create_file(file_name='bar', dir_name='bardir')
+        self.assertEquals(follow('bardir'), [
+            "'bardir/bar' is now being followed (SHA-256: 'fd0c8be4a069c852c94beff161726bfacca28da53c7a4f9a3b54afc04f355313')",
+        ])
+        config = FragmentsConfig()
+        self.assertIn('bardir/bar', config['files'])
+        self.assertNotIn('foodir/foo', config['files'])
+
+
 
 class TestForgetCommand(CommandBase, PostInitCommandMixIn):
 
@@ -500,6 +524,33 @@ class TestForgetCommand(CommandBase, PostInitCommandMixIn):
         outside_path = os.path.realpath(tempfile.mkdtemp())
         outside_file = os.path.join(outside_path, 'outside.repository')
         self.assertEquals(forget(outside_file), ["Could not forget '%s'; it is outside the repository" % os.path.relpath(outside_file)])
+
+    def test_forget_subdirs(self):
+        init()
+        foo_rel, foo_path = self._create_file(file_name='foo', dir_name='foodir')
+        bar_rel, bar_path = self._create_file(file_name='bar', dir_name='bardir')
+        follow('bardir', 'foodir')
+        commit()
+        self.assertEquals(forget('bardir', 'foodir'), [
+            "'bardir/bar' is no longer being followed",
+            "'foodir/foo' is no longer being followed",
+        ])
+        config = FragmentsConfig()
+        self.assertNotIn('bardir/bar', config['files'])
+        self.assertNotIn('foodir/foo', config['files'])
+
+    def test_forget_one_subdir(self):
+        init()
+        foo_rel, foo_path = self._create_file(file_name='foo', dir_name='foodir')
+        bar_rel, bar_path = self._create_file(file_name='bar', dir_name='bardir')
+        follow('bardir', 'foodir')
+        commit()
+        self.assertEquals(forget('bardir'), [
+            "'bardir/bar' is no longer being followed",
+        ])
+        config = FragmentsConfig()
+        self.assertNotIn('bardir/bar', config['files'])
+        self.assertIn('foodir/foo', config['files'])
 
 
 class TestRenameCommand(CommandBase, PostInitCommandMixIn):
