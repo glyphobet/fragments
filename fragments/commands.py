@@ -294,15 +294,15 @@ def fork(*args):
         return
 
     old_filenames = []
-    for old_name in args.SOURCE_FILENAME:
+    for s, old_name in _iterate_over_files(args.SOURCE_FILENAME, config, statuses='MA ?'):
         old_path = os.path.realpath(old_name)
         old_key = os.path.relpath(old_path, config.root)
-        if os.access(old_path, os.R_OK|os.W_OK):
-            old_filenames.append(old_path)
-            if old_key not in config['files']:
-                yield "Warning, '%s' not being followed" % os.path.relpath(old_path)
-        else:
+        if s == 'D' or not os.access(old_path, os.R_OK):
             yield "Skipping '%s' while forking, it does not exist" % os.path.relpath(old_path)
+        else:
+            old_filenames.append(old_path)
+            if s == '?':
+                yield "Warning, '%s' not being followed" % os.path.relpath(old_path)
 
     if not old_filenames:
         yield "Could not fork; no valid source files specified"

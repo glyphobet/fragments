@@ -1357,6 +1357,28 @@ class TestForkCommand(CommandBase, PostInitCommandMixIn):
         with open('target.html', 'r') as target:
             self.assertEqual(target.read(), target_contents)
 
+    def test_fork_subdirs(self):
+        init()
+        file1_rel, file1_path = self._create_file(dir_name='dir1', contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\n")
+        file2_rel, file2_path = self._create_file(dir_name='dir2', contents="Line One\nLine Two\nLine 3\nLine Four\nLine Five\n")
+        file3_rel, file3_path = self._create_file(contents="Line One\nLine II\nLine III\nLine IV\nLine Five\n")
+        follow(file1_rel, file2_rel, file3_rel)
+        commit(file1_rel, file2_rel, file3_rel)
+        fork('dir1', 'dir2', 'out-1-2')
+        config = FragmentsConfig()
+        self.assertEquals(open(os.path.join(config.root, 'out-1-2')).read(), 'Line One\nLine Two\n\nLine Four\nLine Five\n')
+
+    def test_fork_one_subdir(self):
+        init()
+        file1_rel, file1_path = self._create_file(dir_name='dirA', contents="Line One\nLine Two\nLine Three\nLine Four\nLine Five\n")
+        file2_rel, file2_path = self._create_file(dir_name='dirA', contents="Line One\nLine Two\nLine 3\nLine Four\nLine Five\n")
+        file3_rel, file3_path = self._create_file(dir_name='dirB', contents="Line One\nLine II\nLine III\nLine IV\nLine Five\n")
+        follow(file1_rel, file2_rel, file3_rel)
+        commit(file1_rel, file2_rel, file3_rel)
+        fork('dirA', 'dirA/out-1-2')
+        config = FragmentsConfig()
+        self.assertEquals(open(os.path.join(config.root, 'dirA/out-1-2')).read(), 'Line One\nLine Two\n\nLine Four\nLine Five\n')
+
 
 class TestApplyCommand(CommandBase, PostInitCommandMixIn):
     maxDiff = None
