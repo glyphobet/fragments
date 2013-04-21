@@ -837,6 +837,54 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
             '\ No newline at end of file',
         ])
 
+    def test_diff_subdirs(self):
+        init()
+        foo_rel, foo_path = self._create_file(file_name='foo', dir_name='foodir', contents="one\ntwo\n")
+        bar_rel, bar_path = self._create_file(file_name='bar', dir_name='bardir', contents="eins\nzwei\n")
+        follow(foo_rel, bar_rel)
+        commit()
+        with open(foo_rel, 'a') as foofile:
+            foofile.write('three\n')
+        with open(bar_rel, 'a') as barfile:
+            barfile.write('drei\n')
+        self.assertEquals(diff('foodir', 'bardir'), [
+            'diff a/bardir/bar b/bardir/bar',
+            '--- bardir/bar',
+            '+++ bardir/bar',
+            '@@ -1,2 +1,3 @@',
+            ' eins',
+            ' zwei',
+            '+drei',
+            'diff a/foodir/foo b/foodir/foo',
+            '--- foodir/foo',
+            '+++ foodir/foo',
+            '@@ -1,2 +1,3 @@',
+            ' one',
+            ' two',
+            '+three',
+        ])
+
+    def test_diff_one_subdir(self):
+        init()
+        foo_rel, foo_path = self._create_file(file_name='foo', dir_name='foodir', contents="one\ntwo\n")
+        bar_rel, bar_path = self._create_file(file_name='bar', dir_name='bardir', contents="eins\nzwei\n")
+        follow(foo_rel, bar_rel)
+        commit()
+        with open(foo_rel, 'a') as foofile:
+            foofile.write('three\n')
+        with open(bar_rel, 'a') as barfile:
+            barfile.write('drei\n')
+        self.assertEquals(diff('bardir'), [
+            'diff a/bardir/bar b/bardir/bar',
+            '--- bardir/bar',
+            '+++ bardir/bar',
+            '@@ -1,2 +1,3 @@',
+            ' eins',
+            ' zwei',
+            '+drei',
+        ])
+
+
 
 class TestCommitCommand(CommandBase, PostInitCommandMixIn):
 
@@ -922,6 +970,34 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         follow(file_name)
         commit(file_name)
         self.assertEquals(commit(file_name), ["Could not commit '%s' because it has not been changed" % os.path.relpath(file_path)])
+
+    def test_commit_subdirs(self):
+        init()
+        foo_rel, foo_path = self._create_file(file_name='foo', dir_name='foodir')
+        bar_rel, bar_path = self._create_file(file_name='bar', dir_name='bardir')
+        follow(bar_rel, foo_rel)
+        self.assertEquals(commit('bardir', 'foodir',), [
+            "'bardir/bar' committed",
+            "'foodir/foo' committed",
+        ])
+        self.assertEquals(status()[2:], [
+            ' \tbardir/bar',
+            ' \tfoodir/foo',
+        ])
+
+    def test_commit_one_subdir(self):
+        init()
+        foo_rel, foo_path = self._create_file(file_name='foo', dir_name='foodir')
+        bar_rel, bar_path = self._create_file(file_name='bar', dir_name='bardir')
+        follow(bar_rel, foo_rel)
+        self.assertEquals(commit('bardir',), [
+            "'bardir/bar' committed",
+        ])
+        self.assertEquals(status()[2:], [
+            ' \tbardir/bar',
+            'A\tfoodir/foo',
+        ])
+
 
 
 class TestRevertCommand(CommandBase, PostInitCommandMixIn):
@@ -1021,6 +1097,43 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
         follow(file_name)
         commit(file_name)
         self.assertEquals(revert(file_name), ["Could not revert '%s' because it has not been changed" % os.path.relpath(file_path)])
+
+    def test_revert_subdirs(self):
+        init()
+        foo_rel, foo_path = self._create_file(file_name='foo', dir_name='foodir')
+        bar_rel, bar_path = self._create_file(file_name='bar', dir_name='bardir')
+        follow(bar_rel, foo_rel)
+        commit(bar_rel, foo_rel)
+        with open(bar_rel, 'a') as barfile:
+            barfile.write("boo!\n")
+        with open(foo_rel, 'a') as foofile:
+            foofile.write("foo!\n")
+        self.assertEquals(revert('bardir', 'foodir'), [
+            "'bardir/bar' reverted",
+            "'foodir/foo' reverted",
+        ])
+        self.assertEquals(status()[2:], [
+            ' \tbardir/bar',
+            ' \tfoodir/foo',
+        ])
+
+    def test_revert_one_subdir(self):
+        init()
+        foo_rel, foo_path = self._create_file(file_name='foo', dir_name='foodir')
+        bar_rel, bar_path = self._create_file(file_name='bar', dir_name='bardir')
+        follow(bar_rel, foo_rel)
+        commit(bar_rel, foo_rel)
+        with open(bar_rel, 'a') as barfile:
+            barfile.write("boo!\n")
+        with open(foo_rel, 'a') as foofile:
+            foofile.write("foo!\n")
+        self.assertEquals(revert('bardir',), [
+            "'bardir/bar' reverted",
+        ])
+        self.assertEquals(status()[2:], [
+            ' \tbardir/bar',
+            'M\tfoodir/foo',
+        ])
 
 
 class TestForkCommand(CommandBase, PostInitCommandMixIn):
