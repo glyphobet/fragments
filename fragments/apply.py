@@ -143,7 +143,7 @@ def apply(*args):
     current_revision = changed_revision = 3
     weave.add_revision(changed_revision, changes_to_apply, [1])
 
-    for other_path in _iterate_over_files(args.TARGET_FILENAME, config):
+    for s, other_path in _iterate_over_files(args.TARGET_FILENAME, config):
         other_key = os.path.relpath(other_path, config.root)
         if other_path == changed_path:
             continue # don't try to apply changes to ourself
