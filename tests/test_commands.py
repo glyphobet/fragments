@@ -166,7 +166,7 @@ class TestInitCommand(CommandBase):
         os.unlink(os.path.join(os.path.join(self.path, configuration_directory_name, configuration_file_name)))
         init()
         self.assertTrue(os.path.exists(os.path.join(self.path, configuration_directory_name, configuration_file_name)))
-    
+
     def test_recovery_from_corrupt_fragments_config_json(self):
         init()
         with open(os.path.join(os.path.join(self.path, configuration_directory_name, configuration_file_name)), 'a') as corrupted_config:
@@ -766,7 +766,7 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
 
         follow(file1_path)
         commit(file1_path)
-        
+
         os.unlink(file1_path)
         self.assertEquals(list(diff(file1_name)), [
             'diff a/file1.ext b/file1.ext',
