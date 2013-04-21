@@ -30,7 +30,7 @@ def apply(*args):
     """
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, apply.__name__), description=apply.__doc__)
     parser.add_argument('SOURCE_FILENAME', help="file containing changes to be applied")
-    parser.add_argument('TARGET_FILENAME', help="file(s) to apply changes to", nargs='*')
+    parser.add_argument('TARGET_FILENAME', help="file(s) to apply changes to", nargs='*', default=['.'])
     parser.add_argument('-U', '--unified', type=int, dest="NUM", default=3, action="store", help="number of lines of context to show")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-i", "--interactive", action="store_true" , default=True , dest="interactive", help="interactively select changes to apply")
@@ -143,7 +143,7 @@ def apply(*args):
     current_revision = changed_revision = 3
     weave.add_revision(changed_revision, changes_to_apply, [1])
 
-    for s, other_path in _iterate_over_files(args.TARGET_FILENAME, config):
+    for s, other_path in _iterate_over_files(args.TARGET_FILENAME, config, statuses='MAD '):
         other_key = os.path.relpath(other_path, config.root)
         if other_path == changed_path:
             continue # don't try to apply changes to ourself

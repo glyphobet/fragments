@@ -86,17 +86,15 @@ def status(*args):
     Limit output to files with status STATUS, if present.
     """
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, status.__name__), description=status.__doc__)
-    parser.add_argument('FILENAME', help="files to show status for", nargs="*")
-    parser.add_argument('-l', '--limit', type=str, dest="STATUS", default=None, action="store", help="limit to files in STATUS")
+    parser.add_argument('FILENAME', help="files to show status for", nargs="*", default=['.',])
+    parser.add_argument('-l', '--limit', type=str, dest="STATUS", default='MDAE ', action="store", help="limit to files in STATUS")
     args = parser.parse_args(args)
 
     config = FragmentsConfig()
-    if not args.STATUS:
-        yield "%s configuration version %s.%s.%s" % ((__package__,) + config['version'])
-        yield "stored in %s" % config.directory
-    for s, curr_path in _iterate_over_files(args.FILENAME, config):
-        if not args.STATUS or s in args.STATUS.upper():
-            yield _status_to_color.get(s, str)('%s\t%s' % (s, os.path.relpath(curr_path)))
+    yield "%s configuration version %s.%s.%s" % ((__package__,) + config['version'])
+    yield "stored in %s" % config.directory
+    for s, curr_path in _iterate_over_files(args.FILENAME, config, statuses=args.STATUS):
+        yield _status_to_color.get(s, str)('%s\t%s' % (s, os.path.relpath(curr_path)))
 
 
 def follow(*args):
@@ -186,13 +184,13 @@ def rename(*args):
 def diff(*args):
     """Show differences between committed and uncommitted versions, limited to FILENAME(s) if specified."""
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, diff.__name__), description=diff.__doc__)
-    parser.add_argument('FILENAME', help="file(s) to show changes in", nargs="*")
+    parser.add_argument('FILENAME', help="file(s) to show changes in", nargs="*", default=['.'])
     parser.add_argument('-U', '--unified', type=int, dest="NUM", default=3, action="store", help="number of lines of context to show")
     args = parser.parse_args(args)
 
     config = FragmentsConfig()
 
-    for s, curr_path in _iterate_over_files(args.FILENAME, config):
+    for s, curr_path in _iterate_over_files(args.FILENAME, config, statuses='MAD'):
         key = os.path.relpath(curr_path, config.root)
         if key not in config['files']:
             yield "Could not diff '%s', it is not being followed" % os.path.relpath(curr_path)
@@ -220,12 +218,12 @@ def diff(*args):
 def commit(*args):
     """Commit changes to the fragments repository, limited to FILENAME(s) if specified."""
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, commit.__name__), description=commit.__doc__)
-    parser.add_argument('FILENAME', help="file(s) to commit", nargs="*")
+    parser.add_argument('FILENAME', help="file(s) to commit", nargs="*", default=['.'])
     args = parser.parse_args(args)
 
     config = FragmentsConfig()
 
-    for s, curr_path in _iterate_over_files(args.FILENAME, config):
+    for s, curr_path in _iterate_over_files(args.FILENAME, config, statuses='MAD'):
         key = os.path.relpath(curr_path, config.root)
         if key not in config['files']:
             yield "Could not commit '%s' because it is not being followed" % os.path.relpath(curr_path)
@@ -247,12 +245,12 @@ def commit(*args):
 def revert(*args):
     """Revert changes to the fragments repository, limited to FILENAME(s) if specified."""
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, revert.__name__), description=revert.__doc__)
-    parser.add_argument('FILENAME', help="file(s) to revert", nargs="*")
+    parser.add_argument('FILENAME', help="file(s) to revert", nargs="*", default=['.'])
     args = parser.parse_args(args)
 
     config = FragmentsConfig()
 
-    for s, curr_path in _iterate_over_files(args.FILENAME, config):
+    for s, curr_path in _iterate_over_files(args.FILENAME, config, statuses='MAD'):
         key = os.path.relpath(curr_path, config.root)
         if key not in config['files']:
             yield "Could not revert '%s' because it is not being followed" % os.path.relpath(curr_path)

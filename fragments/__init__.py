@@ -52,17 +52,17 @@ def _files_by_status(config, dirpath, statuses='MDAE '):
             yield (status, path)
 
 
-def _iterate_over_files(args, config):
-    if args:
-        seen = set()
-        for a in args:
-            if a not in seen:
-                seen.add(a)
-                path = os.path.realpath(a)
+def _iterate_over_files(args, config, statuses='MDAE '):
+    seen = set()
+    for a in sorted(args):
+        if a not in seen:
+            seen.add(a)
+            path = os.path.realpath(a)
+            if os.path.isdir(path):
+                for status, path in sorted(_files_by_status(config, path, statuses=statuses)):
+                    yield status, path
+            else:
                 yield _file_status(config, path), path
-    else:
-        for status, path in sorted(_files_by_status(config, os.path.realpath('.'))):
-            yield status, path
 
 
 def _smart_open(path, mode='r'):
