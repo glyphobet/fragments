@@ -630,6 +630,43 @@ class TestRenameCommand(CommandBase, PostInitCommandMixIn):
         commit(file2_name)
         self.assertEquals(status()[2:], [' \tindex.html', ' \tnotactuallytheindex.html'])
 
+    def test_rename_three_file_arguments(self):
+        init()
+        file1_name, file1_path = self._create_file(contents="GEE BER One")
+        file2_name, file2_path = self._create_file(contents="GEE TWO ISH")
+        file3_name, file3_path = self._create_file(contents="THREE BER ISH")
+        follow(file1_name, file2_name, file3_name)
+        commit(file1_name, file2_name, file3_name)
+        self.assertEquals(rename(file1_name, file2_name, file3_name), [
+            "Could not rename multiple files, 'file3.ext' is not a directory."
+        ])
+
+    def test_move_three_files_into_dir(self):
+        init()
+        file1_name, file1_path = self._create_file(contents="GEE BER One")
+        file2_name, file2_path = self._create_file(contents="GEE TWO ISH")
+        file3_name, file3_path = self._create_file(contents="THREE BER ISH")
+        follow(file1_name, file2_name, file3_name)
+        commit(file1_name, file2_name, file3_name)
+        config = FragmentsConfig()
+        os.mkdir(os.path.join(config.root, 'file_bag'))
+        self.assertEquals(rename(file1_name, file2_name, file3_name, 'file_bag'), [
+        ])
+        config = FragmentsConfig()
+        self.assertIn(os.path.join('file_bag', file1_name), config['files'])
+        self.assertIn(os.path.join('file_bag', file2_name), config['files'])
+        self.assertIn(os.path.join('file_bag', file3_name), config['files'])
+        self.assertTrue(os.access(os.path.join(config.root, 'file_bag', file1_name), os.R_OK))
+        self.assertTrue(os.access(os.path.join(config.root, 'file_bag', file2_name), os.R_OK))
+        self.assertTrue(os.access(os.path.join(config.root, 'file_bag', file3_name), os.R_OK))
+        self.assertEquals(open(os.path.join(config.root, 'file_bag', file1_name), 'r').read(), "GEE BER One"  )
+        self.assertEquals(open(os.path.join(config.root, 'file_bag', file2_name), 'r').read(), "GEE TWO ISH"  )
+        self.assertEquals(open(os.path.join(config.root, 'file_bag', file3_name), 'r').read(), "THREE BER ISH")
+        self.assertFalse(os.access(os.path.join(config.root, file1_name), os.R_OK))
+        self.assertFalse(os.access(os.path.join(config.root, file2_name), os.R_OK))
+        self.assertFalse(os.access(os.path.join(config.root, file3_name), os.R_OK))
+
+
 
 class TestDiffCommand(CommandBase, PostInitCommandMixIn):
 

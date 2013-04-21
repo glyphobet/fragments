@@ -154,32 +154,43 @@ def forget(*args):
 def rename(*args):
     """Rename OLD_FILENAME to NEW_FILENAME, moving the actual file on disk if it has not already been moved."""
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, rename.__name__), description=rename.__doc__)
-    parser.add_argument('OLD_FILENAME', help="old file name")
-    parser.add_argument('NEW_FILENAME', help="new file name")
+    parser.add_argument('OLD_FILENAME', help="old file name", nargs='+')
+    parser.add_argument('NEW_FILENAME', help="new file name", nargs=1)
     args = parser.parse_args(args)
 
-    old_name, new_name = os.path.relpath(args.OLD_FILENAME), os.path.relpath(args.NEW_FILENAME)
-
     config = FragmentsConfig()
-    old_path = os.path.realpath(old_name)
-    old_key = os.path.relpath(old_path, config.root)
-    new_path = os.path.realpath(new_name)
-    new_key = os.path.relpath(new_path, config.root)
-    if old_key not in config['files']:
-        yield "Could not rename '%s', it is not being tracked" % old_name
-    elif new_key in config['files']:
-        yield "Could not rename '%s' to '%s', '%s' is already being tracked" % (old_name, new_name, new_name)
-    elif os.access(old_path, os.W_OK|os.R_OK) and os.access(new_path, os.W_OK|os.R_OK):
-        yield "Could not rename '%s' to '%s', both files already exist" % (old_name, new_name)
-    elif not os.access(old_path, os.W_OK|os.R_OK) and not os.access(new_path, os.W_OK|os.R_OK):
-        yield "Could not rename '%s' to '%s', neither file exists" % (old_name, new_name)
-    else:
-        new_sha = _file_key(new_key)
-        os.rename(os.path.join(config.directory, config['files'][old_key]), os.path.join(config.directory, new_sha))
-        config['files'][new_key] = new_sha
-        del config['files'][old_key]
-        if os.access(old_path, os.W_OK|os.R_OK):
-            os.rename(old_path, new_path)
+    dest_path = os.path.realpath(args.NEW_FILENAME[0])
+    dest_isdir = os.path.isdir(dest_path)
+    if len(args.OLD_FILENAME) > 1 and not dest_isdir:
+        yield "Could not rename multiple files, '%s' is not a directory." % os.path.relpath(dest_path)
+        return
+
+    for src_path in args.OLD_FILENAME:
+        old_name = os.path.relpath(src_path)
+        if dest_isdir:
+            new_name = os.path.relpath(os.path.join(dest_path, os.path.basename(src_path)))
+        else:
+            new_name = os.path.relpath(dest_path)
+
+        old_path = os.path.realpath(old_name)
+        old_key = os.path.relpath(old_path, config.root)
+        new_path = os.path.realpath(new_name)
+        new_key = os.path.relpath(new_path, config.root)
+        if old_key not in config['files']:
+            yield "Could not rename '%s', it is not being tracked" % old_name
+        elif new_key in config['files']:
+            yield "Could not rename '%s' to '%s', '%s' is already being tracked" % (old_name, new_name, new_name)
+        elif os.access(old_path, os.W_OK|os.R_OK) and os.access(new_path, os.W_OK|os.R_OK):
+            yield "Could not rename '%s' to '%s', both files already exist" % (old_name, new_name)
+        elif not os.access(old_path, os.W_OK|os.R_OK) and not os.access(new_path, os.W_OK|os.R_OK):
+            yield "Could not rename '%s' to '%s', neither file exists" % (old_name, new_name)
+        else:
+            new_sha = _file_key(new_key)
+            os.rename(os.path.join(config.directory, config['files'][old_key]), os.path.join(config.directory, new_sha))
+            config['files'][new_key] = new_sha
+            del config['files'][old_key]
+            if os.access(old_path, os.W_OK|os.R_OK):
+                os.rename(old_path, new_path)
     config.dump()
 
 
