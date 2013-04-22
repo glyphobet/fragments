@@ -125,9 +125,10 @@ Commands
 
     Stop following changes to one or more _FILENAME_(s).
 
-* `rename OLD_FILENAME NEW_FILENAME`
+* `rename OLD_FILENAME NEW_FILENAME` or `rename OLD_FILENAME [OLD_FILENAME ...] NEW_DIRECTORY`
 
-    Rename _OLD\_FILENAME_ to _NEW\_FILENAME_, moving the actual file on disk if it has not already been moved.
+    Rename _OLD\_FILENAME_ to _NEW\_FILENAME_ or move _OLD\_FILENAME_(s) to _NEW\_DIRECTORY_.
+    File(s) on disk, including unfollowed files, are moved, if they are not already in the new location.
 
 * `diff [[-U | --unified] NUM] [FILENAME [FILENAME ...]]`
 

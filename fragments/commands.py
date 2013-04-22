@@ -152,26 +152,17 @@ def forget(*args):
 
 
 def rename(*args):
-    """Rename OLD_FILENAME to NEW_FILENAME, moving the actual file on disk if it has not already been moved."""
+    """
+    Rename OLD_FILENAME to NEW_FILENAME or move OLD_FILENAME(s) to NEW_DIRECTORY
+
+    File(s) on disk, including unfollowed files, are moved, if they are not already in the new location.
+    """
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, rename.__name__), description=rename.__doc__)
     parser.add_argument('OLD_FILENAME', help="old file name", nargs='+')
     parser.add_argument('NEW_FILENAME', help="new file name", nargs=1)
     args = parser.parse_args(args)
 
-    config = FragmentsConfig()
-    dest_path = os.path.realpath(args.NEW_FILENAME[0])
-    dest_isdir = os.path.isdir(dest_path)
-    if len(args.OLD_FILENAME) > 1 and not dest_isdir:
-        yield "Could not rename multiple files, '%s' is not a directory." % os.path.relpath(dest_path)
-        return
-
-    for src_path in args.OLD_FILENAME:
-        old_name = os.path.relpath(src_path)
-        if dest_isdir:
-            new_name = os.path.relpath(os.path.join(dest_path, os.path.basename(src_path)))
-        else:
-            new_name = os.path.relpath(dest_path)
-
+    def _rename(config, old_name, new_name):
         old_path = os.path.realpath(old_name)
         old_key = os.path.relpath(old_path, config.root)
         new_path = os.path.realpath(new_name)
@@ -191,6 +182,40 @@ def rename(*args):
             del config['files'][old_key]
             if os.access(old_path, os.W_OK|os.R_OK):
                 os.rename(old_path, new_path)
+
+    config = FragmentsConfig()
+    dest_path = os.path.relpath(args.NEW_FILENAME[0])
+    dest_isdir = os.path.isdir(dest_path)
+    if len(args.OLD_FILENAME) > 1 and not dest_isdir:
+        yield "Could not rename multiple files, '%s' is not a directory." % os.path.relpath(dest_path)
+        return
+
+    for src_path in args.OLD_FILENAME:
+        if os.path.isdir(src_path):
+            old_names = list(_iterate_over_files([src_path], config, statuses='MDA '))
+            if os.access(dest_path, os.R_OK):
+                os.rename(src_path, os.path.join(dest_path, src_path))
+                for s, path in old_names:
+                    old_name = os.path.relpath(path)
+                    new_name = os.path.join(dest_path, old_name)
+                    for y in _rename(config, old_name, new_name):
+                        yield y
+            else:
+                os.rename(src_path, dest_path)
+                for s, path in old_names:
+                    old_name = os.path.relpath(path)
+                    new_name = os.path.join(dest_path, old_name[len(src_path)+1:])
+                    for y in _rename(config, old_name, new_name):
+                        yield y
+        else:
+            old_name = os.path.relpath(src_path)
+            if dest_isdir:
+                new_name = os.path.join(dest_path, os.path.basename(src_path))
+            else:
+                new_name = dest_path
+            for y in _rename(config, old_name, new_name):
+                yield y
+
     config.dump()
 
 
