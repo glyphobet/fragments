@@ -155,7 +155,7 @@ def rename(*args):
 
     The rename and move commands are the same.
 
-    File(s) on disk, including unfollowed files, are moved, if they are not already in the new location.
+    Files on disk, including unfollowed files, are moved, if they are not already in the new location.
     """
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, rename.__name__), description=rename.__doc__)
     parser.add_argument('OLD_FILENAME', help="old file name", nargs='+')
