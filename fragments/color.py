@@ -35,30 +35,39 @@ class Added(ColoredString):
             return BLUE
         return GREEN
 
+
 class Deleted(ColoredString):
     color = RED
+
 
 class Modified(ColoredString):
     color = YELLOW
 
+
 class LineNumber(ColoredString):
     color = MAGENTA
+
 
 class Unknown(ColoredString):
     color = MAGENTA
 
+
 class Error(ColoredString):
     color = GREY
+
 
 class DeletedHeader(Deleted):
     weight = BOLD
 
+
 class AddedHeader(Added):
     weight = BOLD
+
 
 class Header(ColoredString):
     color = BRIGHT_WHITE
     weight = BOLD
+
 
 class Prompt(ColoredString):
     color = YELLOW

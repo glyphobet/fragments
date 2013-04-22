@@ -4,7 +4,13 @@ from __future__ import unicode_literals
 import os
 import codecs
 
-__version__ = (1,2,4)
+try:
+    from itertools import izip as zip
+except ImportError:
+    pass
+
+__version__ = (1, 2, 4)
+
 
 class FragmentsError(Exception): pass
 
@@ -12,7 +18,7 @@ class FragmentsError(Exception): pass
 def _file_status(config, curr_path):
     key = curr_path[len(config.root)+1:]
     if key not in config['files']:
-        return '?' # unfollowed
+        return '?'  # unfollowed
 
     repo_path = os.path.join(config.directory, config['files'][key])
 
@@ -21,22 +27,22 @@ def _file_status(config, curr_path):
 
     if repo_exists and curr_exists:
         if os.stat(repo_path)[6] != os.stat(curr_path)[6]:
-            return 'M' # current and repo versions have different sizes: file has been modified
+            return 'M'  # current and repo versions have different sizes: file has been modified
         else:
             with open(repo_path, 'r') as repo_file:
                 with open(curr_path, 'r') as curr_file:
                     for repo_line, curr_line in zip(repo_file.readlines(), curr_file.readlines()):
                         if len(repo_line) != len(curr_line):
-                            return 'M' # corresponding lines have different length: file has been modified
+                            return 'M'  # corresponding lines have different length: file has been modified
                         if repo_line != curr_line:
-                            return 'M' # corresponding lines are different: file has been modified
-                    return ' ' # current and repo versions are the same size, corresponding lines are all the same length and all match: file is unmodified
+                            return 'M'  # corresponding lines are different: file has been modified
+                    return ' '  # current and repo versions are the same size, corresponding lines are all the same length and all match: file is unmodified
     elif repo_exists:
-        return 'D' # deleted
+        return 'D'  # deleted
     elif curr_exists:
-        return 'A' # added
+        return 'A'  # added
     else:
-        return 'E' # error. this should never happen - both files on disk are missing, but file is being followed
+        return 'E'  # error. this should never happen - both files on disk are missing, but file is being followed
 
 
 def _expand(dirpath):

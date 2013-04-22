@@ -7,19 +7,16 @@ import hashlib
 import argparse
 #import difflib
 
-try:
-    from itertools import izip as zip
-except ImportError:
-    pass
-
-from . import __version__, FragmentsError, _file_status, _iterate_over_files, _smart_open
-from .config import FragmentsConfig, configuration_directory_name, find_configuration, ConfigurationFileCorrupt, ConfigurationFileNotFound, ConfigurationDirectoryNotFound
+from . import __version__, FragmentsError, _iterate_over_files, _smart_open
+from .config import FragmentsConfig, configuration_directory_name, ConfigurationFileCorrupt, ConfigurationFileNotFound, ConfigurationDirectoryNotFound
 from .diff import _full_diff
 from .apply import apply
 from .precisecodevillemerge import Weave
 from . import color
 
+
 class ExecutionError(FragmentsError): pass
+
 
 def help(*args):
     """Prints help."""
@@ -42,14 +39,14 @@ def init(*args):
 
     try:
         config = FragmentsConfig()
-    except ConfigurationFileCorrupt as exc:
+    except ConfigurationFileCorrupt:
         config = FragmentsConfig(autoload=False)
         os.rename(config.path, config.path + '.corrupt')
         config.dump()
-    except ConfigurationFileNotFound as exc:
+    except ConfigurationFileNotFound:
         config = FragmentsConfig(autoload=False)
         config.dump()
-    except ConfigurationDirectoryNotFound as exc:
+    except ConfigurationDirectoryNotFound:
         if args.FRAGMENTS_ROOT:
             configuration_parent = os.path.realpath(args.FRAGMENTS_ROOT)
         else:
@@ -72,11 +69,11 @@ def _file_key(file_path):
 
 
 _status_to_color = {
-    '?':color.Unknown,
-    'M':color.Modified,
-    'D':color.Deleted,
-    'A':color.Added,
-    'E':color.Error,
+    '?': color.Unknown,
+    'M': color.Modified,
+    'D': color.Deleted,
+    'A': color.Added,
+    'E': color.Error,
 }
 
 
@@ -86,7 +83,7 @@ def status(*args):
     Limit output to files with status STATUS, if present.
     """
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, status.__name__), description=status.__doc__)
-    parser.add_argument('FILENAME', help="files to show status for", nargs="*", default=['.',])
+    parser.add_argument('FILENAME', help="files to show status for", nargs="*", default=['.'])
     parser.add_argument('-l', '--limit', type=str, dest="STATUS", default='MDAE ', action="store", help="limit to files in STATUS")
     args = parser.parse_args(args)
 
@@ -332,7 +329,6 @@ def fork(*args):
     old_filenames = []
     for s, old_name in _iterate_over_files(args.SOURCE_FILENAME, config, statuses='MA ?'):
         old_path = os.path.realpath(old_name)
-        old_key = os.path.relpath(old_path, config.root)
         if s == 'D' or not os.access(old_path, os.R_OK):
             yield "Skipping '%s' while forking, it does not exist" % os.path.relpath(old_path)
         else:
@@ -361,11 +357,11 @@ def fork(*args):
             line_or_conflict = diff_output[i]
             if isinstance(line_or_conflict, tuple):
                 old, new = line_or_conflict
-                following_conflict_index = 0 # index of furthest following conflict within args.NUM lines
+                following_conflict_index = 0  # index of furthest following conflict within args.NUM lines
                 for j, loc in enumerate(diff_output[i+1:i+1+args.NUM]):
                     if isinstance(loc, tuple):
                         following_conflict_index = j
-                new_lines.extend(['\n'] * (following_conflict_index+1)) # add a blank line for each line and conflict we are skipping
+                new_lines.extend(['\n'] * (following_conflict_index+1))  # add a blank line for each line and conflict we are skipping
                 i += following_conflict_index
             else:
                 new_lines.append(line_or_conflict)
@@ -383,17 +379,17 @@ move = rename
 
 try:
     raw_input
-except NameError: # pragma: no cover # Python 3 support
+except NameError:  # pragma: no cover # Python 3 support
     raw_input = input
 
 
-def _colorize(line): # pragma: no cover
+def _colorize(line):  # pragma: no cover
     if hasattr(line, 'colorize'):
         return line.colorize()
     return line
 
 
-def _main(): # pragma: no cover
+def _main():  # pragma: no cover
     from . import commands
     print("%s version %s.%s.%s" % ((__package__,) + __version__))
     cmd = None
@@ -411,7 +407,7 @@ def _main(): # pragma: no cover
                 else:
                     print("No such command '%s'. Available commands are:" % sys.argv[1])
                     print(' '.join(__all__))
-    if (cmd): # command is present and legit
+    if (cmd):  # command is present and legit
         try:
             command_generator = getattr(commands, cmd)(*sys.argv[2:])
             while True:

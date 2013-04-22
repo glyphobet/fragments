@@ -5,10 +5,11 @@
 from __future__ import unicode_literals
 try:
     xrange
-except NameError: # Python3 compatibility
+except NameError:  # Python3 compatibility
     xrange = range
 
 from bisect import bisect
+
 
 def unique_lcs(a, b):
     # set index[line in a] = position of line in a unless
@@ -73,8 +74,8 @@ def unique_lcs(a, b):
     result.reverse()
     return result
 
+
 def recurse_matches(a, b, ahi, bhi, answer, maxrecursion):
-    oldlen = len(answer)
     if maxrecursion < 0:  # pragma: no cover
         # this will never happen normally, this check is to prevent DOS attacks
         return
@@ -113,6 +114,7 @@ def recurse_matches(a, b, ahi, bhi, answer, maxrecursion):
         recurse_matches(a, b, nahi, nbhi, answer, maxrecursion - 1)
         for i in xrange(ahi - nahi):
             answer.append((nahi + i, nbhi + i))
+
 
 class Weave(object):
     def __init__(self):
@@ -183,8 +185,10 @@ class Weave(object):
             # extant lines before or after new lines
             hit = True
             if weavepos != -1 and weavepos + 1 != len(self.weave):
-                hit = (self.weave[weavepos][0],
-                    self.weave[weavepos + 1][0]) in alledges
+                hit = (
+                    self.weave[weavepos][0],
+                    self.weave[weavepos + 1][0]
+                ) in alledges
             if hit:
                 # add current weave lines to the new weave
                 newweave.extend(self.weave[weavepos + 1:b])

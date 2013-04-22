@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from . import color
 
+
 def _visible_in_diff(merge_result, context_lines=3):
     """Collects the set of lines that should be visible in a diff with a certain number of context lines"""
     i = old_line = new_line = 0
@@ -19,7 +20,7 @@ def _visible_in_diff(merge_result, context_lines=3):
                     yield old_line, new_line, line_or_conflict
                     break
             else:
-                yield None # sentinel to mark boundaries between diff section groups
+                yield None  # sentinel to mark boundaries between diff section groups
             old_line += 1
             new_line += 1
         i += 1
@@ -69,13 +70,13 @@ def _diff_group(group):
             for o in old:
                 yield color.Deleted('-' + o.strip('\n'))
 
-            if new and old and new[-1].endswith('\n') and not old[-1].endswith('\n'): # new last line has a newline but old last line doesn't
+            if new and old and new[-1].endswith('\n') and not old[-1].endswith('\n'):  # new last line has a newline but old last line doesn't
                 yield "\ No newline at end of file"
 
             for n in new:
                 yield color.Added('+' + n.strip('\n'))
 
-            if old and new and old[-1].endswith('\n') and not new[-1].endswith('\n'): # old last line has a newline but new last line doesn't
+            if old and new and old[-1].endswith('\n') and not new[-1].endswith('\n'):  # old last line has a newline but new last line doesn't
                 yield "\ No newline at end of file"
 
         else:

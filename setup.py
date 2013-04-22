@@ -21,9 +21,9 @@ setup(
     author='Matt Chisholm',
     author_email='matt-fragments@theory.org',
     url='https://github.com/glyphobet/fragments',
-    packages= ['fragments',],
+    packages=['fragments'],
     install_requires=install_requires,
-    entry_points = {
+    entry_points={
         'console_scripts': [
             'fragments = fragments.commands:_main',
         ],

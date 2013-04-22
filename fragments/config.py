@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 import os
-import sys
 import json
 
 from . import FragmentsError, __version__
@@ -13,8 +12,14 @@ configuration_directory_name = '_fragments'
 
 
 class ConfigurationError(FragmentsError): pass
+
+
 class ConfigurationDirectoryNotFound(ConfigurationError): pass
+
+
 class ConfigurationFileNotFound(ConfigurationError): pass
+
+
 class ConfigurationFileCorrupt(ConfigurationError): pass
 
 

@@ -10,6 +10,7 @@ except ImportError:
 import unittest
 from fragments import color
 
+
 class FakeTTY(StringIO):
     def isatty(self):
         return True

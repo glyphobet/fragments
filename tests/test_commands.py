@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 import os
-import sys
 import json
 import time
 import types
@@ -232,8 +231,10 @@ class TestUnicode(CommandBase):
 class PostInitCommandMixIn(object):
 
     def test_command_attribute_set_properly(self):
-        self.assertTrue(isinstance(self.command, types.FunctionType),
-            "%s.command attribute must be a staticmethod." % type(self).__name__)
+        self.assertTrue(
+            isinstance(self.command, types.FunctionType),
+            "%s.command attribute must be a staticmethod." % type(self).__name__
+        )
 
     def test_command_raises_error_before_init(self):
         self.assertRaises(ConfigurationDirectoryNotFound, self.command)
@@ -282,7 +283,7 @@ class TestStatusCommand(CommandBase, PostInitCommandMixIn):
         follow(file_name)
         commit(file_name)
         yestersecond = time.time() - 2
-        os.utime(file_path, (yestersecond, yestersecond)) # mtime should be irrelevant
+        os.utime(file_path, (yestersecond, yestersecond))  # mtime should be irrelevant
         config = FragmentsConfig()
         self.assertEquals(status(file_name), [
             'fragments configuration version %s.%s.%s' % __version__,
@@ -295,10 +296,10 @@ class TestStatusCommand(CommandBase, PostInitCommandMixIn):
         file_name, file_path = self._create_file()
         now = time.time()
         yestersecond = now - 2
-        os.utime(file_path, (yestersecond, yestersecond)) # mtime should be irrelevant
+        os.utime(file_path, (yestersecond, yestersecond))  # mtime should be irrelevant
         follow(file_name)
         commit(file_name)
-        os.utime(file_path, (now, now)) # mtime should be irrelevant
+        os.utime(file_path, (now, now))  # mtime should be irrelevant
         config = FragmentsConfig()
         self.assertEquals(status(file_name), [
             'fragments configuration version %s.%s.%s' % __version__,
@@ -383,7 +384,6 @@ class TestStatusCommand(CommandBase, PostInitCommandMixIn):
         bar_rel, bar_path = self._create_file(file_name='bar', dir_name='bardir')
         follow(foo_rel, bar_rel)
         commit()
-        config = FragmentsConfig()
         self.assertEquals(status()[2:], [
             ' \tbardir/bar',
             ' \tfoodir/foo'
@@ -406,7 +406,7 @@ class TestStatusCommand(CommandBase, PostInitCommandMixIn):
 
 class TestFollowCommand(CommandBase, PostInitCommandMixIn):
 
-    command = staticmethod(lambda : follow('file.ext'))
+    command = staticmethod(lambda: follow('file.ext'))
 
     def test_follow_file(self):
         init()
@@ -415,7 +415,7 @@ class TestFollowCommand(CommandBase, PostInitCommandMixIn):
         config = FragmentsConfig()
         key = file_path[len(os.path.split(config.directory)[0])+1:]
         self.assertIn(key, config['files'])
-        self.assertEquals(follow_output, ["'%s' is now being followed (SHA-256: '%s')" % (file_name,config['files'][key])])
+        self.assertEquals(follow_output, ["'%s' is now being followed (SHA-256: '%s')" % (file_name, config['files'][key])])
 
     def test_file_twice_on_the_command_line(self):
         init()
@@ -483,10 +483,9 @@ class TestFollowCommand(CommandBase, PostInitCommandMixIn):
         self.assertNotIn('foodir/foo', config['files'])
 
 
-
 class TestForgetCommand(CommandBase, PostInitCommandMixIn):
 
-    command = staticmethod(lambda : forget('file.ext'))
+    command = staticmethod(lambda: forget('file.ext'))
 
     def test_forget_unfollowed_file(self):
         init()
@@ -556,7 +555,7 @@ class TestForgetCommand(CommandBase, PostInitCommandMixIn):
 
 class TestRenameCommand(CommandBase, PostInitCommandMixIn):
 
-    command = staticmethod(lambda : rename('foo', 'bar'))
+    command = staticmethod(lambda: rename('foo', 'bar'))
 
     def test_cant_rename_followed_file(self):
         init()
@@ -718,7 +717,7 @@ class TestRenameCommand(CommandBase, PostInitCommandMixIn):
 
 class TestMoveCommand(CommandBase, PostInitCommandMixIn):
 
-    command = staticmethod(lambda : move('foo', 'bar'))
+    command = staticmethod(lambda: move('foo', 'bar'))
 
 
 class TestDiffCommand(CommandBase, PostInitCommandMixIn):
@@ -975,7 +974,6 @@ class TestDiffCommand(CommandBase, PostInitCommandMixIn):
         ])
 
 
-
 class TestCommitCommand(CommandBase, PostInitCommandMixIn):
 
     command = staticmethod(commit)
@@ -1035,8 +1033,6 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
     def test_commit_unfollowed_file(self):
         init()
         file_name, file_path = self._create_file()
-        config = FragmentsConfig()
-        key = file_path[len(config.root)+1:]
         self.assertEquals(commit(file_path), ["Could not commit '%s' because it is not being followed" % os.path.relpath(file_path)])
 
     def test_commit_removed_file(self):
@@ -1045,8 +1041,6 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         follow(file_name)
         commit(file_path)
         os.unlink(file_path)
-        config = FragmentsConfig()
-        key = file_path[len(config.root)+1:]
         self.assertEquals(commit(file_path), ["Could not commit '%s' because it has been removed, instead revert or forget it" % os.path.relpath(file_path)])
 
     def test_commit_unchanged_file(self):
@@ -1054,9 +1048,6 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
         file_name, file_path = self._create_file()
         yestersecond = time.time() - 2
         os.utime(file_path, (yestersecond, yestersecond))
-        with open(file_path, 'r') as original_file:
-            original_content = original_file.read()
-
         follow(file_name)
         commit(file_name)
         self.assertEquals(commit(file_name), ["Could not commit '%s' because it has not been changed" % os.path.relpath(file_path)])
@@ -1087,7 +1078,6 @@ class TestCommitCommand(CommandBase, PostInitCommandMixIn):
             ' \tbardir/bar',
             'A\tfoodir/foo',
         ])
-
 
 
 class TestRevertCommand(CommandBase, PostInitCommandMixIn):
@@ -1141,24 +1131,16 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
     def test_follow_modify_revert_file(self):
         init()
         file_name, file_path = self._create_file()
-        with open(file_path, 'r') as original_file:
-            original_content = original_file.read()
-
         # pretend file was actually created two seconds ago
         # so that commit will detect changes
         yestersecond = time.time() - 2
         os.utime(file_path, (yestersecond, yestersecond))
-
         follow(file_name)
-        config = FragmentsConfig()
-        key = file_path[len(config.root)+1:]
         self.assertEquals(revert(file_name), ["Could not revert '%s' because it has never been committed" % os.path.relpath(file_path)])
 
     def test_revert_unfollowed_file(self):
         init()
         file_name, file_path = self._create_file()
-        config = FragmentsConfig()
-        key = file_path[len(config.root)+1:]
         self.assertEquals(revert(file_name), ["Could not revert '%s' because it is not being followed" % os.path.relpath(file_path)])
 
     def test_revert_removed_file(self):
@@ -1181,9 +1163,6 @@ class TestRevertCommand(CommandBase, PostInitCommandMixIn):
     def test_revert_unchanged_file(self):
         init()
         file_name, file_path = self._create_file()
-        with open(file_path, 'r') as original_file:
-            original_content = original_file.read()
-
         follow(file_name)
         commit(file_name)
         self.assertEquals(revert(file_name), ["Could not revert '%s' because it has not been changed" % os.path.relpath(file_path)])
@@ -1472,7 +1451,7 @@ class TestForkCommand(CommandBase, PostInitCommandMixIn):
 
 class TestApplyCommand(CommandBase, PostInitCommandMixIn):
     maxDiff = None
-    command = staticmethod(lambda : apply('file.ext'))
+    command = staticmethod(lambda: apply('file.ext'))
 
     html_file1_contents = """<!DOCTYPE html>
 <html>

@@ -80,13 +80,13 @@ def apply(*args):
                 if not response:
                     continue
                 response = response.lower()
-            if not args.interactive or response.startswith('y') or apply_all == True:
+            if not args.interactive or response.startswith('y') or apply_all is True:
                 for old_line, new_line, line_or_conflict in display_group:
                     if isinstance(line_or_conflict, tuple):
                         preserve_changes[(old_line, new_line)] = line_or_conflict
                 display_groups.pop(index)
                 break
-            elif response.startswith('n') or apply_all == False:
+            elif response.startswith('n') or apply_all is False:
                 for old_line, new_line, line_or_conflict in display_group:
                     if isinstance(line_or_conflict, tuple):
                         discard_changes[(old_line, new_line)] = line_or_conflict
@@ -128,7 +128,7 @@ def apply(*args):
                 changes_to_apply.extend(new)
             elif (old_line, new_line) in discard_changes:
                 changes_to_apply.extend(old)
-            else: # pragma: no cover
+            else:  # pragma: no cover
                 raise Exception("Catastrophic error in selecting diff chunks. Please report a bug.")
             old_line += len(old)
             new_line += len(new)
@@ -144,13 +144,12 @@ def apply(*args):
     weave.add_revision(changed_revision, changes_to_apply, [1])
 
     for s, other_path in _iterate_over_files(args.TARGET_FILENAME, config, statuses='MAD '):
-        other_key = os.path.relpath(other_path, config.root)
         if other_path == changed_path:
-            continue # don't try to apply changes to ourself
+            continue  # don't try to apply changes to ourself
         current_revision += 1
         with _smart_open(other_path, 'r') as other_file:
             weave.add_revision(current_revision, other_file.readlines(), [])
-        merge_result = weave.cherry_pick(changed_revision, current_revision) # Can I apply changes in changed_revision onto this other file?
+        merge_result = weave.cherry_pick(changed_revision, current_revision)  # Can I apply changes in changed_revision onto this other file?
         if len(merge_result) == 1 and isinstance(merge_result[0], tuple):
             # total conflict, skip
             yield "Changes in '%s' cannot apply to '%s', skipping" % (os.path.relpath(changed_path), os.path.relpath(other_path))
