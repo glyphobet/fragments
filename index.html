@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Fragments : tool for diff-based templating / fragmentation control" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Fragments</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/glyphobet/fragments">View on GitHub</a>
+
+          <h1 id="project_title">Fragments</h1>
+          <h2 id="project_tagline">tool for diff-based templating / fragmentation control</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/glyphobet/fragments/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/glyphobet/fragments/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>Fragments</h1>
+
+<p>Fragments uses concepts from version control to replace many uses of templating languages.
+Instead of a templating language, it provides diff-based templating;
+instead of revision control, it provides "fragmentation control".</p>
+
+<p>Fragments is a <a href="http://en.wikipedia.org/wiki/Don't_repeat_yourself">DRY (Don't Repeat Yourself)</a> violation manager;
+it is a <a href="http://en.wikipedia.org/wiki/Single_Source_of_Truth">Multiple Source of Truth</a> engine.</p>
+
+<h2>What is diff-based templating?</h2>
+
+<p>Generating HTML with templating languages is difficult because templating languages often have two semi-incompatible purposes.
+The first purpose is managing common HTML elements &amp; structure: headers, sidebars, and footers; across multiple templates.
+This is sometimes called page "inheritance".
+The second purpose is to perform idiosyncratic display logic on data coming from another source.
+When these two purposes can be separated, templates can be much simpler.</p>
+
+<p>Fragments manages this first purpose, common HTML elements and structure, with diff and merge algorithms.
+The actual display logic is left to your application, or to a templating language whose templates are themselves managed by Fragments.</p>
+
+<h2>What is fragmentation control?</h2>
+
+<p>The machinery to manage common and different code fragments across multiple versions of <em>a single file</em> already exists in modern version control systems.
+Fragments adapts these tools to manage common and different versions of <em>several different files</em>.</p>
+
+<p>Each file is in effect its own "branch", and whenever you modify a file ("branch") you can apply ("merge") that change into whichever other files ("branches") you choose.
+In this sense Fragments is a different kind of "source control"--rather than controlling versions/revisions over time, it controls fragments across many files that all exist simultaneously.
+Hence the term "fragmentation control".</p>
+
+<p>As I am a linguist, I have to point out that the distinction between <a href="http://en.wikipedia.org/wiki/Synchronic_analysis">Synchronic</a> and <a href="http://en.wikipedia.org/wiki/Diachronics">Diachronic</a> Linguistics gave me this idea in the first place.</p>
+
+<h2>How does it work?</h2>
+
+<p>The merge algorithm is a version of <a href="http://revctrl.org/PreciseCodevilleMerge">Precise Codeville Merge</a> modified to support cherry-picking.
+Precise Codeville Merge was chosen because it supports <a href="http://revctrl.org/AccidentalCleanMerge">accidental clean merges</a> and <a href="http://revctrl.org/Convergence">convergence</a>.
+That is, if two files are independently modified in the same way, they merge together cleanly.
+This makes adding new files easy; use Fragment's <code>fork</code> command to create a new file based on other files (or just <code>cp</code> one of your files), change it as desired, and commit it.
+Subsequent changes to any un-modified, common sections, in that file or in its siblings, will be applicable across the rest of the repository.</p>
+
+<p>Like version control, you run Fragments on the command line each time you make a change to your HTML, not before each page render.</p>
+
+<h2>What is it good for?</h2>
+
+<p>Fragments was designed with the task of simplifying large collections of HTML or HTML templates.
+It could replace simpler CMS-managed websites with pure static HTML.
+It could also handle several different translations of an HTML website, ensuring that the same HTML structure was wrapped around each translation of the content.</p>
+
+<p>But Fragments is also not HTML specific.
+If it's got newlines, Fragments can manage it.
+That means XML, CSS, JSON, YAML, or source code from any programming language where newlines are common (sorry, Perl).
+cFragments is even smart enough to know not to merge totally different files together.
+You could use it to manage a large set of configuration files for different servers and deployment configurations, for example.
+Or you could use it to manage bug fixes to that mess of duplicated source files on that legacy project you wish you didn't have to maintain.</p>
+
+<p>In short, Fragments can be used anyplace where you have thought to yourself "this group of files really is violating DRY".</p>
+
+<h2>Integration with version control</h2>
+
+<p>Fragments has no history; It only stores the previous committed state of a file.
+Storing history is up to your version control system.
+But Fragments stores its repository configuration in such a way to allow your version control system to manage it painlessly and obviously.
+Configuration is stored in a <code>_fragments</code> directory.
+This directory name is not preceded by a <code>.</code>, and all the files in it are stored as plain text.
+You want to make sure to run <code>fragments init</code> from your repository root, which is usually at least one directory level above your actual content.
+Otherwise your <code>_fragments</code> directory may get accidentally deployed to production or interfere with template loaders.</p>
+
+<p>The <code>rename</code> and <code>forget</code> commands in Fragments are written to not interfere with a version control's rename and remove commands, as these commands sometimes need to be used in tandem.</p>
+
+<h2>Invisibility</h2>
+
+<p>Fragments is invisible to people who don't know it's being used.
+If you (or someone else) make more than one change to a file, Fragments' <code>apply</code> command allows you to perform chunk-based interactive application of changes, similar to <code>git commit --patch</code> or <code>hg record</code>.
+So, you can give a single HTML file to your web designer or junior programmer, let him or her modify it as desired.
+Later, you can selectively apply some of those changes across all other HTML files, while leaving other changes only in the modified file.</p>
+
+<h2>Installation</h2>
+
+<p>Fragments is <a href="http://pypi.python.org/pypi/fragments">on PyPI</a>.
+You can install it with <code>pip install fragments</code>.</p>
+
+<h2>Usage</h2>
+
+<p>Fragments installs a <code>fragments</code> command line script.
+Like version control, the first argument to Fragments is the command.
+And like version control, you must first <code>$ fragments init</code> a repository, then <code>$ fragments follow</code> some files, then <code>$ fragments commit</code> them.
+Deliberately different command names are used in some cases, to remind you that Fragments is not version control.</p>
+
+<p>If you are red-green color-blind (protanopic or deutanopic), set the <code>COLORBLIND</code> environment variable to <code>protan</code> or <code>deutan</code> and fragments will use blue instead of green for displaying added lines.</p>
+
+<pre><code>export COLORBLIND=protan
+</code></pre>
+
+<h2>Commands</h2>
+
+<ul>
+<li>
+<p><code>help [COMMAND]</code></p>
+
+<p>Display global help, or help for <em>COMMAND</em> if specified.</p>
+</li>
+<li>
+<p><code>init [FRAGMENTS_ROOT]</code></p>
+
+<p>Initialize a new fragments repository.
+Repository is in a directory named <code>_fragments/</code>, created in either the current working directory, or <em>FRAGMENTS_ROOT</em> if specified.</p>
+</li>
+<li>
+<p><code>status [[ -l | --limit] STATUS ] [FILENAME [FILENAME ...]]</code></p>
+
+<p>Get the current status of the fragments repository, limited to <em>FILENAME</em>(s) if specified.
+Limit output to files with status <em>STATUS</em>, if present.</p>
+</li>
+<li>
+<p><code>follow FILENAME [FILENAME ...]</code></p>
+
+<p>Start following changes to one or more <em>FILENAME</em>(s).</p>
+</li>
+<li>
+<p><code>forget FILENAME [FILENAME ...]</code></p>
+
+<p>Stop following changes to one or more <em>FILENAME</em>(s).</p>
+</li>
+<li>
+<p><code>rename OLD_FILENAME NEW_FILENAME</code> or <code>rename OLD_FILENAME [OLD_FILENAME ...] NEW_DIRECTORY</code></p>
+
+<p>Rename <em>OLD_FILENAME</em> to <em>NEW_FILENAME</em> or move <em>OLD_FILENAME</em>(s) to <em>NEW_DIRECTORY</em>.
+File(s) on disk, including unfollowed files, are moved, if they are not already in the new location.</p>
+</li>
+<li><p><code>move</code> is an alias for <code>rename</code></p></li>
+<li>
+<p><code>diff [[-U | --unified] NUM] [FILENAME [FILENAME ...]]</code></p>
+
+<p>Show differences between committed and uncommitted versions, limited to <em>FILENAME</em>(s) if specified.</p>
+
+<p><code>-U NUM</code>, <code>--unified NUM</code> number of lines of context to show</p>
+</li>
+<li>
+<p><code>commit [FILENAME [FILENAME ...]]</code></p>
+
+<p>Commit changes to the fragments repository, limited to <em>FILENAME</em>(s) if specified.</p>
+</li>
+<li>
+<p><code>revert [FILENAME [FILENAME ...]]</code></p>
+
+<p>Revert changes to the fragments repository, limited to <em>FILENAME</em>(s) if specified.</p>
+</li>
+<li>
+<p><code>fork [[-U | --unified] NUM] SOURCE_FILENAME [SOURCE_FILENAME ...] TARGET_FILENAME</code></p>
+
+<p>Create a new file in <em>TARGET_FILENAME</em> based on one or more <em>SOURCE_FILENAME</em>(s).
+Large common sections are preserved;
+differing sections, and common sections shorter than <em>NUM</em> lines between differing sections, are replaced with one newline for each line or conflict.</p>
+</li>
+<li>
+<p><code>apply [-i | -a] [[-U | --unified] NUM] SOURCE_FILENAME [TARGET_FILENAME [TARGET_FILENAME ...]]</code></p>
+
+<p>Apply changes in <em>SOURCE_FILENAME</em> that were made since last commit, where possible.
+Limit application to <em>TARGET_FILENAME</em>(s) if specified.
+Files that conflict in their entirety will be skipped.
+Smaller conflicts will be written to the file as conflict sections.</p>
+
+<p><code>-i, --interactive</code> interactively select changes to apply</p>
+
+<p><code>-a, --automatic</code> automatically apply all changes</p>
+
+<p><code>-U NUM</code>, <code>--unified NUM</code> number of lines of context to show</p>
+
+<p>In interactive mode, you can use the following commands:</p>
+
+<ul>
+<li>
+<code>y</code> include this change</li>
+<li>
+<code>n</code> do not include this change</li>
+<li>
+<code>a</code> include this change and all remaining changes</li>
+<li>
+<code>d</code> done, do not include this change nor any remaining changes</li>
+<li>
+<code>j</code> leave this change undecided, see next undecided change</li>
+<li>
+<code>k</code> leave this change undecided, see previous undecided change</li>
+<li>
+<code>?</code> interactive apply mode help</li>
+</ul>
+</li>
+</ul><h2>Future improvements</h2>
+
+<h3>Preprocessors</h3>
+
+<p>Since Fragments is diff-based, it will not do well with minified or otherwise compressed content.
+Do not expect it to handle changes to your 10,000 character, single line, über-compressed CSS or JavaScript file, or to the inline JavaScript function in an <code>onclick</code> attribute in your HTML.
+The more newlines there are in your files, the more robust Fragments' merging will be.</p>
+
+<p>Adding preprocessors to enforce consistent newline placement and indentation across all followed files would potentially make Fragments' merging even more robust.
+The preprocessors would run before <code>commit</code>, <code>fork</code>, and <code>apply</code>, and there would be different preprocessors for different file formats.</p>
+
+<h3>Miscellaneous improvements</h3>
+
+<ul>
+<li>Better command-line completion mode for bash</li>
+<li>Command-line completion mode for zsh</li>
+<li>Command aliasing and default configuration</li>
+<li>Pluggable diff &amp; merge algorithms, if they prove useful</li>
+</ul><h2>Credits</h2>
+
+<p>Fragments is Copyright 2012 by Matt Chisholm, and is released under the BSD License.
+It is available <a href="https://github.com/glyphobet/fragments">on GitHub</a> and <a href="http://pypi.python.org/pypi/fragments">on PyPI</a>.
+Many thanks to Ross Cohen for his thoughts on the idea, and for preparing Precise Codeville Merge for use in Fragments.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Fragments maintained by <a href="https://github.com/glyphobet">glyphobet</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-32742441-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>
