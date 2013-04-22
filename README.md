@@ -130,6 +130,8 @@ Commands
     Rename _OLD\_FILENAME_ to _NEW\_FILENAME_ or move _OLD\_FILENAME_(s) to _NEW\_DIRECTORY_.
     File(s) on disk, including unfollowed files, are moved, if they are not already in the new location.
 
+* `move` is an alias for `rename`
+
 * `diff [[-U | --unified] NUM] [FILENAME [FILENAME ...]]`
 
     Show differences between committed and uncommitted versions, limited to _FILENAME_(s) if specified.

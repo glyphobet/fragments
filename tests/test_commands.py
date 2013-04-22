@@ -27,6 +27,7 @@ def status(*a): return list(commands.status(*a))
 def follow(*a): return list(commands.follow(*a))
 def forget(*a): return list(commands.forget(*a))
 def rename(*a): return list(commands.rename(*a))
+def move  (*a): return list(commands.move  (*a))
 def fork  (*a): return list(commands.fork  (*a))
 def commit(*a): return list(commands.commit(*a))
 def revert(*a): return list(commands.revert(*a))
@@ -650,8 +651,7 @@ class TestRenameCommand(CommandBase, PostInitCommandMixIn):
         commit(file1_name, file2_name, file3_name)
         config = FragmentsConfig()
         os.mkdir(os.path.join(config.root, 'file_bag'))
-        self.assertEquals(rename(file1_name, file2_name, file3_name, 'file_bag'), [
-        ])
+        self.assertEquals(rename(file1_name, file2_name, file3_name, 'file_bag'), [])
         config = FragmentsConfig()
         self.assertIn(os.path.join('file_bag', file1_name), config['files'])
         self.assertIn(os.path.join('file_bag', file2_name), config['files'])
@@ -715,6 +715,10 @@ class TestRenameCommand(CommandBase, PostInitCommandMixIn):
         self.assertTrue(os.access(file3_rel, os.R_OK))
         self.assertFalse(os.access(file4_rel, os.R_OK))
 
+
+class TestMoveCommand(CommandBase, PostInitCommandMixIn):
+
+    command = staticmethod(lambda : move('foo', 'bar'))
 
 
 class TestDiffCommand(CommandBase, PostInitCommandMixIn):

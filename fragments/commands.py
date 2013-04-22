@@ -155,6 +155,8 @@ def rename(*args):
     """
     Rename OLD_FILENAME to NEW_FILENAME or move OLD_FILENAME(s) to NEW_DIRECTORY
 
+    The rename and move commands are the same.
+
     File(s) on disk, including unfollowed files, are moved, if they are not already in the new location.
     """
     parser = argparse.ArgumentParser(prog="%s %s" % (__package__, rename.__name__), description=rename.__doc__)
@@ -378,6 +380,8 @@ def fork(*args):
     yield "Forked new file in '%s', remember to follow and commit it" % os.path.relpath(args.TARGET_FILENAME)
     config.dump()
 
+move = rename
+
 
 try:
     raw_input
@@ -426,4 +430,4 @@ def _main(): # pragma: no cover
         except KeyboardInterrupt:
             pass
 
-__all__ = ['help', 'init', 'status', 'follow', 'forget', 'rename', 'diff', 'commit', 'revert', 'fork', 'apply']
+__all__ = ['help', 'init', 'status', 'follow', 'forget', 'rename', 'move', 'diff', 'commit', 'revert', 'fork', 'apply']
