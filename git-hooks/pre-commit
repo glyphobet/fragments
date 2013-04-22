@@ -1,0 +1,4 @@
+#!/bin/bash
+# This is an example git pre-commit hook which will automatically
+# `git add` all changes in `_fragments` before each `git commit`.
+find . -name '_fragments' | xargs git add
