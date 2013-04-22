@@ -105,8 +105,6 @@ def follow(*args):
 
     config = FragmentsConfig()
     for s, filename in _iterate_over_files(args.FILENAME, config, statuses='?'):
-        if s != '?':
-            continue
         fullpath = os.path.realpath(filename)
         if fullpath.startswith(config.root):
             key = os.path.relpath(fullpath, config.root)
